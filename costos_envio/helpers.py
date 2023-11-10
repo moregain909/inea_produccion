@@ -6,36 +6,7 @@ from decouple import AutoConfig, config, UndefinedValueError
 from dotenv import *
 import httpx
 from openpyxl import load_workbook, Workbook
-#from openpyxl import load_workbook, Workbook
-#from gbp import proveedor_del_sku, gbp_get_sku_publis
 
-
-# SCRIPT PARA IDENTIFICAR TIPOS DE ENVIO DE ML
-# Los tipos de envío catalogados hasta el momento se configuran en SHIPMENT_TYPES_CATALOG. 
-# El script reporta los tipos de envío que no estén catalogados.
- 
-#   CONFIGURA EN QUÉ TIENDAS BUSCA TIPOS DE ENVÍO
-LISTA_TIENDAS = ["tecnorium", "celestron", "lenovo"]
-
-# CONFIGURA CATALOGO DE TIPOS DE ENVIO DE ML CON SUS PRIORIDADES PARA CALCULAR EL COSTO DE ENVIO DE REFERENCIA
-# Con priority >= 50 se toma directamente el costo de envío, con menos, se promedia el costo de todas las prioridades => 0
-SHIPMENT_TYPES_CATALOG =    {510645: {'name': 'Estándar a domicilio',                'shipping_method_type': 'three_days',   'priority': -10}, \
-                             510945: {'name': 'Estándar a sucursal de correo',       'shipping_method_type': 'three_days',   'priority': 0}, \
-                             511546: {'name': 'Estándar a sucursal de correo',       'shipping_method_type': 'four_days',    'priority': 0}, \
-                             504345: {'name': 'Estándar a sucursal de correo',       'shipping_method_type': 'standard',     'priority': 0}, \
-                              73330: {'name': 'Express a domicilio',                 'shipping_method_type': 'express',      'priority': 100}, \
-                             510545: {'name': 'Express a domicilio',                 'shipping_method_type': 'two_days',     'priority': 90}, \
-                             510845: {'name': 'Express a sucursal de correo',        'shipping_method_type': 'two_days',     'priority': 0}, \
-                             502845: {'name': 'Express a sucursal de correo',        'shipping_method_type': 'express',      'priority': 0}, \
-                             510445: {'name': 'Prioritario a domicilio',             'shipping_method_type': 'next_day',     'priority': -10}, \
-                             510745: {'name': 'Prioritario a sucursal de correo',    'shipping_method_type': 'next_day',     'priority': 0}, \
-                             514245: {'name': 'Prioritario',                         'shipping_method_type': 'five_days',    'priority': -10}, \
-                              73328: {'name': 'Estándar a domicilio',                'shipping_method_type': 'standard',     'priority': 60}, \
-                             514345: {'name': 'Prioritario',                         'shipping_method_type': 'six_days',     'priority': 60}, \
-                             514245: {'name': 'Prioritario',                         'shipping_method_type': 'five_days',    'priority': -10}, \
-                              73328: {'name': 'Estándar a domicilio',                'shipping_method_type': 'standard',     'priority': 60}, \
-                             514345: {'name': 'Prioritario',                         'shipping_method_type': 'six_days',     'priority': 60}, \
-                             511545: {'name': 'Estándar a domicilio',                'shipping_method_type': 'four_days',    'priority': -10} }
 
 
 #   AUTENTICACIÓN EN ML
@@ -117,7 +88,7 @@ def ml_aut(tienda: str = "tecnorium", client: httpx.Client = None)-> Union[str, 
     }
     response = client.post(url, headers=headers, data=payload)
     j = response.json()
-    print(j)
+    #print(j)
 
     token = f'Bearer {j["access_token"]}'
     
@@ -129,6 +100,53 @@ def ml_aut(tienda: str = "tecnorium", client: httpx.Client = None)-> Union[str, 
         return None
     else:
         return(token)
+
+def tienda_publi(item_id, client: httpx.Client):
+    """Trae el nombre de la tienda de una publicación de ML.
+
+    Args:
+        item_id (_type_): _description_
+
+    Returns:
+        _type_: _description_
+    """
+    TIENDAS = ["tecnorium", "celestron", "lenovo"]
+    tienda = ""
+
+    if not client:
+        client = httpx.Client()
+    else:
+        client = client
+
+
+    for x in TIENDAS:
+        token = ml_aut(x)        
+
+        url = "https://api.mercadolibre.com/items/" + item_id
+
+        payload = {}
+        headers = {
+          'Authorization': token
+        }
+
+        response = client.get(url, headers=headers)
+        j = response.json()
+
+        if response.status_code == 200:
+            id_tienda = j["seller_id"]
+            if id_tienda == 77581040:
+                tienda = "Tecnorium"
+            elif id_tienda == 146367667:
+                tienda = "Celestron"
+            elif id_tienda == 301181249:
+                tienda = "Lenovo"
+            
+            # print("La tienda de la publicación {} es {}".format(item_id, tienda))
+            return tienda
+        
+    if tienda == "":
+        print("No se pudo conseguir la tienda de la publicación {}".format(item_id))
+        print(response.status_code, response.text)
 
 @dataclass
 class Tienda:
@@ -554,16 +572,23 @@ def get_proveedor_sku(sku, Articulos_GBP_extendida_sheet=None):
             return proveedor
     return False
 
+def path2data(data_filename, DATA_DIR_REL_PATH="..", DATA_DIR="data"):
+    return os.path.join(os.path.dirname(__file__), DATA_DIR_REL_PATH, DATA_DIR, data_filename)
+
 #   ARMA LISTA CON PUBLICACIONES GBP
 
-def get_publis_gbp(sku=True, proveedor=False, tienda=False, costo_envio=False, precio=False, Articulos_GBP_ext_sheet=None) -> List[Publicacion]:
+def get_publis_gbp(sku=True, proveedor=False, tienda=False, costo_envio=False, precio=False, Articulos_GBP_ext_sheet=None, \
+    DATA_DIR_REL_PATH="..", DATA_DIR="data", PUBLIS_GBP_SOURCE_FILE="Publis_GBP.xlsx") -> List[Publicacion]:
     # trae List de publis de GBP
     # estaría bueno hacerla asincrónica ya que demora mucho
 
     #   Levanta excel Publis_GBP
-    # os.chdir("C:\!PYTHON\ML")
-    os.chdir(os.path.dirname(os.path.abspath(__file__)))
-    workbook = load_workbook(filename="data/Publis_GBP.xlsx")
+
+    #os.chdir(os.path.dirname(os.path.abspath(__file__)))
+    #filename = os.path.join(os.path.dirname(__file__), DATA_DIR_REL_PATH, DATA_DIR, PUBLIS_GBP_SOURCE_FILE)
+    filename = path2data(DATA_DIR_REL_PATH=DATA_DIR_REL_PATH, DATA_DIR=DATA_DIR, data_filename=PUBLIS_GBP_SOURCE_FILE)
+
+    workbook = load_workbook(filename=filename)
     sheet = workbook.active
     rows = int(sheet.dimensions[5:])
 
@@ -589,44 +614,156 @@ def get_publis_gbp(sku=True, proveedor=False, tienda=False, costo_envio=False, p
 
     return publis_gbp
 
+def costos_envio_colecta_publi_json(item_id = None, token = None, client=None, item_json = None) -> Union[Dict, None]:
+    """Trae json de costos promedio aproximados (el que informa ML en la interface) de envío por correo de una publicación para ML y MS.
+
+    Args:
+        item_id (_str_, optional): ID publicación. Defaults to None.
+        token (_str_, optional): Defaults to None.
+        item_json (_json_, optional): JSON del recurso /item de la publicación. Defaults to None.
+
+        Si se usa item_json como argumento, no se necesitan item_id y token, y viceversa.
+
+    Returns:
+        Dict (json)
+    """
+
+    if item_json:
+        j = item_json
+    elif not item_id:
+        print("Se requiere item_id o item_json para calcular el costo de envío")
+        return None
+    else:
+        if not token:
+            token = ml_aut(tienda_publi(item_id))
+
+        if not client:
+            client= httpx.Client()
+
+        ZIP_CODE = "1602"
+         
+        url = f'https://api.mercadolibre.com/items/{item_id}/shipping_options?zip_code={ZIP_CODE}'
+
+        headers = {
+          'Authorization': token
+        }
+
+        count = 0
+        while count < 6:
+            response = client.get(url, headers=headers)
+            j = response.json()
+            if response.status_code == 404:
+                #print(f'La publicación {item_id} no tiene Mercado Envíos')
+                return None
+            elif response.status_code != 200:
+                print(f'No se pudo traer json con costo de envío de la publicación {item_id}')
+                print(response.status_code, response.text)
+                count += 1
+                print(f'Intento {count} para la publicación {item_id}')
+                if count < 6:
+                    print('Reintentando...')
+                else:
+                    print(f'Se cancela la búsqueda de costo de envío de {item_id}')
+                    return None
+            else:
+                if count > 0:
+                    print(f'Se obtuvo json con costo de envío de la publicación {item_id} con exito al intento {count + 1}')
+                return j
+
+def costos_envio_colecta_publi(costos_envio_colecta_publi_json) -> Union[Costos_Envio, None]:
+
+    if costos_envio_colecta_publi_json == None:
+        return None
+    j = costos_envio_colecta_publi_json
+    costo_ml = None
+    for x in j["options"]:
+        if x["name"] ==  "Estándar a domicilio":   # Envío por Correo Estandar a domicilio
+            costo_ml = x["list_cost"]
+            break
+        elif x["name"] == "Express a domicilio":
+            costo_ml = x["list_cost"]
+        elif x["name"] == "Prioritario a domicilio" and x["shipping_method_type"] == "next_day":
+            costo_ml = x["list_cost"]
+    if not costo_ml:
+        print(f'La publicación {j["item_id"]} no tiene opciones de Envío por Correo Estandar, Express a Domicilio o Prioritario a Domicilio')
+        return None
+    else:
+        costo_ms = costo_ml * 2
+        costo_envio = Costos_Envio(ml=costo_ml, ms=costo_ms)
+        #costos_envio = {"ml": costo_ml, "ms": costo_ms}    
+        return costo_envio
+
+def tiene_mercado_envio(item_json) -> bool:
+    if item_json["shipping"]["mode"] == "not_specified" or item_json["shipping"]["mode"] == None:
+        return False
+    else:
+        return True
+
+
+### ESCRIBE EXCEL PARA IMPORTAR EN GBP CON PUBLICACIONES A ACTUALIZAR
+
+# WORKBOOK REQUERIMENTS
+# Ingresar importe como TEXTO, con el separador decimal como COMA (ej: "1599,00")
+
+def save_to_excel(publis_para_actualizar: List[Publicacion], excel_pathname: str, gbp_updater_file_title_cells: Dict[str, str], \
+                  gbp_updater_file_sheet_title: str = "Publicaciones", gbp_updater_file_columns_width: int = 18) -> bool:
+    """Genera archivo excel con publicaciones con costo de envío a actualizar en GBP para importar en el sistema. 
+    Cumple con la versión 17 del template que entrega GBP. Siempre confirmar que el formato actual siga siendo compatible.
+    Se puede acceder a la versión actual desde acá:
+    http://gbp47.globalbluepoint.com/tecnorium/App_HelpFiles/Cambio%20masivo%20de%20Estados%20de%20Publicaciones.xlsx
+     
+    Args:
+        publis_para_actualizar (List[Publi_gbp]): Listado de publicaciones (con objeto Publi_gbp) a actualizar.
+        excel_path (str): Path y nombre del archivo a generar.
+        gbp_updater_file_title_cells (Dict[str, str]): Columnas del excel a generar. Chekear en GBP que no hayan cambiado.
+        gbp_updater_file_sheet_title (str): Nombre de la hoja del excel. Defaults to "Publicaciones". Chekear en GBP que no haya cambiado el nombre requerido.
+        gbp_updater_file_columns_width (int): Ancoh de las columnas. No afecta el funcionamiento pero facilita el control del excel si necesitamos abrirlo. Defaults to 15.
+
+    Returns:
+        bool: Si está todo bien, devuelve True. Si falta algún argumento o alguno tiene el tipado incorrecto, devuelve False.
+    """
+
+    # Checks if all the arguments are present and correct 
+    if not publis_para_actualizar or not excel_pathname or not gbp_updater_file_title_cells or not gbp_updater_file_sheet_title or not gbp_updater_file_columns_width:
+         print('Falta un argumento.\nUso: save_to_excel(publis_para_actualizar: List[Publi_gbp], excel_pathname: str, gbp_updater_file_title_cells: Dict[str, str], \
+                  gbp_updater_file_sheet_title: str = "Publicaciones", gbp_updater_file_columns_width: int = 15)')
+         return False
+    elif type(publis_para_actualizar ) != list:
+         return False
+    elif type(excel_pathname) != str:
+         return False
+    elif type(gbp_updater_file_title_cells) != dict:
+         return False
+    elif type(gbp_updater_file_sheet_title) != str:
+         return False
+    elif type(gbp_updater_file_columns_width) != int:
+         return False
+    else:
+        # Create a new workbook
+        gbp_updater_wb = Workbook()
+        gbp_updater_sheet = gbp_updater_wb.active
+        gbp_updater_sheet.title = gbp_updater_file_sheet_title
+        col_letters = [col.strip("1") for col in gbp_updater_file_title_cells.keys()]
+
+        # Set columns width (just for OCT)
+        for col in col_letters:
+            gbp_updater_sheet.column_dimensions[col].width = gbp_updater_file_columns_width
+
+        # Set workbook column names
+        for column_cell in gbp_updater_file_title_cells.keys():
+            gbp_updater_sheet[column_cell].value = gbp_updater_file_title_cells[column_cell]
+
+        # Write the new content
+        for row in range(2, len(publis_para_actualizar) + 2):
+            gbp_updater_sheet[f'A{row}'] = publis_para_actualizar[row - 2].item_id
+            gbp_updater_sheet[f'B{row}'] = f'{str(publis_para_actualizar[row - 2].costos_envio.gbp)},00'
+
+
+        # Saves the excel file over existing one
+        gbp_updater_wb.save(filename=excel_pathname)
+        gbp_updater_wb.close()
+        return True
+
 
 if __name__ == '__main__':
-    
-    new_shipment_types = {}
-
-    #   GENERA TOKENS Y CLIENTS PARA CADA TIENDA
-    #   convierte lista de tiendas en diccionario con credenciales con formato {tienda: Tienda()}
-    tiendas = {t: Tienda(name=t) for t in LISTA_TIENDAS}
-    
-    #   releva opciones de envío de cada publicación de cada tienda
-    for v in tiendas.values():
-
-        #   trae listado de ids de publicaciones de la tienda
-        publis_tienda = get_items_ids(store=v.name, token=v.token, client=v.client)
-
-        #   trae opciones de envío de cada publicación de la tienda
-        for pt in publis_tienda:
-            print(v.name, pt)
-            publi = Publicacion(item_id=pt)
-            shipment_options_json = publi.get_item_shipment_options_json(token=v.token, client=v.client)
-            publi.shipment_options = publi.get_item_free_shipment_options(shipment_options_json, include_prices=True, shipment_types_catalog=SHIPMENT_TYPES_CATALOG)
-
-            precio_referencia = publi.reference_ml_shipment_cost()
-
-            # Si la publicación tiene un tipo de envío no catalogado, compara su costo contra el costo de referencia para asignarle prioridad y lo agrega al dict new_shipment_types
-            if publi.shipment_options:
-                for so in publi.shipment_options:
-                    if so.shipping_method_id not in SHIPMENT_TYPES_CATALOG.keys():
-                        if so.shipping_method_id not in new_shipment_types.keys():
-                            
-                            if so.price == precio_referencia:
-                                so.shipping_method_type_priority = 60
-                            else:
-                                so.shipping_method_type_priority = -10
-                            new_shipment_types.update({so.shipping_method_id: {'name': so.name, 'shipping_method_type': so.shipping_method_type, 'priority': so.shipping_method_type_priority}})
-                            print(f'Agregado este nuevo shipment type: {so.shipping_method_id} - {so.price} - {so.name} - {so.shipping_method_type} - {so.shipping_method_type_priority} / Precio referencia: {precio_referencia}')
-                print()
-                
-        #   Si new_shipment_types tiene contenido, imprimirlo
-    if new_shipment_types != {}:
-        print(new_shipment_types)    
+    pass
