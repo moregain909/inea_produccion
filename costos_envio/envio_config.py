@@ -1,15 +1,17 @@
 #   CONFIGURATION AND CONSTANTS FOR COSTOS_ENVIO
 
-from dataclasses import dataclass, field, asdict
-import os
-import copy
+#from dataclasses import dataclass, field, asdict
+#import os
+#import copy
 from typing import List, Dict, Union
-from decouple import AutoConfig, config, UndefinedValueError
+#from decouple import AutoConfig, config, UndefinedValueError
 from dotenv import *
-import httpx
-from openpyxl import load_workbook, Workbook
+#import httpx
+#from openpyxl import load_workbook, Workbook
 
-from helpers import Publicacion, Tienda, get_items_ids
+from envio_helpers import Publicacion, get_items_ids
+
+from auth import Tienda
 
 #   CONFIGURA EN QUÉ TIENDAS BUSCA TIPOS DE ENVÍO
 LISTA_TIENDAS = ["tecnorium", "lenovo"]
@@ -17,10 +19,14 @@ LISTA_TIENDAS = ["tecnorium", "lenovo"]
 #   CONFIGURA QUÉ PROVEEDORES TIENEN COSTO CON ENVIO EN GBP
 ALIAS_PROVEEDORES_CON_COSTO_ENVIO = ["microglobal", "bowie"]
 
-#   CONFIGURA QUÉ TIENDAS CONTROLA
-LISTA_TIENDAS = ["tecnorium", "lenovo"]
+#   CONFIGURA MAPA DE PROVEEDORES CON COSTOS DE ENVIO EN GBP Y UMBRALES
+MAP_PROVEEDORES =  {"microglobal":  {"name": "MICROGLOBAL ARGENTINA SOCIEDAD",  "pid": "16", "umbrales":   {90000: 1, \
+                                                                                                            1200000: 0.5}}, \
+                    "bowie":        {"name": "Bowie SRL",                       "pid": "79", "umbrales":   {90000: 1, \
+                                                                                                            1200000: 0.5}}}
 
-#   CONFIGURA DIRECTORIO DE DATA
+  
+#CONFIGURA DIRECTORIO DE DATA
 DATA_DIR_REL_PATH = ".."
 DATA_DIR_NAME = "data"
 
@@ -31,13 +37,13 @@ PUBLIS_GBP_SOURCE_FILE = "Publis_GBP.xlsx"
 ARTICULOS_GBP_EXTENDIDA = "Articulos_GBP_extendida.xlsx"
 
 
-#   CONFIG COEFICIENTE CALCULO ENVIO MS RESPECTO ENVIO ML
+#   CONFIGURA COEFICIENTE CALCULO ENVIO MS RESPECTO ENVIO ML
 MS_SHIPMENT_MULTIPLIER  = 2
 
 
 # CONFIG GBP_UPDATER_FILE
 
-GBP_UPDATER_FILE = "data/actualizador_publis_gbp.xlsx"
+GBP_UPDATER_FILE = "actualizador_publis_gbp.xlsx"
 GBP_UPDATER_FILE_TITLE_CELLS = {"A1": "ID de Publicación", "B1": "Costo de Envío"}
 GBP_UPDATER_FILE_SHEET_TITLE = "Publicaciones"
 GBP_UPDATER_FILE_COLUMNS_WIDTH = 18

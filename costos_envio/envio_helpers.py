@@ -7,163 +7,18 @@ from dotenv import *
 import httpx
 from openpyxl import load_workbook, Workbook
 
+import sys
+path2root = os.path.join(os.path.dirname(__file__), "..")
+sys.path.append(path2root)
+
+#print(sys.path)
+
+from auth import Credentials, ml_aut, tienda_publi
 
 
-#   AUTENTICACIÓN EN ML
 
-#config = AutoConfig(' ')    # previene un bug the decouple que a veces no encuentra .env desde Jupyter
-
-@dataclass
-class Credentials:
-    store: str = field(repr=True, default="tecnorium")
-    app_id: str = field(repr=True, default=None) # también documentado o referenciado como CLIENT_ID
-    client_secret = str, field(repr=True, default=None)
-    refresh_token = str, field(repr=True, default=None)
-    user_id: str = field(repr=True, default=None)
-
-    def __post_init__(self) -> None:
-        self.get_credentials()
-
-    def get_credentials(self) -> bool:
-        """Trae credenciales para ML de las variables de entorno.
-        Argumento:
-            store (str): Alias de la tienda. Tiene que estar mapeado en credentials_map.
-        Devolución:
-            Dict con credenciales (Ej. )
-        """
-
-        # Diccionario que mapea store a keys de credenciales de entorno
-        credentials_map = {
-            ("tecnorium", "tecnorrum"): ("TEC_CLIENT_ID", "TEC_CLIENT_SECRET", "TEC_REFRESH_TOKEN", "TEC_USER_ID"), \
-            ("celestron",): ("CEL_CLIENT_ID", "CEL_CLIENT_SECRET", "CEL_REFRESH_TOKEN", "CEL_USER_ID"), \
-            ("lenovo", ): ("LEN_CLIENT_ID", "LEN_CLIENT_SECRET", "LEN_REFRESH_TOKEN", "LEN_USER_ID"), \
-            ("iojan", "iojann"): ("IOJAN_CLIENT_ID", "IOJAN_CLIENT_SECRET", "IOJAN_REFRESH_TOKEN", "IOJAN_TEC_USER_ID"), \
-            ("test01" ,): ("IOJAN_CLIENT_ID", "IOJAN_CLIENT_SECRET", "TEST01_REFRESH_TOKEN", "TEST01_USER_ID")
-        }
-
-        # Trae las credenciales de .env con config
-        store = self.store.lower()
-        for s, c in credentials_map.items():
-            if store in s:
-                try:
-                    self.app_id = config(c[0])
-                    self.client_secret = config(c[1])
-                    self.refresh_token = config(c[2])
-                    self.user_id = config(c[3])
-                    return True
-                except UndefinedValueError as e:
-                    print(f"{e}")
-                    #print("Me está dando UndefinedValueError")
-                except Exception as e:
-                    print(type(e), e)
-                    
-                return False
-        print(f"No se tienen credenciales de la tienda {store}\n") 
-        return False
-   
-            
-def ml_aut(tienda: str = "tecnorium", client: httpx.Client = None)-> Union[str, None]:
-    """
-    Autentica en ML
-    Argumentos:
-        tienda (str): Alias de una tienda ML de la que tengamos las credenciales en .env y figure mapeado en credentials_map de get_credentials(). Default=None.
-        session (httpx.Client()): Cliente de httpx que puede compartirse con otras funciones. Default=None. Si no se declara, crea uno.
-    Devolución:
-        Entrega un token (str) para autenticar en ML. Si el server devuelve error, la función devuelve False.
-    """
-    if not client:
-        client = httpx.Client()
-    else:
-        client = client
-
-    c = Credentials(tienda)
-    
-    # autentica en ML
-
-    url = "https://api.mercadolibre.com/oauth/token"
-    payload=f'grant_type=refresh_token&client_id={c.app_id}&client_secret={c.client_secret}&refresh_token={c.refresh_token}'
-    headers = {
-      'accept': 'application/json',
-      'content-type': 'application/x-www-form-urlencoded'
-    }
-    response = client.post(url, headers=headers, data=payload)
-    j = response.json()
-    #print(j)
-
-    token = f'Bearer {j["access_token"]}'
-    
-    if response.status_code == 401:
-        print("Token inválido")
-        return None
-    elif response.status_code == 400:
-        print(j["error"], j["error_description"])
-        return None
-    else:
-        return(token)
-
-def tienda_publi(item_id, client: httpx.Client):
-    """Trae el nombre de la tienda de una publicación de ML.
-
-    Args:
-        item_id (_type_): _description_
-
-    Returns:
-        _type_: _description_
-    """
-    TIENDAS = ["tecnorium", "celestron", "lenovo"]
-    tienda = ""
-
-    if not client:
-        client = httpx.Client()
-    else:
-        client = client
-
-
-    for x in TIENDAS:
-        token = ml_aut(x)        
-
-        url = "https://api.mercadolibre.com/items/" + item_id
-
-        payload = {}
-        headers = {
-          'Authorization': token
-        }
-
-        response = client.get(url, headers=headers)
-        j = response.json()
-
-        if response.status_code == 200:
-            id_tienda = j["seller_id"]
-            if id_tienda == 77581040:
-                tienda = "Tecnorium"
-            elif id_tienda == 146367667:
-                tienda = "Celestron"
-            elif id_tienda == 301181249:
-                tienda = "Lenovo"
-            
-            # print("La tienda de la publicación {} es {}".format(item_id, tienda))
-            return tienda
-        
-    if tienda == "":
-        print("No se pudo conseguir la tienda de la publicación {}".format(item_id))
-        print(response.status_code, response.text)
-
-@dataclass
-class Tienda:
-    name: str = field(repr=True, default=None)
-    token: str = field(repr=None, default=None)
-    client: httpx.Client = field(repr=None, default=None)
-
-    def __post_init__(self) -> None:
-        self.get_token()
-        self.get_client()
-
-    def get_token(self) -> None:
-        self.token = ml_aut(self.name)
-        
-    def get_client(self) -> None:
-        self.client = httpx.Client()
-
+#print(sys.path)
+#print()
 
 
 def get_items_ids(store="tecnorium", token=None, client=None, status="active", offset=0, limit=50) -> Union[List, None]:
@@ -176,7 +31,7 @@ def get_items_ids(store="tecnorium", token=None, client=None, status="active", o
         offset (int) = Punto de partida para traer resultados. Default=0.
         limit (int) = Cantidad de publicaciones a traer por llamada a la api. Se suceden las llamada hasta traer el total de reultados (paging). Default=50 (es el máximo). 
     """
-
+    
     if not client:
         client = httpx.Client()
     else:
@@ -218,35 +73,36 @@ class Coeficiente_Envio:
 
 @dataclass
 class Proveedor:
-    MAP_PROVEEDORES =  {"microglobal":  {"name": "MICROGLOBAL ARGENTINA SOCIEDAD",  "pid": "16", "umbrales":   {90000: 1, \
-                                                                                                                120000: 0.5}}, \
-                        "bowie":        {"name": "Bowie SRL",                       "pid": "79", "umbrales":   {90000: 1, \
-                                                                                                                120000: 0.5}}}
-    
+#    MAP_PROVEEDORES =  {"microglobal":  {"name": "MICROGLOBAL ARGENTINA SOCIEDAD",  "pid": "16", "umbrales":   {90000: 1, \
+#                                                                                                                120000: 0.5}}, \
+#                        "bowie":        {"name": "Bowie SRL",                       "pid": "79", "umbrales":   {90000: 1, \
+#                                                                                                                120000: 0.5}}}
+#    
     alias: str = field(repr=True, default=None)
     pid: str = field(repr=True, default=None)
     name: str = field(repr=True, default=None)
-    #map_proveedores: Dict[str, str] = field(repr=False, default=dict)
+    map_proveedores: Dict[str, str] = field(repr=False, default=None)
     coeficientes_envio: List[Coeficiente_Envio] = field(default_factory=list)
 
     def __post_init__(self) -> None:
-        if not self.pid:
-            self.get_id()
-        if not self.alias:
-            self.get_alias()
-        elif not self.name:
-            self.get_name()
+        if self.map_proveedores:
+            if not self.pid:
+                self.get_id()
+            if not self.alias:
+                self.get_alias()
+            elif not self.name:
+                self.get_name()
 
     def get_id(self) -> bool:
         if self.alias:
-            for alias, details in self.MAP_PROVEEDORES.items():
+            for alias, details in self.map_proveedores.items():
                 if alias == self.alias:
                     self.pid = details["pid"]
                     return True
             print(f"No encontró ID de proveedor de {self.alias}")
             return False        
         elif self.name:
-            for details in self.MAP_PROVEEDORES.values():
+            for details in self.map_proveedores.values():
                 if details["name"] == self.name:
                     self.pid = details["pid"]
                     return True
@@ -258,7 +114,7 @@ class Proveedor:
         
     def get_name(self):
         if self.alias:
-            for alias, details in self.MAP_PROVEEDORES.items():
+            for alias, details in self.map_proveedores.items():
                 if alias == self.alias:
                     self.name = details["name"]
                     return True
@@ -267,7 +123,7 @@ class Proveedor:
 
     def get_alias(self):
         if self.name:
-            for alias, details in self.MAP_PROVEEDORES.items():
+            for alias, details in self.map_proveedores.items():
                 if details["name"] == self.name:
                     self.alias = alias
                     return True
@@ -276,11 +132,15 @@ class Proveedor:
     
     def get_coeficientes_envio(self) -> List[Coeficiente_Envio]:
 
-        if self.alias not in self.MAP_PROVEEDORES.keys():
-            #print(f'Proveedor {self.alias} no mapeado en MAP_PROVEEDORES')
+        if self.map_proveedores is None:
+            print(f'No se encontró MAP_PROVEEDORES. Se necesita para get_coeficientes_envios()')
             return False
+        else:
+            if self.alias not in self.map_proveedores.keys():
+                #print(f'Proveedor {self.alias} no mapeado en MAP_PROVEEDORES')
+                return False
         
-        for umbral, coeficiente in self.MAP_PROVEEDORES[self.alias]["umbrales"].items():
+        for umbral, coeficiente in self.map_proveedores[self.alias]["umbrales"].items():
             self.coeficientes_envio.append(Coeficiente_Envio(umbral=umbral, coeficiente=coeficiente))
         if self.coeficientes_envio:
             return True
@@ -359,7 +219,7 @@ class Publicacion:
     precios: Precios = field(repr=True, default=None)
     coeficiente_envio_gbp: float = field(repr=True, default=None)
 
-    def set_coeficiente_envio_gbp(self) -> float:
+    def set_coeficiente_envio_gbp(self) -> bool:
         if self.proveedor:
             if not self.proveedor.coeficientes_envio:
                 print(f'{self.item_id}: Faltan los coeficientes_envio del proveedor {self.proveedor.alias} para calcular el coeficiente de envío gbp a aplicar')
@@ -386,13 +246,13 @@ class Publicacion:
             print(f'{self.item_id}: No se encontró el proveedor para calcular el coeficiente de envío gbp a aplicar')
             return False
             
-    def set_costo_envio_gbp(self) -> float:
+    def set_costo_envio_gbp(self) -> bool:
         if not self.costos_envio.ml:
-            print(f'{self.item_id}: Falta el costo de envío ML para calcular el costo de envío GBP')
+            #print(f'{self.item_id}: Falta el costo de envío ML para calcular el costo de envío GBP')
             return False
         else:
             if not self.coeficiente_envio_gbp:
-                print(f'{self.item_id}: No hay coeficientes de envío GBP configurado, se aplica 0')
+                #print(f'{self.item_id}: No hay coeficientes de envío GBP configurado, se aplica 0')
                 coeficiente = 0
             else:
                 coeficiente = self.coeficiente_envio_gbp
@@ -461,7 +321,7 @@ class Publicacion:
         j = response.json()
 
         if response.status_code == 404:
-            print(f'La publicación {self.item_id} no tiene opciones de envío.')
+            #print(f'La publicación {self.item_id} no tiene opciones de envío.')
             return None
         elif response.status_code != 200:
                 print(f'No se pudo traer opciones de envío de la publicación {self.item_id}.\nStatus code: {response.status_code} - {response.text}')
@@ -469,12 +329,12 @@ class Publicacion:
         else:
              return j
 
-    def get_reference_shipment_costs(self, ms_shipment_multiplier=None) -> Union[Costos_Envio, bool]:
+    def set_reference_shipment_costs(self, ms_shipment_multiplier=None) -> bool:
         
         if not ms_shipment_multiplier:
             ms_shipment_multiplier = 2
         
-        print(self.costos_envio)
+        #print(self.costos_envio)
         ml_shipment_cost = self.reference_ml_shipment_cost()
         if not ml_shipment_cost or not self.costos_envio:
             self.costos_envio = Costos_Envio()
@@ -551,7 +411,7 @@ class Publicacion:
 
 #   TRAE PROVEEDOR EN UNA PUBLICACION
 
-def get_proveedor_sku(sku, Articulos_GBP_extendida_sheet=None):
+def get_proveedor_sku(sku, MAP_PROVEEDORES, Articulos_GBP_extendida_sheet=None) -> Union[Proveedor, False]:
 
     if Articulos_GBP_extendida_sheet:
         sheet = Articulos_GBP_extendida_sheet
@@ -567,18 +427,17 @@ def get_proveedor_sku(sku, Articulos_GBP_extendida_sheet=None):
         if sku_in_row == sku:
             p_id = sheet["T"+str(x)].value.split(" | ", 3)[1]
             pname = sheet["T"+str(x)].value.split(" | ", 3)[0]
-            proveedor = Proveedor(pid = p_id, name = pname)
-            proveedor.get_coeficientes_envio()
+            proveedor = Proveedor(pid = p_id, name = pname, map_proveedores=MAP_PROVEEDORES)
             return proveedor
     return False
 
-def path2data(data_filename, DATA_DIR_REL_PATH="..", DATA_DIR="data"):
-    return os.path.join(os.path.dirname(__file__), DATA_DIR_REL_PATH, DATA_DIR, data_filename)
+def path2data(data_filename: str, DATA_DIR_REL_PATH="..", DATA_DIR_NAME="data") -> str:
+    return os.path.join(os.path.dirname(__file__), DATA_DIR_REL_PATH, DATA_DIR_NAME, data_filename)
 
 #   ARMA LISTA CON PUBLICACIONES GBP
 
 def get_publis_gbp(sku=True, proveedor=False, tienda=False, costo_envio=False, precio=False, Articulos_GBP_ext_sheet=None, \
-    DATA_DIR_REL_PATH="..", DATA_DIR="data", PUBLIS_GBP_SOURCE_FILE="Publis_GBP.xlsx") -> List[Publicacion]:
+    DATA_DIR_REL_PATH="..", DATA_DIR_NAME="data", PUBLIS_GBP_SOURCE_FILE="Publis_GBP.xlsx") -> List[Publicacion]:
     # trae List de publis de GBP
     # estaría bueno hacerla asincrónica ya que demora mucho
 
@@ -586,7 +445,7 @@ def get_publis_gbp(sku=True, proveedor=False, tienda=False, costo_envio=False, p
 
     #os.chdir(os.path.dirname(os.path.abspath(__file__)))
     #filename = os.path.join(os.path.dirname(__file__), DATA_DIR_REL_PATH, DATA_DIR, PUBLIS_GBP_SOURCE_FILE)
-    filename = path2data(DATA_DIR_REL_PATH=DATA_DIR_REL_PATH, DATA_DIR=DATA_DIR, data_filename=PUBLIS_GBP_SOURCE_FILE)
+    filename = path2data(DATA_DIR_REL_PATH=DATA_DIR_REL_PATH, DATA_DIR_NAME=DATA_DIR_NAME, data_filename=PUBLIS_GBP_SOURCE_FILE)
 
     workbook = load_workbook(filename=filename)
     sheet = workbook.active
@@ -724,9 +583,11 @@ def save_to_excel(publis_para_actualizar: List[Publicacion], excel_pathname: str
     """
 
     # Checks if all the arguments are present and correct 
-    if not publis_para_actualizar or not excel_pathname or not gbp_updater_file_title_cells or not gbp_updater_file_sheet_title or not gbp_updater_file_columns_width:
-         print('Falta un argumento.\nUso: save_to_excel(publis_para_actualizar: List[Publi_gbp], excel_pathname: str, gbp_updater_file_title_cells: Dict[str, str], \
-                  gbp_updater_file_sheet_title: str = "Publicaciones", gbp_updater_file_columns_width: int = 15)')
+    if not publis_para_actualizar:
+        print(f'No hay publicaciones para actualizar')
+        return False
+    if not excel_pathname or not gbp_updater_file_title_cells or not gbp_updater_file_sheet_title or not gbp_updater_file_columns_width:
+         print('Falta un argumento.\nUso: save_to_excel(publis_para_actualizar: List[Publi_gbp], excel_pathname: str, gbp_updater_file_title_cells: Dict[str, str], gbp_updater_file_sheet_title: str = "Publicaciones", gbp_updater_file_columns_width: int = 15)')
          return False
     elif type(publis_para_actualizar ) != list:
          return False
