@@ -167,3 +167,9 @@ def format_tienda(tienda):
 #   formatea el string tienda de PUBLIS GBP
     split_tienda = tienda.split(" ", 1)
     return split_tienda[0].lower()
+
+
+if __name__ == '__main__':
+    
+
+    pass
