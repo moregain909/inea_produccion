@@ -1,13 +1,11 @@
 from typing import List, Dict, Union
-#from decouple import AutoConfig, config, UndefinedValueError
 from dotenv import *
-#import httpx
-#from openpyxl import load_workbook, Workbook
 
-from envio_helpers import Publicacion, get_items_ids
+
+from envio_helpers import Publicacion
+from envio_helpers import get_items_ids
 
 from auth import Tienda
-from auth import ml_aut
 
 from envio_config import LISTA_TIENDAS, SHIPMENT_TYPES_CATALOG
 
