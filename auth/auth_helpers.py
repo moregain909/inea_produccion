@@ -88,7 +88,16 @@ def ml_aut(tienda: str = "tecnorium", client: httpx.Client = None)-> Union[str, 
     j = response.json()
     #print(j)
 
-    token = f'Bearer {j["access_token"]}'
+    try:
+        token = f'Bearer {j["access_token"]}'
+    except KeyError as e:
+        print(f'{tienda}: Token inválido. {e}')
+        print(response.status_code, response.text)
+        return None
+    except Exception as e:
+        print(tienda, type(e), e)
+        print(response.status_code, response.text)
+        return None
     
     if response.status_code == 401:
         print("Token inválido")
@@ -171,5 +180,5 @@ def format_tienda(tienda):
 
 if __name__ == '__main__':
     
-
+    ml_aut("lenovo")
     pass
