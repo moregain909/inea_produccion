@@ -18,6 +18,8 @@ class Credentials:
     client_secret = str, field(repr=True, default=None)
     refresh_token = str, field(repr=True, default=None)
     user_id: str = field(repr=True, default=None)
+    temp_code = str, field(repr=True, default=None)  
+    redirect_uri = str, field(repr=True, default='https://www.tecnorium.ar/')  
 
     def __post_init__(self) -> None:
         self.get_credentials()
@@ -32,11 +34,11 @@ class Credentials:
 
         # Diccionario que mapea store a keys de credenciales de entorno
         credentials_map = {
-            ("tecnorium", "tecnorrum"): ("TEC_CLIENT_ID", "TEC_CLIENT_SECRET", "TEC_REFRESH_TOKEN", "TEC_USER_ID"), \
-            ("celestron",): ("CEL_CLIENT_ID", "CEL_CLIENT_SECRET", "CEL_REFRESH_TOKEN", "CEL_USER_ID"), \
-            ("lenovo", ): ("LEN_CLIENT_ID", "LEN_CLIENT_SECRET", "LEN_REFRESH_TOKEN", "LEN_USER_ID"), \
-            ("iojan", "iojann"): ("IOJAN_CLIENT_ID", "IOJAN_CLIENT_SECRET", "IOJAN_REFRESH_TOKEN", "IOJAN_TEC_USER_ID"), \
-            ("test01" ,): ("IOJAN_CLIENT_ID", "IOJAN_CLIENT_SECRET", "TEST01_REFRESH_TOKEN", "TEST01_USER_ID")
+            ("tecnorium", "tecnorrum"): ("TEC_CLIENT_ID", "TEC_CLIENT_SECRET", "TEC_REFRESH_TOKEN", "TEC_USER_ID", "TEC_TEMP_CODE"), \
+            ("celestron",): ("CEL_CLIENT_ID", "CEL_CLIENT_SECRET", "CEL_REFRESH_TOKEN", "CEL_USER_ID", "CEL_TEMP_CODE"), \
+            ("lenovo", ): ("LEN_CLIENT_ID", "LEN_CLIENT_SECRET", "LEN_REFRESH_TOKEN", "LEN_USER_ID", "LEN_TEMP_CODE"), \
+            ("iojan", "iojann"): ("IOJAN_CLIENT_ID", "IOJAN_CLIENT_SECRET", "IOJAN_REFRESH_TOKEN", "IOJAN_TEC_USER_ID", "IOJAN_TEMP_CODE"), \
+            ("test01" ,): ("IOJAN_CLIENT_ID", "IOJAN_CLIENT_SECRET", "TEST01_REFRESH_TOKEN", "TEST01_USER_ID", "TEST01_TEMP_CODE")
         }
 
         # Trae las credenciales de .env con config
@@ -48,6 +50,7 @@ class Credentials:
                     self.client_secret = config(c[1])
                     self.refresh_token = config(c[2])
                     self.user_id = config(c[3])
+                    self.temp_code = config(c[4])
                     return True
                 except UndefinedValueError as e:
                     print(f"{e}")
@@ -107,6 +110,45 @@ def ml_aut(tienda: str = "tecnorium", client: httpx.Client = None)-> Union[str, 
         return None
     else:
         return(token)
+
+def get_refresh_token(tienda: str = "tecnorium", client: httpx.Client = None, credentials: Credentials = "None"):
+
+    if not client:
+        client = httpx.Client()
+    else:
+        client = client
+
+    if credentials == "None":
+        credentials = Credentials(tienda)
+    else:
+        credentials = credentials
+
+    url = "https://api.mercadolibre.com/oauth/token"
+
+    payload = f'grant_type=authorization_code&client_id={credentials.user_id}&client_secret={credentials.client_secret}&code={credentials.temp_code}&redirect_uri={credentials.redirect_uri}'
+    headers = {
+        'accept': 'application/json',
+        'content-type': 'application/x-www-form-urlencoded'
+    }
+
+    response = client.post(url, headers=headers, data=payload)
+
+    j = response.json()
+
+    try:
+        credentials.refresh_token = j.refresh_token
+        print(credentials.refresh_token)
+        # ACA TENGO QUE ACTUALIZAR EL REFRESH TOKEN EN .env
+        
+        return True
+    except Exception as e:
+        print(type(e), e)
+        print(response.status_code, response.text)
+        return None
+
+
+# https://www.tecnorium.com.ar/?code=TG-655523791321be000172244e-77581040
+
 
 def tienda_publi(item_id, client: httpx.Client):
     """Trae el nombre de la tienda de una publicación de ML.
@@ -180,5 +222,8 @@ def format_tienda(tienda):
 
 if __name__ == '__main__':
     
+    ml_aut("tecnorium")
+    ml_aut("celestron")
     ml_aut("lenovo")
+    #get_refresh_token("lenovo")
     pass
