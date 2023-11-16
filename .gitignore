@@ -1,8 +1,9 @@
 /env
 .env
-/costos_envio/__pycache__
-/__pycache__
 /data
 .vscode/
 temp_pruebas.py
-auth/__pycache__
+#costos_envio/__pycache__
+**/__pycache__
+#auth/__pycache__
+#utils/__pyache__
