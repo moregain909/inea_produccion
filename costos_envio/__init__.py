@@ -1,8 +1,8 @@
-# For relative imports to work in Python 3.6
+
 import os, sys; 
 
 path2root = os.path.join(os.path.dirname(__file__), "..")
-#sys.path.append(path2root)
+sys.path.append(path2root)
 
 #print(sys.path.append(os.path.dirname(os.path.realpath(__file__))))
 
