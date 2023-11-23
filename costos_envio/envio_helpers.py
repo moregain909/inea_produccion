@@ -6,6 +6,7 @@ from decouple import AutoConfig, config, UndefinedValueError
 from dotenv import *
 import httpx
 from openpyxl import load_workbook, Workbook
+from datetime import date
 
 import sys
 path2root = os.path.join(os.path.dirname(__file__), "..")
@@ -625,6 +626,19 @@ def save_to_excel(publis_para_actualizar: List[Publicacion], excel_pathname: str
         gbp_updater_wb.close()
         return True
 
+
+@dataclass
+class TarifaEnvioFlex:
+    zona: str = field(repr=True, default=None)
+    tarifa: int = field(repr=True, default=None)
+
+@dataclass
+class TarifarioEnvioFlexNotion:
+    name: str = field(repr=True, default=None)
+    tarifas: List[TarifaEnvioFlex] = field(repr=True, default=None)
+    vigencia: date = field(repr=True, default=None)
+
+    pass
 
 if __name__ == '__main__':
     pass
