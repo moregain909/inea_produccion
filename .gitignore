@@ -1,6 +1,7 @@
 /env
 .env
-/data
+/data/*
+!/data/data_helpers.py
 .vscode/
 temp_pruebas.py
 #costos_envio/__pycache__
