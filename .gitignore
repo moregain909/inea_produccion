@@ -1,0 +1,10 @@
+/env
+.env
+/data/*
+!/data/data_helpers.py
+.vscode/
+temp_pruebas.py
+#costos_envio/__pycache__
+**/__pycache__
+#auth/__pycache__
+#utils/__pyache__
