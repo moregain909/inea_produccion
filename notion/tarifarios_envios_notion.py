@@ -1,6 +1,19 @@
 
 ##  ACTUALIZACION DE TARIFAS DEL SISTEMA DE ENVIOS EN NOTION
 
+NUEVO_TARIFARIO = {
+    "nombre": "ML23A-ENERO",
+    "zonas_tarifarias": {
+        "CABA": 1200,
+        "Primer Cordón GBA": 1400,
+        "Segundo Cordón GBA": 1600,
+        "Abona el Cliente": 0,
+        "Envío a Despacho": 1200,
+        "Piedras / Despachos": 1200
+    }
+}
+
+
 #   EN ZONAS TARIFARIAS AGREGAR COLUMNAS CON TARIFARIOS NUEVOS 
     #   Ej de nombre ML23A-ENERO, ML23B-MARZO, ML24A-FEBRERO, FA23A-ENERO, etc
     #   Tipo propiedad "Number", Number Format "Argentine peso"
