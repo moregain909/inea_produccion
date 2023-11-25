@@ -11,11 +11,11 @@ from precios_mg_helpers import mg_get_products, productomg2costomg, insert_costo
 from precios_mg_helpers import CostoMG
 from data.data_helpers import db_connection
 #   Loads env db constants
-from precios_mg_config import MYSQL_USER, MYSQL_PASS, MYSQL_HOST, MYSQL_PORT, DB, \
-    LOCAL_MYSQL_USER, LOCAL_MYSQL_PASS, LOCAL_MYSQL_HOST, LOCAL_MYSQL_PORT, LOCAL_DB
+from precios_mg_config import PRODUCCION_MYSQL_USER, PRODUCCION_MYSQL_PASS, PRODUCCION_MYSQL_HOST, PRODUCCION_MYSQL_PORT, PRODUCCION_DB, \
+    TEST_MYSQL_USER, TEST_MYSQL_PASS, TEST_MYSQL_HOST, TEST_MYSQL_PORT, TEST_DB
 
-#DATABASE = "local"
-DATABASE = "remote"
+#DATABASE = "test"
+DATABASE = "produccion"
 
 if __name__ == "__main__":
     
@@ -23,10 +23,10 @@ if __name__ == "__main__":
     #   Connect to db and start a session
     if DATABASE == "local":
         #   local test database
-        ce = db_connection(LOCAL_MYSQL_USER, LOCAL_MYSQL_PASS, LOCAL_MYSQL_HOST, LOCAL_MYSQL_PORT, LOCAL_DB)
+        ce = db_connection(TEST_MYSQL_USER, TEST_MYSQL_PASS, TEST_MYSQL_HOST, TEST_MYSQL_PORT, TEST_DB)
     else:
         #   remote production database
-        ce = db_connection(MYSQL_USER, MYSQL_PASS, MYSQL_HOST, MYSQL_PORT, DB)
+        ce = db_connection(PRODUCCION_MYSQL_USER, PRODUCCION_MYSQL_PASS, PRODUCCION_MYSQL_HOST, PRODUCCION_MYSQL_PORT, PRODUCCION_DB)
     
     connection = ce[0]
     engine = ce[1]

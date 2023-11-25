@@ -17,8 +17,8 @@ sys.path.append(path2root)
 from data.data_helpers import Base, create_tables, db_connection
 
 #   Loads env db constants
-from precios_mg_config import MYSQL_USER, MYSQL_PASS, MYSQL_HOST, MYSQL_PORT, DB, \
-    LOCAL_MYSQL_USER, LOCAL_MYSQL_PASS, LOCAL_MYSQL_HOST, LOCAL_MYSQL_PORT, LOCAL_DB
+from precios_mg_config import PRODUCCION_MYSQL_USER, PRODUCCION_MYSQL_PASS, PRODUCCION_MYSQL_HOST, PRODUCCION_MYSQL_PORT, PRODUCCION_DB, \
+    TEST_MYSQL_USER, TEST_MYSQL_PASS, TEST_MYSQL_HOST, TEST_MYSQL_PORT, TEST_DB
 
 
 class CostoMG(Base):
