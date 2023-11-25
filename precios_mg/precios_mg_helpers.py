@@ -10,6 +10,7 @@ from typing import Tuple, Dict, List, Union
 import requests
 
 import os, sys
+sys.path.append(os.path.dirname(os.path.realpath(__file__)))
 path2root = os.path.join(os.path.dirname(__file__), "..")
 sys.path.append(path2root)
 
@@ -38,10 +39,65 @@ class CostoMG(Base):
         self.costo = costo
 
     def __repr__(self) -> str:
-        return f'{self.costo_date} {self.sku} {self.costo}'
+        return f'{self.costo_id} {self.costo_date} {self.sku} {self.costo}'
     
     def __str__(self):
         return f'{self.costo_date} {self.sku} {self.costo}'
+
+class ItemMG(Base):
+    """Objeto que representa un item de la tabla productos_mg de la base de datos inea
+    """
+
+    __tablename__ = "productos_mg"
+
+    item_id = Column(Integer, primary_key=True, autoincrement=True)
+    item_date = Column(DateTime, default=func.now(), nullable=False)
+    sku = Column(String (100), nullable=False)
+    nombre = Column(String (250))
+    marca = Column(String (100))
+    categoria = Column(String (100))
+    cod_cat = Column(String (100))
+    iva = Column(DECIMAL(precision=12, scale=2))
+    ean = Column(String (100))
+
+    def __init__(self, item_date, sku, nombre, marca, categoria, cod_cat, iva, ean):
+        self.item_date = item_date
+        self.sku = sku
+        self.nombre = nombre
+        self.marca = marca
+        self.categoria = categoria
+        self.cod_cat = cod_cat
+        self.iva = iva
+        self.ean = ean
+
+    def __repr__(self) -> str:
+        return f'{self.sku} {self.iva} {self.marca} {self.nombre}'
+    
+    def __str__(self) -> str:
+        return f'{self.sku} {self.marca} {self.nombre}'
+
+class DisponibilidadStock(Base):
+
+    __tablename__ = "disponibilidad_stock_mg"
+
+    disponibilidad_id = Column(Integer, primary_key=True, autoincrement=True)
+    timestamp = Column(DateTime, default=func.now(), nullable=False)
+    sku = Column(String (100), nullable=False)
+    disponible = Column(Integer)
+
+    def __init__(self, timestamp, sku, disponible):
+        self.timestamp = timestamp
+        self.sku = sku
+        self.disponible = disponible
+
+    def __repr__(self) -> str:
+        return f'{self.sku} {self.stock}'
+    
+    def __str__(self) -> str:
+        return f'{self.sku} {self.stock}'
+
+#class FacturasMG(Base):
+#    pass
 
 @dataclass
 class ProductoMG:
@@ -63,6 +119,12 @@ def productomg2costomg(producto: ProductoMG) -> CostoMG:
     """Crea un objeto CostoMG a partir de un objeto ProductoMG
     """
     return CostoMG(producto.timestamp, producto.sku, producto.costo)
+
+def productomg2itemmg(producto: ProductoMG) -> ItemMG:
+    """Crea un objto ItemMG a partir de un objto ProductoMG
+    """
+    return ItemMG(producto.timestamp, producto.sku, producto.nombre, producto.marca, producto.categoria, producto.cod_cat, producto.iva, producto.ean)
+
 
 def latest_price_mg(session: Session, sku: str) -> CostoMG:
     """Trae el último precio de un producto de Microglobal
@@ -132,7 +194,7 @@ def mg_cat_xml() -> Union[str, bool]:
         return False    
 
 
-def parse_mgcat(xml_response: str, **kwargs: Dict[str, Union[bool, int, float]]) -> List[ProductoMG]:
+def parse_mgcat(xml_response: str, **kwargs: Dict[str, bool]) -> List[ProductoMG]:
     """
     Parsea el catálogo de producto de Microglobal.
 
@@ -153,20 +215,8 @@ def parse_mgcat(xml_response: str, **kwargs: Dict[str, Union[bool, int, float]])
     Devolución:
         List[ProductoMG]
     """
-    # define default arguments
-    timestamp = kwargs.get("timestamp", False)
-    sku = kwargs.get("sku", True)
-    nombre = kwargs.get("nombre", True)
-    marca = kwargs.get("marca", True)
-    categoria = kwargs.get("categoria", True)
-    cod_cat = kwargs.get("cod_cat", True)
-    costo = kwargs.get("costo", True)
-    stock = kwargs.get("stock", True)
-    iva = kwargs.get("iva", True)
-    ean = kwargs.get("ean", True)
 
     # parsea response del xml en un objeto soup y crea una lista para cada campo
-
     soup = BeautifulSoup(xml_response, 'xml')
 
     skus = soup.find_all("partNumber")
@@ -181,52 +231,55 @@ def parse_mgcat(xml_response: str, **kwargs: Dict[str, Union[bool, int, float]])
 
     # crea lista con el catálogo de todos los productos MG a partir del objeto soup
     cat_mg = []
-    timestamp = datetime.now()
-    
+
     for i in range(0, len(skus)):
                 
         item_args = {
-            "timestamp": timestamp,
-            "sku": skus[i].text, 
-            "nombre": nombres[i].text, 
-            "marca": marcas[i].text, 
-            "categoria": categorias[i].text, 
-            "cod_cat": cod_cats[i].text, 
-            "costo": float(costos[i].text), 
-            "stock": int(stocks[i].text), 
-            "iva": float(ivas[i].text), 
-            "ean": str(upcs[i].text)
+            "timestamp": datetime.now() if kwargs.get("timestamp", False) else False,
+            "sku": skus[i].text if kwargs.get("sku", False) else False,
+            "nombre": nombres[i].text if kwargs.get("nombre", False) else False,
+            "marca": marcas[i].text if kwargs.get("marca", False) else False,
+            "categoria": categorias[i].text if kwargs.get("categoria", False) else False,
+            "cod_cat": cod_cats[i].text if kwargs.get("cod_cat", False) else False,
+            "costo": float(costos[i].text) if kwargs.get("costo", False) else False,
+            "stock": int(stocks[i].text) if kwargs.get("stock", False) else False,
+            "iva": float(ivas[i].text) if kwargs.get("iva", False) else False,
+            "ean": str(upcs[i].text) if kwargs.get("ean", False) else False
         }
 
-        # Filtra argumentos (en **kawrgs) con valor verdadero
-        filtered_args = {key: value for key, value in item_args.items() if kwargs.get(key, False)}
-
-        item = ProductoMG(**filtered_args)
+        item = ProductoMG(**item_args)
         cat_mg.append(item)
 
     return cat_mg
 
-def mg_get_prices():
+def mg_get_products(mg_cat_xml, format=None) -> List[ProductoMG]:
     """
-    Trae lista con precios del catálogo de productos de Microglobal.
+    Trae lista con productos del catálogo de productos de Microglobal.
 
     Argumentos:
-        No requiere    
+        format (str): Si es "prices" devuelve ProductoMG con atributos necesarios para CostoMG
+        Si es "stock" devuelve ProductoMG con atributos necesarios para StockMG
+        Si es None devuelve ProductoMG con atributos necesarios para ItemMG
     Devolución:
-        List[PrecioMG]
+        List[ProductoMG]
     """
-    xml = mg_cat_xml()
-    prices = parse_mgcat(xml, timestamp=True, sku=True, costo=True, nombre=False, marca=False, \
-                                           categoria=False, cod_cat=False, stock=False, \
-                                            iva=False, ean=False)
-    return prices
+    
+    if format == "prices":
+        attrs = ("timestamp", "sku", "costo")
+    elif format == "stock":
+        attrs = ("timestamp", "sku", "stock")
+    else:
+        attrs = ("timestamp", "sku", "nombre", "marca", "categoria", \
+                 "cod_cat", "costo", "stock", "iva", "ean")
 
+    xml = mg_cat_xml
+    kwargs = {attr: True for attr in attrs}
+    products = parse_mgcat(xml, **kwargs)
 
+    return products
 
 
 if __name__ == "__main__":
-
-
 
     #   Connect to db and start a session
     ce = db_connection(MYSQL_USER, MYSQL_PASS, MYSQL_HOST, MYSQL_PORT, DB)
