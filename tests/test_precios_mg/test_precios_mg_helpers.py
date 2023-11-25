@@ -6,7 +6,7 @@ import os, sys;
 
 path2root = os.path.join(os.path.dirname(__file__), "..", "..")
 sys.path.append(path2root)
-from precios_mg import parse_mgcat, ProductoMG, mg_get_products, mg_get_products_
+from precios_mg import parse_mgcat, ProductoMG, mg_get_products
 
 class TestParseMGCat(unittest.TestCase):
 
