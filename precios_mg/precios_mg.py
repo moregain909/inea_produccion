@@ -1,25 +1,33 @@
 #   Actualiza base de costos de productos MicroGlobal
 
-from dotenv import load_dotenv
+#from dotenv import load_dotenv
 from sqlalchemy.orm import DeclarativeBase, sessionmaker, Session
 
 import os, sys
 path2root = os.path.join(os.path.dirname(__file__), "..")
 sys.path.append(path2root)
 
-from precios_mg_helpers import mg_get_prices, productomg2costomg, insert_costo_mg, latest_price_mg
+from precios_mg_helpers import mg_get_products, productomg2costomg, insert_costo_mg, latest_price_mg, mg_cat_xml
 from precios_mg_helpers import CostoMG
 from data.data_helpers import db_connection
 #   Loads env db constants
 from precios_mg_config import MYSQL_USER, MYSQL_PASS, MYSQL_HOST, MYSQL_PORT, DB, \
     LOCAL_MYSQL_USER, LOCAL_MYSQL_PASS, LOCAL_MYSQL_HOST, LOCAL_MYSQL_PORT, LOCAL_DB
 
+#DATABASE = "local"
+DATABASE = "remote"
 
 if __name__ == "__main__":
     
 
     #   Connect to db and start a session
-    ce = db_connection(MYSQL_USER, MYSQL_PASS, MYSQL_HOST, MYSQL_PORT, DB)
+    if DATABASE == "local":
+        #   local test database
+        ce = db_connection(LOCAL_MYSQL_USER, LOCAL_MYSQL_PASS, LOCAL_MYSQL_HOST, LOCAL_MYSQL_PORT, LOCAL_DB)
+    else:
+        #   remote production database
+        ce = db_connection(MYSQL_USER, MYSQL_PASS, MYSQL_HOST, MYSQL_PORT, DB)
+    
     connection = ce[0]
     engine = ce[1]
 
@@ -27,7 +35,7 @@ if __name__ == "__main__":
     session = Session()
 
     #   Get prices from MicroGlobal web service
-    mg_prices = mg_get_prices()
+    mg_prices = mg_get_products(mg_cat_xml(), format="prices")
 
     #   Compare prices with database an
     items_to_update = []
@@ -40,7 +48,7 @@ if __name__ == "__main__":
                 items_to_update.append(mg_price)
         else:
             items_to_add.append(mg_price)
-
+ 
     #   Add updated prices to database
     count = 1
     for item in items_to_update:
