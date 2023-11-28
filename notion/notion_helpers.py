@@ -18,6 +18,16 @@ class NotionDB:
 class TarifarioNotion:
     pass
 
+def notion_token(integracion = "pruebas api"):
+    # PRUEBA_01_NOTION_TOKEN
+    int = integracion.lower()
+    token = ""
+    if int == "pruebas api":            
+        token = config("PRUEBA_01_NOTION_TOKEN")
+    elif int == "qatar":
+        token = config("QATAR_NOTION_TOKEN")
+    return token 
+
 def check_notificacion_script(script):
 
     paginas = [{"script": "Precios MSHOPS", "page_id": "912523826be2457da40f2ff428c83946"}, \
@@ -28,7 +38,10 @@ def check_notificacion_script(script):
                             {"script": "Retiro en persona", "page_id": "9ac271ab-f3d7-4209-945f-4a81ac046c6a"}, \
                                 {"script": "Garantias ML", "page_id": "4e54343f-5182-4776-8de8-df2e0b15339c"}, \
                                     {"script": "Flex ML", "page_id": "db911620-2531-4c2c-bc7d-81e8e9123e29"}, \
-                                        {"script": "Control Precios MG", "page_id": "aa30029d-3a81-4e8d-9856-4ecd2960c716"}]
+                                        {"script": "Control Precios MG", "page_id": "aa30029d-3a81-4e8d-9856-4ecd2960c716"}, \
+                                            {"script": "Database Costos MG", "page_id": "c15803b7-95c6-4ba1-a510-385bb4ecfa5c"}]
+
+#   
 
     for x in range(0, len(paginas)):
         if paginas[x]["script"] == script:
@@ -61,3 +74,6 @@ def check_notificacion_script(script):
                 print(response.text)
                 print()
             break
+
+if __name__ == "__main__":
+    check_notificacion_script("Database Costos MG")

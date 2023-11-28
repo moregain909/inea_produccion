@@ -13,6 +13,7 @@ from data.data_helpers import db_connection
 #   Loads env db constants
 from precios_mg_config import PRODUCCION_MYSQL_USER, PRODUCCION_MYSQL_PASS, PRODUCCION_MYSQL_HOST, PRODUCCION_MYSQL_PORT, PRODUCCION_DB, \
     TEST_MYSQL_USER, TEST_MYSQL_PASS, TEST_MYSQL_HOST, TEST_MYSQL_PORT, TEST_DB
+from notion.notion_helpers import check_notificacion_script
 
 #DATABASE = "test"
 DATABASE = "produccion"
@@ -50,25 +51,31 @@ if __name__ == "__main__":
             items_to_add.append(mg_price)
  
     #   Add updated prices to database
-    count = 1
+    updated_count = 1
     for item in items_to_update:
         print(f'El precio de {item.sku} ha cambiado por {item.costo}')
         new_db_price = productomg2costomg(item)
         insert_costo_mg(session, new_db_price)
-        count += 1
+        updated_count += 1
 
     #   Add new prices to database
-    count = 1
+    added_count = 1
     for item in items_to_add:
         print(f'No existe el producto {item.sku} en la db. Se agrega.')
         new_db_price = productomg2costomg(item)
         insert_costo_mg(session, new_db_price)
-        count += 1
+        added_count += 1
 
     print(f'Actualizados {len(items_to_update)} precios de MG')
     print(f'Insertados {len(items_to_add)} precios de MG')
 
-    # create_tables(engine)
 
     connection.close()
-    pass
+
+
+    # TODO: Notificar por telegram cuando haya precios actualizados
+
+    # TODO: Marcar la ejecución en monitoreo de scripts en Notion
+    check_notificacion_script("Database Costos MG")
+
+
