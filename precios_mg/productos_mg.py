@@ -18,7 +18,7 @@ from precios_mg_config import PRODUCCION_MYSQL_USER, PRODUCCION_MYSQL_PASS, PROD
 
 if __name__ == "__main__":
 
-    DATABASE = "local"
+    DATABASE = "NO_local"
 
    #   Connect to db and start a session
     if DATABASE == "local":
