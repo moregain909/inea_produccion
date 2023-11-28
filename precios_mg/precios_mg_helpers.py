@@ -1,8 +1,12 @@
 from bs4 import BeautifulSoup
 from dataclasses import dataclass, field
+from decimal import Decimal
 from dotenv import load_dotenv
-from sqlalchemy import Column, Integer, String, DateTime, DECIMAL, Time, Boolean, UniqueConstraint, create_engine, Engine
-from sqlalchemy.orm import DeclarativeBase, sessionmaker, Session
+from sqlalchemy import Column, Integer, String, DateTime, DECIMAL, Time, Boolean, UniqueConstraint, \
+    Engine, ForeignKey
+from sqlalchemy import create_engine
+from sqlalchemy.orm import DeclarativeBase, Session
+from sqlalchemy.orm import sessionmaker
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.sql import func
 from datetime import datetime, time
@@ -19,30 +23,10 @@ from data.data_helpers import Base, create_tables, db_connection
 #   Loads env db constants
 from precios_mg_config import PRODUCCION_MYSQL_USER, PRODUCCION_MYSQL_PASS, PRODUCCION_MYSQL_HOST, PRODUCCION_MYSQL_PORT, PRODUCCION_DB, \
     TEST_MYSQL_USER, TEST_MYSQL_PASS, TEST_MYSQL_HOST, TEST_MYSQL_PORT, TEST_DB
+from sqlalchemy.orm import relationship
 
 
-class CostoMG(Base):
-    """Objeto que representa un item de la tabla costos_mg de la base de datos inea
-    """
-
-    __tablename__ = "costos_mg"
-
-    costo_id = Column(Integer, primary_key=True, autoincrement=True)
-    costo_date = Column(DateTime, default=func.now(), nullable=False)
-    sku = Column(String (100), nullable=False)
-    costo = Column(DECIMAL(precision=12, scale=2))
-    
-
-    def __init__(self, costo_date, sku, costo):
-        self.costo_date = costo_date
-        self.sku = sku
-        self.costo = costo
-
-    def __repr__(self) -> str:
-        return f'{self.costo_id} {self.costo_date} {self.sku} {self.costo}'
-    
-    def __str__(self):
-        return f'{self.costo_date} {self.sku} {self.costo}'
+#   Tablas con info de MG para database inea
 
 class ItemMG(Base):
     """Objeto que representa un item de la tabla productos_mg de la base de datos inea
@@ -50,14 +34,15 @@ class ItemMG(Base):
 
     __tablename__ = "productos_mg"
 
-    item_id = Column(Integer, primary_key=True, autoincrement=True)
+    #item_id = Column(Integer, primary_key=True, autoincrement=True)
+    #sku = Column(String (100), index=True, unique=True, nullable=False)
+    sku = Column(String (100), primary_key=True, index=True)
     item_date = Column(DateTime, default=func.now(), nullable=False)
-    sku = Column(String (100), nullable=False)
     nombre = Column(String (250))
     marca = Column(String (100))
     categoria = Column(String (100))
     cod_cat = Column(String (100))
-    iva = Column(DECIMAL(precision=12, scale=2))
+    iva = Column(DECIMAL(precision=12, scale=3))
     ean = Column(String (100))
 
     def __init__(self, item_date, sku, nombre, marca, categoria, cod_cat, iva, ean):
@@ -70,31 +55,63 @@ class ItemMG(Base):
         self.iva = iva
         self.ean = ean
 
+    # Define the one-to-many relationship
+    costos = relationship("CostoMG", back_populates="itemmg")
+
+    #disponibilidad_stock = relationship("DisponibilidadStock", back_populates="itemmg")
+
     def __repr__(self) -> str:
         return f'{self.sku} {self.iva} {self.marca} {self.nombre}'
     
     def __str__(self) -> str:
         return f'{self.sku} {self.marca} {self.nombre}'
+    
 
-class DisponibilidadStock(Base):
+class CostoMG(Base):
+    """Objeto que representa un item de la tabla costos_mg de la base de datos inea
+    """
 
-    __tablename__ = "disponibilidad_stock_mg"
+    __tablename__ = "costos_mg"
 
-    disponibilidad_id = Column(Integer, primary_key=True, autoincrement=True)
-    timestamp = Column(DateTime, default=func.now(), nullable=False)
-    sku = Column(String (100), nullable=False)
-    disponible = Column(Integer)
+    costo_id = Column(Integer, primary_key=True, autoincrement=True)
+    costo_date = Column(DateTime, default=func.now(), nullable=False)
+    sku = Column(String (100), ForeignKey("productos_mg.sku"), nullable=False)
+    costo = Column(DECIMAL(precision=12, scale=2))
 
-    def __init__(self, timestamp, sku, disponible):
-        self.timestamp = timestamp
+    # Establish the back-reference from CostoMG to ItemMG
+    itemmg = relationship("ItemMG", back_populates="costos")    
+
+    def __init__(self, costo_date, sku, costo):
+        self.costo_date = costo_date
         self.sku = sku
-        self.disponible = disponible
+        self.costo = costo
 
     def __repr__(self) -> str:
-        return f'{self.sku} {self.stock}'
+        return f'{self.costo_id} {self.costo_date} {self.sku} {self.costo}'
     
-    def __str__(self) -> str:
-        return f'{self.sku} {self.stock}'
+    def __str__(self):
+        return f'{self.costo_date} {self.sku} {self.costo}'
+
+
+
+#class DisponibilidadStock(Base):
+#
+#    __tablename__ = "disponibilidad_stock_mg"
+#
+#    disponibilidad_id = Column(Integer, primary_key=True, autoincrement=True)
+#    timestamp = Column(DateTime, default=func.now(), nullable=False)
+#    sku = Column(String (100), ForeignKey("productos_mg.sku", name="fk_disponibilidad_stock_sku"), nullable=False)
+#    stock_disponible = Column(Integer)
+#
+#    itemmg = relationship("ItemMG", back_populates="disponibilidad_stock")
+#
+#    def __init__(self, timestamp, sku, stock_disponible):
+#        self.timestamp = timestamp
+#        self.sku = sku
+#        self.stock_disponible = stock_disponible
+#
+#    def __repr__(self) -> str:
+#        return f'{self.sku} {self.stock_disponible}'
 
 #class FacturasMG(Base):
 #    pass
@@ -114,6 +131,8 @@ class ProductoMG:
     iva: float = field(repr=True, default=None)
     ean: str = field(repr=True, default=None)
 
+
+#   Funciones relacionadas con la base de datos de MG
 
 def productomg2costomg(producto: ProductoMG) -> CostoMG:
     """Crea un objeto CostoMG a partir de un objeto ProductoMG
@@ -145,6 +164,59 @@ def insert_costo_mg(session: Session, costo: CostoMG) -> bool:
     except IntegrityError as e:
         print(f'Error al insertar el costo {costo}: {e}')
         return False
+
+def insert_item_mg(session: Session, item: ItemMG) -> bool:
+    """Inserta un producto en la base de datos
+    """
+    try:
+        session.add(item)
+        session.commit()
+        print(f'Se insertó el producto {item}')
+        return True
+    except IntegrityError as e:
+        print(f'Error al insertar el producto {item}: {e}')
+        return False
+
+def update_item_mg(session: Session, item: ItemMG) -> bool:
+    """Actualiza un producto en la base de datos
+    """
+    try:
+        session.query(ItemMG)\
+            .filter(ItemMG.sku == item.sku)\
+                .update({ItemMG.nombre: item.nombre, ItemMG.marca: item.marca, ItemMG.categoria: item.categoria, ItemMG.cod_cat: item.cod_cat, ItemMG.iva: item.iva, ItemMG.ean: item.ean})
+        session.commit()
+        print(f'Se actualizó el producto {item}')
+        return True
+    except IntegrityError as e:
+        print(f'Integrity Error al actualizar el producto {item}: {e}')
+        return False
+    except Exception as e:
+        print(f'Exeption Error al actualizar el producto {item}: {e}')
+    return False
+
+def is_in_table(session: Session, sku: str) -> bool:
+    """Comprueba si un producto está en la base de datos
+    """
+    return session.query(ItemMG).filter(ItemMG.sku == sku).count() > 0
+
+
+def same_as_in_table(session: Session, mg_product: ProductoMG) -> bool:
+    """Comprueba si un producto es el mismo que está en la base de datos
+    """
+    db_product = session.query(ItemMG).filter(ItemMG.sku == mg_product.sku).first()
+
+    #   Convierto los valores de iva a Decimal para poder compararlos (originalmente sería float vs DECIMAL)
+    mg_iva = Decimal(f"{mg_product.iva:.3f}")
+    db_iva = Decimal(db_product.iva)
+
+    if db_product.sku == mg_product.sku and db_product.nombre ==  mg_product.nombre and db_product.categoria == mg_product.categoria \
+        and db_product.ean == mg_product.ean and db_product.cod_cat == mg_product.cod_cat \
+            and db_product.marca == mg_product.marca and db_iva == mg_iva:
+        return True
+    else:
+        return False
+
+#   Funciones relacionadas con el Web Service de MG
 
 def mg_cat_xml() -> Union[str, bool]:
     """Trae el xml con el catálogo de Microglobal
@@ -281,8 +353,16 @@ def mg_get_products(mg_cat_xml, format=None) -> List[ProductoMG]:
 
 if __name__ == "__main__":
 
-    #   Connect to db and start a session
-    ce = db_connection(MYSQL_USER, MYSQL_PASS, MYSQL_HOST, MYSQL_PORT, DB)
+    DATABASE = "local"
+
+   #   Connect to db and start a session
+    if DATABASE == "local":
+        #   local test database
+        ce = db_connection(TEST_MYSQL_USER, TEST_MYSQL_PASS, TEST_MYSQL_HOST, TEST_MYSQL_PORT, TEST_DB)
+    else:
+        #   remote production database
+        ce = db_connection(PRODUCCION_MYSQL_USER, PRODUCCION_MYSQL_PASS, PRODUCCION_MYSQL_HOST, PRODUCCION_MYSQL_PORT, PRODUCCION_DB)
+    
     connection = ce[0]
     engine = ce[1]
 
@@ -290,7 +370,8 @@ if __name__ == "__main__":
     Session = sessionmaker(bind=engine)
     session = Session()    
 
-    db_connection
     #create_tables(engine)
+
+    connection.close()
 
     pass
