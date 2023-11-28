@@ -15,11 +15,10 @@ from precios_mg_config import PRODUCCION_MYSQL_USER, PRODUCCION_MYSQL_PASS, PROD
     TEST_MYSQL_USER, TEST_MYSQL_PASS, TEST_MYSQL_HOST, TEST_MYSQL_PORT, TEST_DB
 from notion.notion_helpers import check_notificacion_script
 
-#DATABASE = "test"
-DATABASE = "produccion"
 
 if __name__ == "__main__":
-    
+
+    DATABASE = "local"
 
     #   Connect to db and start a session
     if DATABASE == "local":
@@ -70,12 +69,13 @@ if __name__ == "__main__":
     print(f'Insertados {len(items_to_add)} precios de MG')
 
 
+    #   Closes database connection
     connection.close()
 
 
     # TODO: Notificar por telegram cuando haya precios actualizados
 
-    # TODO: Marcar la ejecución en monitoreo de scripts en Notion
+    #   Registra ejecución en dashboard de monitoreo de Notion
     check_notificacion_script("Database Costos MG")
 
 
