@@ -14,6 +14,7 @@ from data.data_helpers import db_connection
 #   Loads env db constants
 from precios_mg_config import PRODUCCION_MYSQL_USER, PRODUCCION_MYSQL_PASS, PRODUCCION_MYSQL_HOST, PRODUCCION_MYSQL_PORT, PRODUCCION_DB, \
     TEST_MYSQL_USER, TEST_MYSQL_PASS, TEST_MYSQL_HOST, TEST_MYSQL_PORT, TEST_DB
+from notion.notion_helpers import check_notificacion_script
 
 
 if __name__ == "__main__":
@@ -81,3 +82,8 @@ if __name__ == "__main__":
 
     #   Closes database connection
     connection.close()
+
+    # TODO: Notificar por telegram cuando haya precios actualizados
+
+    #   Registra ejecución en dashboard de monitoreo de Notion
+    check_notificacion_script("Database Productos MG")

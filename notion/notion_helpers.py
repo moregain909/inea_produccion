@@ -40,7 +40,7 @@ def check_notificacion_script(script):
                                     {"script": "Flex ML", "page_id": "db911620-2531-4c2c-bc7d-81e8e9123e29"}, \
                                         {"script": "Control Precios MG", "page_id": "aa30029d-3a81-4e8d-9856-4ecd2960c716"}, \
                                             {"script": "Database Costos MG", "page_id": "c15803b7-95c6-4ba1-a510-385bb4ecfa5c"}, \
-                                                {"script": "Database Productos MG", "page_id": "ffc515d5-a1ed-48ef-b66d-85b701a9cf7a"}]
+                                                {"script": "Database Productos MG", "page_id": "ce6a149e-205f-4b8c-97be-766173aefa77"}]
 
 #   
 
