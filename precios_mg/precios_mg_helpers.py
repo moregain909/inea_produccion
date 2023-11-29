@@ -353,7 +353,7 @@ def mg_get_products(mg_cat_xml, format=None) -> List[ProductoMG]:
 
 if __name__ == "__main__":
 
-    DATABASE = "local"
+    DATABASE = "NOlocal"
 
    #   Connect to db and start a session
     if DATABASE == "local":
