@@ -19,7 +19,7 @@ from notion.notion_helpers import check_notificacion_script
 
 if __name__ == "__main__":
 
-    DATABASE = "local"
+    DATABASE = "NO_local"
 
    #   Connect to db and start a session
     if DATABASE == "local":
