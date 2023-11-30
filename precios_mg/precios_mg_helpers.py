@@ -105,7 +105,23 @@ class DisponibilidadStock(Base):
 
     itemmg = relationship("ItemMG", back_populates="disponibilidad_stock")
 
-    def __init__(self, timestamp, sku, stock_disponible):
+    def __init__(self, timestamp: datetime, sku: str, stock_disponible: int):
+
+        # Valida presencia de valores de entrada:
+        if None in [timestamp, sku, stock_disponible]:
+            raise ValueError("timestamp, sku y stock_disponible son requeridos")
+
+        # Valida tipos de valores de entrada:
+        #   timestamp: datetime
+        #   sku: str
+        #   stock_disponible: int
+        if not isinstance(timestamp, datetime):
+            raise TypeError("timestamp tiene que ser datetime")
+        if not isinstance(sku, str):
+            raise TypeError("sku tiene que ser string")
+        if not isinstance(stock_disponible, int):
+            raise TypeError("stock_disponible tiene que ser int")  
+
         self.timestamp = timestamp
         self.sku = sku
         self.stock_disponible = stock_disponible
@@ -120,6 +136,7 @@ class DisponibilidadStock(Base):
             return True
         return False
 
+# TODO: Crear clase FacturasMG para manejar la tabla facturas_mg de la base de datos inea
 #class FacturasMG(Base):
 #    pass
 
@@ -137,6 +154,22 @@ class ProductoMG:
     stock: int = field(repr=True, default=None)
     iva: float = field(repr=True, default=None)
     ean: str = field(repr=True, default=None)
+
+    string_fields = ["sku", "nombre", "marca", "categoria", "cod_cat", "ean"]
+    float_fields = ["costo", "iva"]
+
+    def __post_init__(self):
+
+        # Valida tipos de entrada
+        if self.timestamp is not None and not isinstance(self.timestamp, datetime):
+            raise TypeError(f'timestamp tiene que ser datetime o None y no {type(self.timestamp)}')
+        for string_field in self.string_fields:
+            if getattr(self, string_field) is not None and not isinstance(getattr(self, string_field), str):
+                raise TypeError(f'{string_field} tiene que ser str o None, no {type(getattr(self, string_field))}')
+        for float_field in self.float_fields:
+            if getattr(self, float_field) is not None and not isinstance(getattr(self, float_field), float):
+                raise TypeError(f'{float_field} tiene que ser float o None no {type(getattr(self, float_field))}')
+
 
     def is_available(self) -> bool:
         """Confirma si el ProductoMG tiene stock disponible
@@ -350,16 +383,16 @@ def parse_mgcat(xml_response: str, **kwargs: Dict[str, bool]) -> List[ProductoMG
     for i in range(0, len(skus)):
                 
         item_args = {
-            "timestamp": datetime.now() if kwargs.get("timestamp", False) else False,
-            "sku": skus[i].text if kwargs.get("sku", False) else False,
-            "nombre": nombres[i].text if kwargs.get("nombre", False) else False,
-            "marca": marcas[i].text if kwargs.get("marca", False) else False,
-            "categoria": categorias[i].text if kwargs.get("categoria", False) else False,
-            "cod_cat": cod_cats[i].text if kwargs.get("cod_cat", False) else False,
-            "costo": float(costos[i].text) if kwargs.get("costo", False) else False,
-            "stock": int(stocks[i].text) if kwargs.get("stock", False) else False,
-            "iva": float(ivas[i].text) if kwargs.get("iva", False) else False,
-            "ean": str(upcs[i].text) if kwargs.get("ean", False) else False
+            "timestamp": datetime.now() if kwargs.get("timestamp", False) else None,
+            "sku": skus[i].text if kwargs.get("sku", False) else None,
+            "nombre": nombres[i].text if kwargs.get("nombre", False) else None,
+            "marca": marcas[i].text if kwargs.get("marca", False) else None,
+            "categoria": categorias[i].text if kwargs.get("categoria", False) else None,
+            "cod_cat": cod_cats[i].text if kwargs.get("cod_cat", False) else None,
+            "costo": float(costos[i].text) if kwargs.get("costo", False) else None,
+            "stock": int(stocks[i].text) if kwargs.get("stock", False) else None,
+            "iva": float(ivas[i].text) if kwargs.get("iva", False) else None,
+            "ean": str(upcs[i].text) if kwargs.get("ean", False) else None
         }
 
         item = ProductoMG(**item_args)
@@ -414,6 +447,7 @@ if __name__ == "__main__":
     Session = sessionmaker(bind=engine)
     session = Session()    
 
+    # ! Descomentar para crear tablas nuevas que se hayan definido
     #create_tables(engine)
 
     connection.close()
