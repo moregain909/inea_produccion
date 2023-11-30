@@ -58,7 +58,7 @@ class ItemMG(Base):
     # Define the one-to-many relationship
     costos = relationship("CostoMG", back_populates="itemmg")
 
-    #disponibilidad_stock = relationship("DisponibilidadStock", back_populates="itemmg")
+    disponibilidad_stock = relationship("DisponibilidadStock", back_populates="itemmg")
 
     def __repr__(self) -> str:
         return f'{self.sku} {self.iva} {self.marca} {self.nombre}'
@@ -94,24 +94,31 @@ class CostoMG(Base):
 
 
 
-#class DisponibilidadStock(Base):
-#
-#    __tablename__ = "disponibilidad_stock_mg"
-#
-#    disponibilidad_id = Column(Integer, primary_key=True, autoincrement=True)
-#    timestamp = Column(DateTime, default=func.now(), nullable=False)
-#    sku = Column(String (100), ForeignKey("productos_mg.sku", name="fk_disponibilidad_stock_sku"), nullable=False)
-#    stock_disponible = Column(Integer)
-#
-#    itemmg = relationship("ItemMG", back_populates="disponibilidad_stock")
-#
-#    def __init__(self, timestamp, sku, stock_disponible):
-#        self.timestamp = timestamp
-#        self.sku = sku
-#        self.stock_disponible = stock_disponible
-#
-#    def __repr__(self) -> str:
-#        return f'{self.sku} {self.stock_disponible}'
+class DisponibilidadStock(Base):
+
+    __tablename__ = "disponibilidad_stock_mg"
+
+    disponibilidad_id = Column(Integer, primary_key=True, autoincrement=True)
+    timestamp = Column(DateTime, default=func.now(), nullable=False)
+    sku = Column(String (100), ForeignKey("productos_mg.sku", name="fk_disponibilidad_stock_sku"), nullable=False)
+    stock_disponible = Column(Integer)
+
+    itemmg = relationship("ItemMG", back_populates="disponibilidad_stock")
+
+    def __init__(self, timestamp, sku, stock_disponible):
+        self.timestamp = timestamp
+        self.sku = sku
+        self.stock_disponible = stock_disponible
+
+    def __repr__(self) -> str:
+        return f'{self.sku} {self.stock_disponible}'
+    
+    def is_available(self) -> bool:
+        """Confirma si el sku (objeto DisponibilidadStock) tiene stock disponible
+        """
+        if self.stock_disponible > 0:
+            return True
+        return False
 
 #class FacturasMG(Base):
 #    pass
@@ -131,6 +138,12 @@ class ProductoMG:
     iva: float = field(repr=True, default=None)
     ean: str = field(repr=True, default=None)
 
+    def is_available(self) -> bool:
+        """Confirma si el ProductoMG tiene stock disponible
+        """
+        if self.stock > 0:
+            return True
+        return False
 
 #   Funciones relacionadas con la base de datos de MG
 
@@ -140,10 +153,22 @@ def productomg2costomg(producto: ProductoMG) -> CostoMG:
     return CostoMG(producto.timestamp, producto.sku, producto.costo)
 
 def productomg2itemmg(producto: ProductoMG) -> ItemMG:
-    """Crea un objto ItemMG a partir de un objto ProductoMG
+    """Crea un objto ItemMG a partir de un objeto ProductoMG
     """
     return ItemMG(producto.timestamp, producto.sku, producto.nombre, producto.marca, producto.categoria, producto.cod_cat, producto.iva, producto.ean)
 
+def productomg2disponibilidadstock(producto: ProductoMG) -> DisponibilidadStock:
+    """Crea un objeto DisponibilidadStock a partir de un objeto ProductoMG
+    """
+    return DisponibilidadStock(producto.timestamp, producto.sku, producto.stock)
+
+def db_get_disponibilidad_stock(session: Session, sku: str) -> Union[DisponibilidadStock, None]:
+    """Trae el último registro de stock disponible de un producto
+    """
+    return session.query(DisponibilidadStock)\
+        .filter(DisponibilidadStock.sku == sku)\
+            .order_by(DisponibilidadStock.timestamp.desc())\
+                .first()
 
 def latest_price_mg(session: Session, sku: str) -> CostoMG:
     """Trae el último precio de un producto de Microglobal
@@ -152,6 +177,8 @@ def latest_price_mg(session: Session, sku: str) -> CostoMG:
         .filter(CostoMG.sku == sku)\
             .order_by(CostoMG.costo_date.desc())\
                 .first()
+
+# TODO: Estas tres funciones insert podrían ser una sola
 
 def insert_costo_mg(session: Session, costo: CostoMG) -> bool:
     """Inserta un precio en la base de datos
@@ -175,6 +202,22 @@ def insert_item_mg(session: Session, item: ItemMG) -> bool:
         return True
     except IntegrityError as e:
         print(f'Error al insertar el producto {item}: {e}')
+        return False
+
+def insert_disponibilidad_stock(session: Session, disponibilidad_stock: DisponibilidadStock) -> bool:
+    """Inserta un registro DisponibilidadStocken la base de datos
+    """
+    try:
+        session.add(disponibilidad_stock)
+        session.commit()
+        #print(f'Se insertó el registro de stock disponible {disponibilidad_stock}')
+        if disponibilidad_stock.stock_disponible > 0:
+            print(f'  🟢  {disponibilidad_stock.sku} tiene stock disponible')
+        else:
+            print(f'  🔴  {disponibilidad_stock.sku} deja de estar disponible')
+        return True
+    except IntegrityError as e:
+        print(f'Error al insertar el registro de stock disponible {disponibilidad_stock}: {e}')
         return False
 
 def update_item_mg(session: Session, item: ItemMG) -> bool:
@@ -353,7 +396,8 @@ def mg_get_products(mg_cat_xml, format=None) -> List[ProductoMG]:
 
 if __name__ == "__main__":
 
-    DATABASE = "NOlocal"
+    #DATABASE = ""
+    DATABASE = "local"
 
    #   Connect to db and start a session
     if DATABASE == "local":
