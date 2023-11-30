@@ -1,6 +1,10 @@
 import requests 
+import httpx
 import json
 from decouple import config
+from dotenv import load_dotenv
+import os
+from typing import Dict, Union
 
 
 from dataclasses import dataclass
@@ -40,7 +44,8 @@ def check_notificacion_script(script):
                                     {"script": "Flex ML", "page_id": "db911620-2531-4c2c-bc7d-81e8e9123e29"}, \
                                         {"script": "Control Precios MG", "page_id": "aa30029d-3a81-4e8d-9856-4ecd2960c716"}, \
                                             {"script": "Database Costos MG", "page_id": "c15803b7-95c6-4ba1-a510-385bb4ecfa5c"}, \
-                                                {"script": "Database Productos MG", "page_id": "ce6a149e-205f-4b8c-97be-766173aefa77"}]
+                                                {"script": "Database Productos MG", "page_id": "ce6a149e-205f-4b8c-97be-766173aefa77"}, \
+                                                    {"script": "Database Disponibilidad Stock MG", "page_id": "d6eeebc5-1b44-44a2-8448-a789f7fdc029"}]
 
 #   
 
@@ -76,5 +81,47 @@ def check_notificacion_script(script):
                 print()
             break
 
+def get_notion_database(notion_token: str, database_id: str, client: Union[None, httpx.Client]=None) -> Dict:
+
+    if not client:
+        client = httpx.Client()
+
+    url = f'https://api.notion.com/v1/databases/{database_id}/query'
+
+    payload = ""
+    headers = {
+        'Authorization': f'Bearer {notion_token}',
+        'Content-Type': 'application/json',
+        'Notion-Version': '2022-06-28'
+    }
+
+    response = client.post(url, headers=headers)
+    j = response.json()
+
+    return j
+
+def get_page_id(database_json: Dict, page_title: str) -> str:
+
+    for page in database_json["results"]:
+        if page["properties"]["Script"]["title"][0]["text"]["content"] == page_title:
+            page_id = page["id"]
+            print(f'El id de la página {page_title} es: {page_id}')
+            return page_id
+    print(f'No se encontró la página con título {page_title}')
+    return False
+
+    pass
+
 if __name__ == "__main__":
-    check_notificacion_script("Database Costos MG")
+    #check_notificacion_script("Database Costos MG")
+
+    #get_page_id()
+
+    load_dotenv()
+    TOKEN = os.getenv("PRUEBA_01_NOTION_TOKEN")
+    DATABASE_ID = os.getenv("Notificaciones_Scripts_ID")
+
+    db = get_notion_database(TOKEN, DATABASE_ID)
+    get_page_id(db, "Database Costos MG")
+
+    pass
