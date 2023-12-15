@@ -1,7 +1,10 @@
 from bs4 import BeautifulSoup
+from bs4.element import Tag
+import httpx
 from dataclasses import dataclass, field
 from decimal import Decimal
 from dotenv import load_dotenv
+import json
 from sqlalchemy import Column, Integer, String, DateTime, DECIMAL, Time, Boolean, UniqueConstraint, \
     Engine, ForeignKey
 from sqlalchemy import create_engine
@@ -17,6 +20,8 @@ import os, sys
 sys.path.append(os.path.dirname(os.path.realpath(__file__)))
 path2root = os.path.join(os.path.dirname(__file__), "..")
 sys.path.append(path2root)
+data_dir = os.path.join(path2root, "data")
+sys.path.append(data_dir)
 
 from data.data_helpers import Base, create_tables, db_connection
 
@@ -306,35 +311,42 @@ def mg_cat_xml() -> Union[str, bool]:
 
     url = "https://ecommerce.microglobal.com.ar/WSMG/WSMG.asmx"
 
-    payload = "<?xml version=\"1.0\" encoding=\"utf-8\"?>\n<soap:Envelope xmlns:soap=\"http://schemas.xmlsoap.org/soap/envelope/\">\n  <soap:Body>\n    <GetCatalog xmlns=\"http://tempuri.org/\">\n      <cliente>906992</cliente>\n      <usuario>juan</usuario>\n      <password>Jose1974</password>\n    </GetCatalog>\n  </soap:Body>\n</soap:Envelope>\n"
+    #payload = "<?xml version=\"1.0\" encoding=\"utf-8\"?>\n<soap:Envelope xmlns:soap=\"http://schemas.xmlsoap.org/soap/envelope/\">\n  <soap:Body>\n    <GetCatalog xmlns=\"http://tempuri.org/\">\n      <cliente>MG_CLIENTE</cliente>\n      <usuario>juan</usuario>\n      <password>Jose1974</password>\n    </GetCatalog>\n  </soap:Body>\n</soap:Envelope>\n"
+    payload = f'<?xml version=\"1.0\" encoding=\"utf-8\"?>\n<soap:Envelope xmlns:soap=\"http://schemas.xmlsoap.org/soap/envelope/\">\n  <soap:Body>\n    <GetCatalog xmlns=\"http://tempuri.org/\">\n\
+        <cliente>{MG_CLIENTE}</cliente>\n      <usuario>{MG_USUARIO}</usuario>\n      <password>{MG_PASSWORD}</password>\n    </GetCatalog>\n  </soap:Body>\n</soap:Envelope>\n'
+
     headers = {
       'Content-Type': 'text/xml; charset=utf-8',
-      'SOAPAction': 'http://tempuri.org/GetCatalog',
-      'cliente': MG_CLIENTE,
-      'usuario': MG_USUARIO,
-      'password': MG_PASSWORD
+      'SOAPAction': 'http://tempuri.org/GetCatalog'
     }
     try:
         # Conecta a Microglobal y trae el catálogo de productos
-        response = requests.request("POST", url, headers=headers, data=payload)
-        if response.status_code != 200:
-            print(response.status_code, response.text)
-            return False
-        else:
-            return response.text
-    except requests.exceptions.SSLError as e:
-        print(f'SSL Error (Certificado SSL expirado?) conectando a {url}\n{e}')
-        #   notificar por telegram
-        mensaje = f'🔴   Problemas para conectar con MICROGLOBAL.\n\nSSL Error (Certificado SSL expirado?)\n\n{type(e)}'
-        #mandar_mensaje_telegram("iojan", chat_telegram("ineabots"), mensaje)
+        response = httpx.post(url, headers=headers, data=payload)
+        response.raise_for_status()     # if response code != 2xx raises an exception
+        return response.text
+    
+    except httpx.HTTPStatusError as e:
+        print(f'Status Error conectando a {url}\n{e}')
         return False
+    
+    except httpx.HTTPError as e:
+        print(f'HTTP Error conectando a {url}\n{e}')
+        return False    
+    
+    #except requests.exceptions.SSLError as e:
+    #    print(f'SSL Error (Certificado SSL expirado?) conectando a {url}\n{e}')
+    #    #   notificar por telegram
+    #    mensaje = f'🔴   Problemas para conectar con MICROGLOBAL.\n\nSSL Error (Certificado SSL expirado?)\n\n{type(e)}'
+    #    #mandar_mensaje_telegram("iojan", chat_telegram("ineabots"), mensaje)
+    #    return False
 
-    except requests.exceptions.RequestException as e:
-        print(f'Error conectando a {url}\n{e}')
-        mensaje = f'🔴   Problemas para conectar con MICROGLOBAL.\n\nRequest Error\n\n{type(e)}'
-        #mandar_mensaje_telegram("iojan", chat_telegram("ineabots"), mensaje)
-        #return handle_exception_and_notify(e, mensaje)
-        return False
+    #except requests.exceptions.RequestException as e:
+    #    print(f'Error conectando a {url}\n{e}')
+    #    mensaje = f'🔴   Problemas para conectar con MICROGLOBAL.\n\nRequest Error\n\n{type(e)}'
+    #    #mandar_mensaje_telegram("iojan", chat_telegram("ineabots"), mensaje)
+    #    #return handle_exception_and_notify(e, mensaje)
+    #    return False
+    
     except Exception as e:
         print(f'{type(e)} Error inesperado\n{e}')
         mensaje = f'🔴   Error inesperado\n\n{type(e)}'
@@ -367,6 +379,12 @@ def parse_mgcat(xml_response: str, **kwargs: Dict[str, bool]) -> List[ProductoMG
     # parsea response del xml en un objeto soup y crea una lista para cada campo
     soup = BeautifulSoup(xml_response, 'xml')
 
+    #   Comprueba si hay errores en la respuesta del servidor MG
+    server_result = soup.find("result").text
+    if mg_get_response_error(server_result) != None:
+        print(f'Error conectando a MG: {mg_get_response_error(server_result)}')
+        return None
+        
     skus = soup.find_all("partNumber")
     nombres = soup.find_all("descripcion")
     marcas = soup.find_all("codMarca")
@@ -426,10 +444,237 @@ def mg_get_products(mg_cat_xml, format=None) -> List[ProductoMG]:
 
     return products
 
+def mg_get_brands_xml() -> Union[str, bool]:
+    """Trae el xml con las marcas de Microglobal
+    """
+    # Carga variables de entorno
+    load_dotenv()
+
+    MG_CLIENTE = os.getenv("MG_CLIENTE")
+    MG_USUARIO = os.getenv("MG_USUARIO")
+    MG_PASSWORD = os.getenv("MG_PASSWORD")
+
+    url = "https://ecommerce.microglobal.com.ar/WSMG_back/WSMG.asmx"
+
+    payload = f'<?xml version=\"1.0\" encoding=\"utf-8\"?>\n<soap:Envelope xmlns:soap=\"http://schemas.xmlsoap.org/soap/envelope/\">\n  <soap:Body>\n    <GetBrands xmlns=\"http://tempuri.org/\">\n\
+                    <cliente>{MG_CLIENTE}</cliente>\n      <usuario>{MG_USUARIO}</usuario>\n      <password>{MG_PASSWORD}</password>\n    </GetBrands>\n  </soap:Body>\n</soap:Envelope>\n'
+    headers = {
+        'Content-Type': 'text/xml; charset=utf-8',
+        'SOAPAction': 'http://tempuri.org/GetBrands'
+    }
+
+    try:
+        response = httpx.post(url, headers=headers, data=payload)
+
+        # Conecta a Microglobal y trae el catálogo de marcas
+        if response.status_code != 200:
+            print(response.status_code, response.text)
+            return False
+        else:
+            return response.text
+        
+    #except requests.exceptions.RequestException as e:
+    #    print(f'Error conectando a {url}\n{e}')
+    #    mensaje = f'🔴   Problemas para conectar con MICROGLOBAL.\n\nRequest Error\n\n{type(e)}'
+    #    #mandar_mensaje_telegram("iojan", chat_telegram("ineabots"), mensaje)
+    #    #return handle_exception_and_notify(e, mensaje)
+    #    return False
+
+    except Exception as e:
+        print(f'{type(e)} Error inesperado\n{e}')
+        mensaje = f'🔴   Problemas para conectar con MICROGLOBAL.\n\nRequest Error\n\n{type(e)}'
+        #mandar_mensaje_telegram("iojan", chat_telegram("ineabots"), mensaje)
+        return False    
+
+#   Funciones que traen códigos de error de Microglobal y lo bajan a un archivo json
+
+def mg_get_error_codes_xml():
+    """ 
+    Trae el xml con los códigos de error de Microglobal.
+    Devolución:
+        str con el xml de códigos de error. False si hay error.
+    """
+
+
+    # Carga variables de entorno
+    load_dotenv()
+
+    MG_CLIENTE = os.getenv("MG_CLIENTE")
+    MG_USUARIO = os.getenv("MG_USUARIO")
+    MG_PASSWORD = os.getenv("MG_PASSWORD")
+
+    url = "https://ecommerce.microglobal.com.ar/WSMG_back/WSMG.asmx"
+
+    payload = f'<?xml version=\"1.0\" encoding=\"utf-8\"?>\n<soap:Envelope xmlns:soap=\"http://schemas.xmlsoap.org/soap/envelope/\">\n  <soap:Body>\n    <GetErrors xmlns=\"http://tempuri.org/\">\n      <cliente>{MG_CLIENTE}</cliente>\n      <usuario>{MG_USUARIO}</usuario>\n      <password>{MG_PASSWORD}</password>\n    </GetErrors>\n  </soap:Body>\n</soap:Envelope>\n'
+    headers = {
+        'Content-Type': 'text/xml; charset=utf-8',
+        'SOAPAction': 'http://tempuri.org/GetErrors'
+    }
+
+    try:
+        response = httpx.post(url, headers=headers, data=payload)
+        response.raise_for_status()
+        return response.text
+    
+    except httpx.HTTPStatusError as e:
+        print(f'Status Error conectando a {url}\n{e}')
+        #mensaje = f'🔴   Problemas para conectar con MICROGLOBAL.\n\Status Error\n\n{type(e)}'
+        #mandar_mensaje_telegram("iojan", chat_telegram("ineabots"), mensaje)
+        return False
+    except httpx.HTTPError as e:
+        print(f'HTTP Error conectando a {url}\n{e}')
+        #mensaje = f'🔴   Problemas para conectar con MICROGLOBAL.\n\Status Error\n\n{type(e)}'
+        #mandar_mensaje_telegram("iojan", chat_telegram("ineabots"), mensaje)
+        return False    
+    except Exception as e:
+        print(f'{type(e)} Error inesperado\n{e}')
+        mensaje = f'🔴   Problemas para conectar con MICROGLOBAL.\n\nRequest Error\n\n{type(e)}'
+        #mandar_mensaje_telegram("iojan", chat_telegram("ineabots"), mensaje)
+        return False    
+
+def mg_parse_error_codes(xml):
+    """ 
+    Parsea el xml de códigos de error de Microglobal y lo guarda en un diccionario.
+    Devolución:
+        dict con los códigos de error.
+    """
+
+
+    soup = BeautifulSoup(xml, 'xml')
+
+    errors = soup.find_all("Error")
+
+    errors_dict = {}
+    
+    for e in errors:
+        error_code = e.find("codError").text
+        error_message = e.find("error").text
+        errors_dict[error_code] = error_message
+        #print(f'{error_code}: {error_message}')
+
+    return errors_dict
+
+def mg_write_error_codes_to_file(errors_dict: Dict, path=f'{data_dir}/mg_error_codes.json') -> Dict:
+    """ 
+    Guarda en un archivo json los códigos de error de Microglobal. 
+    Si el archivo ya existe, lo sobreescribe. 
+    Si no existe, lo crea. 
+    Si hay error, devuelve False. 
+    Si no hay error, devuelve el dict con los códigos de error. 
+    Argumentos: 
+        errors_dict (dict): Diccionario con los códigos de error. 
+        Ejemplo: {2: "En mantenimiento - Intente nuevamente más tarde", 5: "El usuario no es válido"} 
+    Ejemplo de uso: 
+        errors_dict = mg_parse_error_codes(xml) 
+        mg_write_error_codes_to_file(errors_dict) 
+    Devolución:
+        dict con los códigos de error.
+    """
+
+    # Converts dict to json
+    errors_json = json.dumps(errors_dict, indent=4)
+    print(errors_json)
+
+    # Writes json to file
+    with open(path, 'w') as f:
+        f.write(errors_json)
+    return errors_dict
+
+def mg_load_error_codes_from_file(file_path: str=f'{data_dir}/mg_error_codes.json') -> Union[Dict, None]:
+    """ 
+    Carga los códigos de error de Microglobal desde un archivo json. 
+    Si el archivo no existe, devuelve None. 
+    Si no hay error, devuelve el dict con los códigos de error. 
+    Argumentos: 
+        file_path (str): Ruta del archivo json con los códigos de error. 
+        Por defecto, usa el archivo mg_error_codes.json en la carpeta data. 
+    Ejemplo de uso: 
+        errors_dict = mg_load_error_codes_from_file() 
+    Devolución:
+        dict con los códigos de error.
+    """
+
+    if not os.path.exists(file_path):
+        return None
+
+    with open(file_path, 'r') as f:
+        errors_dict = json.load(f)
+        #print(errors_dict)
+        return errors_dict
+
+def mg_get_response_error(mg_server_result_code: str) -> Union[str, None]:
+    error_codes = {
+        "50": "Mapeo IDs - Cliente nulo o vac\u00edo",
+        "0": "OK",
+        "1": "No pudo recuperarse Error",
+        "2": "En mantenimiento - Intente nuevamente m\u00e1s tarde",
+        "3": "Error interno",
+        "4": "Contrase\u00f1a nula",
+        "5": "El usuario no es v\u00e1lido",
+        "6": "El usuario no est\u00e1 habilitado",
+        "7": "Contrase\u00f1a incorrecta",
+        "8": "No pudo validarse el cliente",
+        "9": "No se han podido obtener los productos",
+        "10": "No se han podido obtener los productos de stock y precio",
+        "11": "Int\u00e9ntelo m\u00e1s tarde",
+        "12": "No pudo realizarse la solicitud",
+        "13": "No se han podido obtener las categor\u00edas",
+        "14": "No se han podido obtener las marcas",
+        "15": "Pedido recibido nulo",
+        "16": "Pedido recibido - Tags nulo o cantidad inv\u00e1lida",
+        "17": "Pedido recibido - IDs nulo o elementos inv\u00e1lidos",
+        "18": "Pedido recibido - PaymentStatus nulo o vac\u00edo",
+        "19": "Pedido recibido - DeliveryStatus nulo o vac\u00edo",
+        "20": "Pedido recibido - DeliveryMethod nulo o vac\u00edo",
+        "21": "Pedido recibido - Currency nulo o inv\u00e1lido",
+        "22": "Pedido recibido - IsCanceled nulo o inv\u00e1lido",
+        "23": "Pedido recibido - Date nulo o inv\u00e1lido",
+        "24": "Pedido recibido - Products nulo o cantidad inv\u00e1lida",
+        "25": "Pedido recibido - Payments nulo o cantidad inv\u00e1lida",
+        "26": "Pedido recibido - Shipments nulo o cantidad inv\u00e1lida",
+        "27": "Mapeo Pedido - PaymentStatus NO Aprobado",
+        "28": "Mapeo Pedido - PaymentStatus nulo",
+        "29": "Mapeo Pedido - Payments nulo",
+        "30": "Mapeo Payments - Pagos inv\u00e1lidos",
+        "31": "Mapeo Payments - \u00daltimo pago realizado es NO Aprobado",
+        "32": "Mapeo Comprobante - No pudo mapearse comprobante",
+        "33": "Mapeo Tags - Tags no v\u00e1lidos",
+        "34": "Mapeo Tags - Tags nulo o vac\u00edo",
+        "35": "Mapeo Tags - Tag obtenido no coincide ID Cliente",
+        "36": "Mapeo Forma de Pago - No realizado",
+        "37": "Mapeo Forma de Entrega - Courier nulo o vac\u00edo",
+        "38": "Mapeo Datos Entrega - no pudo recuperarse datos seg\u00fan cliente y lugar de entrega provistos",
+        "39": "Mapeo Datos Entrega - no pudo recuperarse datos seg\u00fan cliente",
+        "40": "Mapeo IDs - ID nulo o vac\u00edo",
+        "41": "Mapeo Detalle Ndp - Hay al menos un producto nulo o vac\u00edo",
+        "42": "Mapeo Detalle Ndp - Hay al menos un producto con cantidad inv\u00e1lida.",
+        "43": "Mapeo Detalle Ndp - El siguiente PartNumber no es v\u00e1lido",
+        "44": "Mapeo Detalle Ndp - El siguiente PartNumber tiene bundle",
+        "45": "Mapeo Detalle Ndp - No pudo obtenerse c\u00f3digo de art\u00edculo para este PartNumber",
+        "46": "Mapeo Detalle Ndp - Hay PartNumbers repetidos",
+        "47": "AltaDePedido - No pudo realizarse el Alta del Pedido",
+        "48": "Mapeo Cliente - No pudo realizarse mapeo seg\u00fan ID Cliente y ID Tienda provistos",
+        "49": "ExistenciaNdp - Existe Ndp con ID provisto"
+    }
+
+    
+    if mg_server_result_code != "0":
+        if mg_server_result_code in error_codes:
+            error_message = error_codes[mg_server_result_code]
+        else:
+            error_message = f'No se pudo recuperar el código de error MG {mg_server_result_code}'
+
+        #print(f'{error_message}')
+        return error_message
+
+    else:
+        return None
+
+
 
 if __name__ == "__main__":
-
-    #DATABASE = ""
+    """
+        #DATABASE = ""
     DATABASE = "local"
 
    #   Connect to db and start a session
@@ -451,5 +696,11 @@ if __name__ == "__main__":
     #create_tables(engine)
 
     connection.close()
+    """
+    
+    print(parse_mgcat(mg_cat_xml()))
+
+    #cat_response = mg_cat_xml()
+    #mg_get_response_error("100")
 
     pass
