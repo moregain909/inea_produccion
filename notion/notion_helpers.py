@@ -45,7 +45,9 @@ def check_notificacion_script(script):
                                         {"script": "Control Precios MG", "page_id": "aa30029d-3a81-4e8d-9856-4ecd2960c716"}, \
                                             {"script": "Database Costos MG", "page_id": "c15803b7-95c6-4ba1-a510-385bb4ecfa5c"}, \
                                                 {"script": "Database Productos MG", "page_id": "ce6a149e-205f-4b8c-97be-766173aefa77"}, \
-                                                    {"script": "Database Disponibilidad Stock MG", "page_id": "d6eeebc5-1b44-44a2-8448-a789f7fdc029"}]
+                                                    {"script": "Database Disponibilidad Stock MG", "page_id": "d6eeebc5-1b44-44a2-8448-a789f7fdc029"}, \
+                                                        {"script": "Web Service MG", "page_id": "881f56e0-15ba-4be5-bbaa-97db37f9a6d9"}, \
+                                                            {"script": "Precios MG en GBP", "page_id": "9569bc59-2878-499b-9dbd-39f1f3902a95"}]
 
 #   
 
@@ -72,7 +74,8 @@ def check_notificacion_script(script):
             response = requests.request("PATCH", url, headers=headers, data=payload)
 
             if response.status_code == 200:
-                print("Listo Notion")
+                #print("Listo Notion")
+                pass
             else:
                 print("OJO! Respuesta al intentar actualizar database de notificaciones en Notion:")
                 print("  Status Code:", response.status_code)
