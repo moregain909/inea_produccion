@@ -55,7 +55,7 @@ def mandar_mensaje_telegram(nombre_bot, chat_id, mensaje, parse="MarkdownV2"):
 
     Args:
         nombre_bot (_str_): Nombre de Bot que tiene que estar presente en telegram_api_key()
-        alias_chat (_str_): Alias que debe estar presente en chat_telegram()
+        chat_id (_str_): ID chat Telegram.
         mensaje (_str_): Mensaje que se quiere enviar.
         parse (str, optional): _description_. Defaults to "MarkdownV2". Otra opción es usar "HTML". Si no se quiere parsear, se pasa parse=None. Más info sobre formateo de mensajes: https://core.telegram.org/bots/api#formatting-options
     """
