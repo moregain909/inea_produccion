@@ -1,4 +1,5 @@
-#   Testea la conexión al web service de Microglobal
+#   Defines classes and methods for Oberver Pattern
+#   main(): Notifier script that accepts command line arguments
 
 import argparse
 
@@ -9,9 +10,37 @@ sys.path.append(path2root)
 
 from notion.notion_helpers import check_notificacion_script, notion_token
 from telegram.telegram_helpers import mandar_mensaje_telegram, chat_telegram
-#from utils.utils_helpers import create_class_instance
 
-# ! Observer Pattern - Objects setup
+#   Observer Pattern - Objects setup
+
+def create_class_instance(class_name, variables):
+    """ Creates a class instance from its name and variables. 
+    Allows to create a class instance from iteration using variables for name and instance variables. 
+    Args:
+        class_name (str): Class name
+        variables (dict): Class variables
+    
+    Returns:
+        class_instance (class): Class instance
+    
+    Raises:
+        NameError: If class name is not found in globals()
+        TypeError: If class variables are not valid for the class instance
+    """
+    class_ = globals()[class_name]
+    if variables != None:
+        try:
+            class_instance = class_(**variables)
+        except TypeError as e:
+            print(f'Error al crear la instancia de {class_name}. Variable no esperada\n{e}')
+            return False
+            
+    else:
+        class_instance = class_()
+    return class_instance
+
+#   channels = ["TelegramObserver", "ConsoleObserver", \
+#   {"NotionObserver": {"script": "Web Service MG"}}]
 
 # Notifier class
 class StatusNotifier:
@@ -21,6 +50,36 @@ class StatusNotifier:
 
     def attach(self, observer):
         self.observers.append(observer)
+
+    def attach_all(self, observers):
+        for o in observers:
+            #print(o, type(o))
+            if type(o) not in (str, dict):
+                print(f'No se puede agregar Observer {o}. Tipo incorrecto.')
+                pass
+            else:
+                # Setup class name and class variables based on observer item type
+                if type(o) == dict:
+                    observer_class_name = list(o.keys())[0]
+                    observer_class_variables = o[observer_class_name]
+                else:
+                    observer_class_name = o
+                    observer_class_variables = {}
+                
+                ## Create the observer instance
+                instance = create_class_instance(observer_class_name, observer_class_variables)
+                self.attach(instance)
+                #print(f'Se agregó {instance.__class__.__name__} a la lista de observadores')
+
+        if len(self.observers) > 0:
+            return True
+        else:
+            print(f'No se agregó ningún Observer')
+            return False
+
+    def show_observers(self):
+        for observer in self.observers:
+            print(f"{observer}")
 
     def detach(self, observer):
         self.observers.remove(observer)
@@ -56,6 +115,9 @@ class Observer:
 
     def notify_down(self, **kwargs):
         pass
+
+    def __repr__(self) -> str:
+        print(self.__name__)
 
 # Observer classes
 class NotionObserver(Observer):
@@ -110,15 +172,18 @@ class NotionObserver(Observer):
 
 class TelegramObserver(Observer):
 
+    default_nombre_bot = "iojan"
+    default_chat_alias = "ineabots"
+
     def __init__(self, nombre_bot=None, chat_alias=None) -> None:
         if nombre_bot:
             self.nombre_bot = nombre_bot
         else:
-            self.nombre_bot = "iojan"
+            self.nombre_bot = TelegramObserver.default_nombre_bot
         if chat_alias:
             self.chat_alias = chat_alias
         else:
-            self.chat_alias = "ineabots"
+            self.chat_alias = TelegramObserver.default_chat_alias
         self.chat_id = chat_telegram(chat_alias)
     
     def notify(self, **kwargs):
@@ -148,24 +213,24 @@ class TelegramObserver(Observer):
 
     def notify_down(self, **kwargs):
         if "chat_alias" in kwargs.keys():
-            chat_alias = kwargs.get("chat_alias")
-            chat_id = chat_telegram(chat_alias)
+            self.chat_alias = kwargs.get("chat_alias")
+            self.chat_id = chat_telegram(self.chat_alias)
         else:
-            print("No se especificó el alias del chat a notificar")
-            return False
+            self.chat_id = chat_telegram(TelegramObserver.default_chat_alias)
+            print(f'No se especificó el alias del chat a notificar. Se usa default {TelegramObserver.default_chat_alias}.')
         
         if "message" in kwargs.keys():
             message = kwargs.get("message")
         else:
-            message = "Faltó especificar el mensaje a enviar en TelegramObserver.notify_up"
+            message = "notify_down: Faltó especificar el mensaje a enviar."
 
-        if "bot_name" in kwargs.keys():
-            nombre_bot = kwargs.get("bot_name")
+        if "nombre_bot" in kwargs.keys():
+            self.nombre_bot = kwargs.get("nombre_bot")
         else:
-            print("No se especificó el nombre del bot a usar en TelegramObserver.notify_up")
-            return False
+            print(f'No se especificó el nombre del bot a usar en TelegramObserver.notify_up. Se usa default {TelegramObserver.default_nombre_bot}.')
         
-        mandar_mensaje_telegram(nombre_bot, chat_id, message)
+        #print(f'nombre_bot: {self.nombre_bot}, chat_id: {self.chat_id}, chat_alias: {self.chat_alias}')
+        mandar_mensaje_telegram(self.nombre_bot, self.chat_id, message)
         return True
 
 
@@ -193,23 +258,6 @@ class ConsoleObserver(Observer):
         print(message)
         return True
 
-def create_class_instance(class_name, variables):
-    """ Creates a class instance from its name and variables. 
-    Allows to create a class instance from iteration using variables for name and instance variables. 
-    Args:
-        class_name (str): Class name
-        variables (dict): Class variables
-    
-    Returns:
-        class_instance (class): Class instance
-    
-    Raises:
-        NameError: If class name is not found in globals()
-        TypeError: If class variables are not valid for the class instance
-    """
-    class_ = globals()[class_name]
-    class_instance = class_(**variables)
-    return class_instance
 
 if __name__ == "__main__":
 
