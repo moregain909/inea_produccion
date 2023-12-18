@@ -2,6 +2,7 @@
 #   main(): Notifier script that accepts command line arguments
 
 import argparse
+from typing import Union, Dict, List, Tuple
 
 import os, sys
 sys.path.append(os.path.dirname(os.path.realpath(__file__)))
@@ -39,8 +40,28 @@ def create_class_instance(class_name, variables):
         class_instance = class_()
     return class_instance
 
-#   channels = ["TelegramObserver", "ConsoleObserver", \
-#   {"NotionObserver": {"script": "Web Service MG"}}]
+
+# Generic Class used for unit test
+class TestClass:
+    def __init__(self, var1=None, var2=None):
+        self.var1 = var1
+        self.var2 = var2
+
+# Observer parent class
+class Observer:
+    
+    def notify(self, **kwargs):
+        pass
+
+    def notify_up(self, **kwargs):
+        pass
+
+    def notify_down(self, **kwargs):
+        pass
+
+    #def __repr__(self) -> str:
+    #    print(self.__name__)
+
 
 # Notifier class
 class StatusNotifier:
@@ -51,25 +72,36 @@ class StatusNotifier:
     def attach(self, observer):
         self.observers.append(observer)
 
-    def attach_all(self, observers):
+    def attach_all(self, observers: Union[str, Dict, Observer]):
+        """ 
+        Args:
+            Acepta lista con nombres o dicts (con nombre y variables) de observers.
+            Ej: ["TelegramObserver", "ConsoleObserver", \
+                {"NotionObserver": {"notion_script": "Web Service MG"}}]
+
+        """
         for o in observers:
             #print(o, type(o))
-            if type(o) not in (str, dict):
-                print(f'No se puede agregar Observer {o}. Tipo incorrecto.')
-                pass
+            if isinstance(o, Observer):   # manages an instance of Observer's subclass as input
+                instance = o
             else:
-                # Setup class name and class variables based on observer item type
-                if type(o) == dict:
-                    observer_class_name = list(o.keys())[0]
-                    observer_class_variables = o[observer_class_name]
-                else:
-                    observer_class_name = o
-                    observer_class_variables = {}
+                if type(o) not in (str, dict):
+                    print(f'No se puede agregar Observer {o}. Tipo incorrecto.')
+                    pass
                 
-                ## Create the observer instance
-                instance = create_class_instance(observer_class_name, observer_class_variables)
-                self.attach(instance)
-                #print(f'Se agregó {instance.__class__.__name__} a la lista de observadores')
+                else:
+                    # Setup class name and class variables based on observer item type
+                    if type(o) == dict:
+                        observer_class_name = list(o.keys())[0]
+                        observer_class_variables = o[observer_class_name]
+                    else:
+                        observer_class_name = o
+                        observer_class_variables = {}
+                    
+                    ## Create the observer instance
+                    instance = create_class_instance(observer_class_name, observer_class_variables)
+            self.attach(instance)
+            #print(f'Se agregó {instance.__class__.__name__} a la lista de observadores')
 
         if len(self.observers) > 0:
             return True
@@ -104,20 +136,6 @@ class StatusNotifier:
         for observer in self.observers:
             observer.notify_down(**kwargs)
 
-# Observer parent class
-class Observer:
-    
-    def notify(self, **kwargs):
-        pass
-
-    def notify_up(self, **kwargs):
-        pass
-
-    def notify_down(self, **kwargs):
-        pass
-
-    def __repr__(self) -> str:
-        print(self.__name__)
 
 # Observer classes
 class NotionObserver(Observer):
