@@ -2,7 +2,7 @@
 #   main(): Notifier script that accepts command line arguments
 
 import argparse
-from typing import Union, Dict, List, Tuple
+from typing import Union, Dict, List, Type
 
 import os, sys
 sys.path.append(os.path.dirname(os.path.realpath(__file__)))
@@ -11,34 +11,54 @@ sys.path.append(path2root)
 
 from notion.notion_helpers import check_notificacion_script, notion_token
 from telegram.telegram_helpers import mandar_mensaje_telegram, chat_telegram
+from utils.utils_helpers import create_class_instance
+#   Observer Pattern - Objects setup 
+ 
 
-#   Observer Pattern - Objects setup
-
-def create_class_instance(class_name, variables):
-    """ Creates a class instance from its name and variables. 
-    Allows to create a class instance from iteration using variables for name and instance variables. 
-    Args:
-        class_name (str): Class name
-        variables (dict): Class variables
-    
-    Returns:
-        class_instance (class): Class instance
-    
-    Raises:
-        NameError: If class name is not found in globals()
-        TypeError: If class variables are not valid for the class instance
-    """
-    class_ = globals()[class_name]
-    if variables != None:
-        try:
-            class_instance = class_(**variables)
-        except TypeError as e:
-            print(f'Error al crear la instancia de {class_name}. Variable no esperada\n{e}')
-            return False
-            
-    else:
-        class_instance = class_()
-    return class_instance
+#def create_class_instance(class_parameters: Union[str, Dict, Type]) -> Union[Type, bool]:
+#    """ Creates a class instance from input.
+#    Args:
+#        class_parameters (str, dict): 
+#            If argument is str, takes it as class name.
+#            If argument is dict, takes it as class name (key) and it's variables (value)
+#            If argument is class, returns it
+#    
+#    Returns:
+#        class_instance (class): Class instance
+#
+#    """
+#
+#    if isinstance(class_parameters, str):     #   Gestiona la entrada str
+#        class_name = class_parameters
+#        class_variables = {}
+#    elif isinstance(class_parameters, dict):    #   Gestiona la entrada dict
+#        class_name = next(iter(class_parameters), None)
+#        class_variables = class_parameters[class_name]
+#    else:
+#        print(f'Tipo incorrecto: No se puede crear instancia de {class_parameters} porque es {type(class_parameters)}. Sólo se acepta str o dict.')
+#        return False
+#
+#    try:
+#        class_ = globals()[class_name]
+#    except KeyError as e:
+#        print(f'Error al crear la instancia de {class_name}. Clase no encontrada\n{e}')
+#        return False
+#    except Exception as e:
+#        print(f'Error al crear la instancia de {class_name}.\n{e}')
+#        return False
+#    
+#    #print(f'creando {class_}')
+#    if class_variables != None and class_variables != {}:
+#        try:
+#            class_instance = class_(**class_variables)
+#        except TypeError as e:
+#            print(f'Error al crear la instancia de {class_name}. Variable no esperada en {class_variables}\n{e}')
+#            return False
+#            
+#    else:
+#        class_instance = class_()
+#    
+#    return class_instance
 
 
 # Generic Class used for unit test
@@ -59,8 +79,46 @@ class Observer:
     def notify_down(self, **kwargs):
         pass
 
+    def show_variables(self):
+        for variable, value in self.__dict__.items():
+            print(f'{variable}: {value}')
+        return True
+        
+    def __eq__(self, other) -> bool:
+        if isinstance(other, Observer):
+            if self.__dict__ == other.__dict__:
+                return True
+        return False
+    
     #def __repr__(self) -> str:
     #    print(self.__name__)
+
+def instance_has_attributes(instance):
+    """ Checks if a class instance has attributes.
+    Args:
+        class_instance (class): Class instance
+    Returns:
+        True if class instance has attributes.
+        False if class instance has no attributes.
+    """
+    if instance.__dict__ == {}:
+        return False
+    else:
+        return True
+    
+def all_instance_attributes_present(class_instance, reference_instance):
+    """ Checks if all instance attributes and its values that are not None are present in refrerence_instance.
+
+    """
+    instance_attributes = class_instance.__dict__
+    not_none_instance_attributes = {k: v for k, v in instance_attributes.items() if v is not None}
+    reference_attributes = reference_instance.__dict__
+
+    all_attributes_present = all(instance_attr in reference_attributes.items() for instance_attr in not_none_instance_attributes.items())
+    
+    if all_attributes_present:
+        return True
+    return False
 
 
 # Notifier class
@@ -69,39 +127,43 @@ class StatusNotifier:
     def __init__(self):
         self.observers = []
 
-    def attach(self, observer):
-        self.observers.append(observer)
-
-    def attach_all(self, observers: Union[str, Dict, Observer]):
+    def attach(self, observer: Union[str, Dict, Observer]) -> bool:
         """ 
         Args:
-            Acepta lista con nombres o dicts (con nombre y variables) de observers.
-            Ej: ["TelegramObserver", "ConsoleObserver", \
-                {"NotionObserver": {"notion_script": "Web Service MG"}}]
+            Acepta Observer, 'str' con nombre o dict {nombre: variables} de Observer.
+            Observer: TelegramObserver()
+            str: "NotionObserver"
+            dict: {"notion_script": "Web Service MG"}}
+        Returns:
+            True si se agregó Observer a la instancia.
+            False si no se agregó Observer a la instancia.
+        """             
+        #   Manages an instance of Observer's subclass as input
+        if isinstance(observer, Observer):   
+            instance = observer
+        else:
+            #   Create Observer instance from str or dict
+            instance = create_class_instance(observer)     
 
+        if instance:
+            self.observers.append(instance)
+            return True
+        else:
+            print(f'No se agregó {instance.__class__.__name__} a la lista de observadores')
+            return False
+            
+
+    def attach_all(self, observers: List[Union[str, Dict, Observer]]) -> bool:
+        """ 
+        Args:
+            Acepta lista con Observers, 'str' con nombre o dicts {nombre: variables} de Observers.        
+            Ej: [TelegramObserver(), "ConsoleObserver", {"NotionObserver": {"notion_script": "Web Service MG"}}]
+        Returns:
+            True si se agregaron Observers a la lista. 
+            False si no se agregaron Observers.
         """
         for o in observers:
-            #print(o, type(o))
-            if isinstance(o, Observer):   # manages an instance of Observer's subclass as input
-                instance = o
-            else:
-                if type(o) not in (str, dict):
-                    print(f'No se puede agregar Observer {o}. Tipo incorrecto.')
-                    pass
-                
-                else:
-                    # Setup class name and class variables based on observer item type
-                    if type(o) == dict:
-                        observer_class_name = list(o.keys())[0]
-                        observer_class_variables = o[observer_class_name]
-                    else:
-                        observer_class_name = o
-                        observer_class_variables = {}
-                    
-                    ## Create the observer instance
-                    instance = create_class_instance(observer_class_name, observer_class_variables)
-            self.attach(instance)
-            #print(f'Se agregó {instance.__class__.__name__} a la lista de observadores')
+            self.attach(o)
 
         if len(self.observers) > 0:
             return True
@@ -109,13 +171,39 @@ class StatusNotifier:
             print(f'No se agregó ningún Observer')
             return False
 
+
     def show_observers(self):
         for observer in self.observers:
-            print(f"{observer}")
+            print(f"showing observers: {observer.__class__.__name__}")
+
 
     def detach(self, observer):
-        self.observers.remove(observer)
 
+        #   Manages an instance of Observer's subclass as input
+        if isinstance(observer, Observer):   
+            instance_to_remove = observer
+        else:
+            #   Create Observer instance from str or dict
+            instance_to_remove = create_class_instance(observer)     
+
+        if instance_to_remove:
+            for idx, obs in list(enumerate(self.observers))[:]:
+                if isinstance(instance_to_remove, type(obs)):
+                    if not instance_has_attributes(instance_to_remove):
+                        del self.observers[idx]
+                        return True
+                    else:
+                        if all_instance_attributes_present(instance_to_remove, obs):
+                            del self.observers[idx]
+                            return True
+            print(f'No se removió {instance_to_remove.__class__.__name__} de la lista de observadores porque no se encontró una instancia de esa clase.')
+            return False        
+                    
+        else:
+            print(f'No se removió {observer} de la lista de observadores porque no se encontró una instancia de esa clase.')
+            return False
+    
+        
     def notify(self, **kwargs):
         """ Notifica a través de todos los suscriptores.
         Kwargs: 
@@ -128,9 +216,11 @@ class StatusNotifier:
         for observer in self.observers:
             observer.notify(**kwargs)
 
+
     def notify_up(self, **kwargs):
         for observer in self.observers:
             observer.notify_up(**kwargs)
+
 
     def notify_down(self, **kwargs):
         for observer in self.observers:
@@ -146,7 +236,16 @@ class NotionObserver(Observer):
         self.script = notion_script
 
     def notify_up(self, **kwargs):
+        """" Este método se usa para confirmar una ejecución exitosa en el dashboard de monitoreo en Notion. 
+        Args:
+            notion_script (str): Nombre del script para notificar ejecución en Notion. Usado por NotionObserver.
+        Returns:
+            True si se notificó la ejecución en Notion.
+            False si no se notificó la ejecución en Notion.
+        
+        """
 
+        # Obtiene el script de los argumentos, si no tiene, utiliza el que tenga en self.script
         if kwargs.get("notion_script"):
             script = kwargs.get("notion_script")
         else:
@@ -156,6 +255,7 @@ class NotionObserver(Observer):
                 print("No se especificó el script a notificar")
                 return False
 
+        # Envía notificación a Notion
         try:
             check_notificacion_script(script)
             print(f"Ejecución notificada en Notion: {script}")
@@ -191,7 +291,8 @@ class NotionObserver(Observer):
 class TelegramObserver(Observer):
 
     default_nombre_bot = "iojan"
-    default_chat_alias = "ineabots"
+    default_chat_alias = "inea_notificaciones"
+    default_message = "Ejecución notificada en Telegram. Mensaje por defecto."
 
     def __init__(self, nombre_bot=None, chat_alias=None) -> None:
         if nombre_bot:
@@ -202,29 +303,32 @@ class TelegramObserver(Observer):
             self.chat_alias = chat_alias
         else:
             self.chat_alias = TelegramObserver.default_chat_alias
-        self.chat_id = chat_telegram(chat_alias)
+        self.chat_id = chat_telegram(self.chat_alias)
     
     def notify(self, **kwargs):
         if "chat_alias" in kwargs.keys():
             chat_alias = kwargs.get("chat_alias")
+            chat_id = chat_telegram(chat_alias)
         else:
-            chat_alias = "ineabots"
-            #print("No se especificó el alias del chat a notificar, se usa ineabots por defecto en TelegramObserver.notify_up")
-        chat_id = chat_telegram(chat_alias)
+            chat_alias = self.chat_alias
+            chat_id = self.chat_id
         
         if "message" in kwargs.keys():
             message = kwargs.get("message")
         else:
-            message = "Faltó especificar el mensaje a enviar en TelegramObserver.notify_up"
+            message = self.default_message
 
-        if "bot_name" in kwargs.keys():
-            nombre_bot = kwargs.get("bot_name")
+        if "nombre_bot" in kwargs.keys():
+            nombre_bot = kwargs.get("nombre_bot")
         else:
-            nombre_bot = "iojan"
+            nombre_bot = self.nombre_bot
             #print("No se especificó el nombre del bot a usar, se usa iojan por defecto en TelegramObserver.notify_up")
         
-        mandar_mensaje_telegram(nombre_bot, chat_id, message)
-        return True
+        print(nombre_bot, chat_id, message)
+        if mandar_mensaje_telegram(nombre_bot, chat_id, message):
+            return True
+        return False
+      
 
     def notify_up(self, **kwargs):
         pass
@@ -278,6 +382,8 @@ class ConsoleObserver(Observer):
 
 
 if __name__ == "__main__":
+
+    #   Notifier script that accepts command line arguments
 
     # Command-line arguments configuration
     parser = argparse.ArgumentParser(description='Notificador')
@@ -336,7 +442,9 @@ if __name__ == "__main__":
         
         ## Instantiate the class with its variables
         if c in OBSERVERS_VARS_MAPPING:
-            instance = create_class_instance(channel_class.__name__, OBSERVERS_VARS_MAPPING[c])
+            channel_parameters = {channel_class.__name__: OBSERVERS_VARS_MAPPING[c]}
+            #instance = create_class_instance(channel_class.__name__, OBSERVERS_VARS_MAPPING[c])
+            instance = create_class_instance(channel_parameters)
         else:
             instance = channel_class()
 
