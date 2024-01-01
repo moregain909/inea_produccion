@@ -4,6 +4,7 @@ import paramiko
 import os
 from dataclasses import dataclass, field
 import shutil
+from typing import Union, Dict, Type
 
 @dataclass
 class DataFile:
@@ -112,6 +113,50 @@ def copy_file(source_dir, destination_dir, source_filename, destination_filename
         print(f"An error occurred: {e}")
     return False
 
+def create_class_instance(class_parameters: Union[str, Dict, Type]) -> Union[Type, bool]:
+    """ Creates a class instance from input.
+    Args:
+        class_parameters (str, dict): 
+            If argument is str, takes it as class name.
+            If argument is dict, takes it as class name (key) and it's variables (value)
+            If argument is class, returns it
+    
+    Returns:
+        class_instance (class): Class instance
+
+    """
+
+    if isinstance(class_parameters, str):     #   Gestiona la entrada str
+        class_name = class_parameters
+        class_variables = {}
+    elif isinstance(class_parameters, dict):    #   Gestiona la entrada dict
+        class_name = next(iter(class_parameters), None)
+        class_variables = class_parameters[class_name]
+    else:
+        print(f'Tipo incorrecto: No se puede crear instancia de {class_parameters} porque es {type(class_parameters)}. Sólo se acepta str o dict.')
+        return False
+
+    try:
+        class_ = globals()[class_name]
+    except KeyError as e:
+        print(f'Error al crear la instancia de {class_name}. Clase no encontrada\n{e}')
+        return False
+    except Exception as e:
+        print(f'Error al crear la instancia de {class_name}.\n{e}')
+        return False
+    
+    #print(f'creando {class_}')
+    if class_variables != None and class_variables != {}:
+        try:
+            class_instance = class_(**class_variables)
+        except TypeError as e:
+            print(f'Error al crear la instancia de {class_name}. Variable no esperada en {class_variables}\n{e}')
+            return False
+            
+    else:
+        class_instance = class_()
+    
+    return class_instance
 
 if __name__ == "__main__":
 

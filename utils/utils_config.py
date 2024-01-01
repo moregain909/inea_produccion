@@ -1,3 +1,10 @@
+from typing import Union, Dict, Type
+
+
+import os, sys
+sys.path.append(os.path.dirname(os.path.realpath(__file__)))
+path2root = os.path.join(os.path.dirname(__file__), "..")
+sys.path.append(path2root)
 
 # Paths relativos (desde el ROOT) a ML y data
 PATH2ML_REL = "../INEA/ML"
