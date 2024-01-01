@@ -75,14 +75,15 @@ def check_notificacion_script(script):
 
             if response.status_code == 200:
                 #print("Listo Notion")
-                pass
+                return True
             else:
                 print("OJO! Respuesta al intentar actualizar database de notificaciones en Notion:")
                 print("  Status Code:", response.status_code)
                 print()
                 print(response.text)
                 print()
-            break
+                return False
+            
 
 def get_notion_database(notion_token: str, database_id: str, client: Union[None, httpx.Client]=None) -> Dict:
 
