@@ -311,7 +311,6 @@ def mg_cat_xml() -> Union[str, bool]:
 
     url = "https://ecommerce.microglobal.com.ar/WSMG/WSMG.asmx"
 
-    #payload = "<?xml version=\"1.0\" encoding=\"utf-8\"?>\n<soap:Envelope xmlns:soap=\"http://schemas.xmlsoap.org/soap/envelope/\">\n  <soap:Body>\n    <GetCatalog xmlns=\"http://tempuri.org/\">\n      <cliente>MG_CLIENTE</cliente>\n      <usuario>juan</usuario>\n      <password>Jose1974</password>\n    </GetCatalog>\n  </soap:Body>\n</soap:Envelope>\n"
     payload = f'<?xml version=\"1.0\" encoding=\"utf-8\"?>\n<soap:Envelope xmlns:soap=\"http://schemas.xmlsoap.org/soap/envelope/\">\n  <soap:Body>\n    <GetCatalog xmlns=\"http://tempuri.org/\">\n\
         <cliente>{MG_CLIENTE}</cliente>\n      <usuario>{MG_USUARIO}</usuario>\n      <password>{MG_PASSWORD}</password>\n    </GetCatalog>\n  </soap:Body>\n</soap:Envelope>\n'
 
