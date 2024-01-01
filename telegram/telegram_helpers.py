@@ -41,7 +41,7 @@ def chat_telegram(alias_chat):
         chat_id = -625477360
     elif alias_chat == "ineapublis" or alias_chat == "inea publis":
         chat_id = -625477360    
-    elif alias_chat == "ineanotis" or alias_chat == "inea notis":
+    elif alias_chat == "ineanotis" or alias_chat == "inea notis" or alias_chat == "inea_notificaciones":
         chat_id = -625477360   
     elif alias_chat == "ineaquestions" or alias_chat == "inea questions":
         chat_id = -625477360        
@@ -61,11 +61,15 @@ def mandar_mensaje_telegram(nombre_bot, chat_id, mensaje, parse="MarkdownV2"):
     """
 
     bot = telebot.TeleBot(telegram_api_key(nombre_bot))
-    if parse == None:
-        bot.send_message(chat_id, markdown_text(mensaje))
-    else:
-        bot.send_message(chat_id, markdown_text(mensaje), parse_mode=parse)
 
+    try:
+        if parse == None:
+            bot.send_message(chat_id, markdown_text(mensaje))
+        else:
+            bot.send_message(chat_id, markdown_text(mensaje), parse_mode=parse)
+    except Exception as e:
+        print(f"Error al enviar mensaje a telegram: {e}")
+        return False
 
 # mandar_mensaje_telegram("iojan", chat_telegram("ineabots"), "🔴 🟠 🟡 🟢 🟣 🔵 ⚪")
 # print(chat_telegram("ineabots"))
