@@ -287,8 +287,14 @@ def same_as_in_table(session: Session, mg_product: ProductoMG) -> bool:
     db_product = session.query(ItemMG).filter(ItemMG.sku == mg_product.sku).first()
 
     #   Convierto los valores de iva a Decimal para poder compararlos (originalmente sería float vs DECIMAL)
-    mg_iva = Decimal(f"{mg_product.iva:.3f}")
-    db_iva = Decimal(db_product.iva)
+    if mg_product.iva is None:
+        mg_iva = Decimal(0)
+    else:
+        mg_iva = Decimal(f"{mg_product.iva:.3f}")
+    if db_product.iva is None:
+        db_iva = Decimal(0)
+    else:
+        db_iva = Decimal(db_product.iva)
 
     if db_product.sku == mg_product.sku and db_product.nombre ==  mg_product.nombre and db_product.categoria == mg_product.categoria \
         and db_product.ean == mg_product.ean and db_product.cod_cat == mg_product.cod_cat \
@@ -433,6 +439,8 @@ def mg_get_products(mg_cat_xml, format=None) -> List[ProductoMG]:
         attrs = ("timestamp", "sku", "costo")
     elif format == "stock":
         attrs = ("timestamp", "sku", "stock")
+    elif format == "stock&prices": 
+        attrs = ("timestamp", "sku", "stock", "costo")
     else:
         attrs = ("timestamp", "sku", "nombre", "marca", "categoria", \
                  "cod_cat", "costo", "stock", "iva", "ean")
