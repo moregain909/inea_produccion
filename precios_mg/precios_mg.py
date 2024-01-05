@@ -7,7 +7,7 @@ import os, sys
 path2root = os.path.join(os.path.dirname(__file__), "..")
 sys.path.append(path2root)
 
-from precios_mg_helpers import mg_get_products, productomg2costomg, insert_costo_mg, latest_price_mg, mg_cat_xml
+from precios_mg_helpers import mg_get_products, productomg2costomg, insert_costo_mg, latest_price_mg, mg_cat_xml, insert_item_mg, productomg2itemmg, is_in_table
 from precios_mg_helpers import CostoMG
 from data.data_helpers import db_connection
 #   Loads env db constants
@@ -49,24 +49,40 @@ if __name__ == "__main__":
         else:
             items_to_add.append(mg_price)
  
-    #   Add updated prices to database
+    
     updated_count = 1
     for item in items_to_update:
+        #   Add updated prices to database
         print(f'El precio de {item.sku} ha cambiado por {item.costo}')
         new_db_price = productomg2costomg(item)
         insert_costo_mg(session, new_db_price)
         updated_count += 1
 
-    #   Add new prices to database
+        #   Updates ML items prices
+        # ml_items_with_sku = ml_items_with_sku_from_db(session, sku)
+        # if ml_items_with_sku:
+        #     for ml_item in ml_items_with_sku:
+        #         sku_ml_item.precio = item.costo
+
+        #   Updates GBP prices
+        
+    #   Add new products and prices to database
     added_count = 1
     for item in items_to_add:
         print(f'No existe el producto {item.sku} en la db. Se agrega.')
+
+        # Insert new product into productos_mg table
+        if not is_in_table(session, item.sku):
+            new_db_item = productomg2itemmg(item)
+            insert_item_mg(session, new_db_item)
+        # Insert new price into costos_mg table
         new_db_price = productomg2costomg(item)
         insert_costo_mg(session, new_db_price)
         added_count += 1
 
     print(f'Actualizados {len(items_to_update)} precios de MG')
     print(f'Insertados {len(items_to_add)} precios de MG')
+
 
 
     #   Closes database connection
