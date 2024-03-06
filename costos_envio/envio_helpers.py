@@ -144,6 +144,7 @@ class Proveedor:
         for umbral, coeficiente in self.map_proveedores[self.alias]["umbrales"].items():
             self.coeficientes_envio.append(Coeficiente_Envio(umbral=umbral, coeficiente=coeficiente))
         if self.coeficientes_envio:
+            #print(f"Se usan estos coeficientes de envío: {self.coeficientes_envio}")
             return True
         else:
             print(f"No se encontraron coeficientes de envío para proveedor {self.alias}")
@@ -257,8 +258,10 @@ class Publicacion:
                 coeficiente = 0
             else:
                 coeficiente = self.coeficiente_envio_gbp
+                #print(f'Usando coeficiente de envío {self.coeficiente_envio_gbp} para {self.item_id} me da costo ML {self.costos_envio.ml} y costo GBP {self.costos_envio.gbp}')
             self.costos_envio.gbp = self.costos_envio.ml * coeficiente
             Round_Costos_Envio.round(self.costos_envio)
+            print(f'Usando coeficiente de envío {self.coeficiente_envio_gbp} para {self.item_id} me da costo ML {self.costos_envio.ml} y costo GBP {self.costos_envio.gbp}')
             return True
 
     def get_item_free_shipment_options(self, item_json, include_prices=False, shipment_types_catalog=None) -> Union[List[Shipment_Option], None]:
@@ -405,8 +408,8 @@ class Publicacion:
         # saca promedio
         total = sum(p for p in average_candidates)
         average = total / len(average_candidates)
-        print(f'El costo promedio de las opciones es: {average}')
-        print(shipment_options)
+        print(f'El costo promedio de las opciones de {self.item_id} es: {average}')
+        #print(shipment_options)
         return average
 
 
