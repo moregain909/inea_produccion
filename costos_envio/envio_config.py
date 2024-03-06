@@ -20,10 +20,10 @@ LISTA_TIENDAS = ["tecnorium", "lenovo"]
 ALIAS_PROVEEDORES_CON_COSTO_ENVIO = ["microglobal", "bowie"]
 
 #   CONFIGURA MAPA DE PROVEEDORES CON COSTOS DE ENVIO EN GBP Y UMBRALES
-MAP_PROVEEDORES =  {"microglobal":  {"name": "MICROGLOBAL ARGENTINA SOCIEDAD",  "pid": "16", "umbrales":   {90000: 1, \
-                                                                                                            1200000: 0.5}}, \
-                    "bowie":        {"name": "Bowie SRL",                       "pid": "79", "umbrales":   {90000: 1, \
-                                                                                                            1200000: 0.5}}}
+MAP_PROVEEDORES =  {"microglobal":  {"name": "MICROGLOBAL ARGENTINA SOCIEDAD",  "pid": "16", "umbrales":   {300000: 2, \
+                                                                                                            500000: 1}}, \
+                    "bowie":        {"name": "Bowie SRL",                       "pid": "79", "umbrales":   {300000: 2, \
+                                                                                                            500000: 1}}}
 
   
 #CONFIGURA DIRECTORIO DE DATA
@@ -56,7 +56,7 @@ SHIPMENT_TYPES_CATALOG =    {510645: {'name': 'Estándar a domicilio',          
                              511546: {'name': 'Estándar a sucursal de correo',       'shipping_method_type': 'four_days',    'priority': 0}, \
                              504345: {'name': 'Estándar a sucursal de correo',       'shipping_method_type': 'standard',     'priority': 0}, \
                               73330: {'name': 'Express a domicilio',                 'shipping_method_type': 'express',      'priority': 100}, \
-                             510545: {'name': 'Express a domicilio',                 'shipping_method_type': 'two_days',     'priority': 90}, \
+                             510545: {'name': 'Express a domicilio',                 'shipping_method_type': 'two_days',     'priority': 100}, \
                              510845: {'name': 'Express a sucursal de correo',        'shipping_method_type': 'two_days',     'priority': 0}, \
                              502845: {'name': 'Express a sucursal de correo',        'shipping_method_type': 'express',      'priority': 0}, \
                              510445: {'name': 'Prioritario a domicilio',             'shipping_method_type': 'next_day',     'priority': -10}, \
