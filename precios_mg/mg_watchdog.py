@@ -8,7 +8,7 @@ path2root = os.path.join(os.path.dirname(__file__), "..")
 sys.path.append(path2root)
 
 from precios_mg_helpers import mg_get_brands_xml
-from notificaciones.notificador import StatusNotifier
+from notificaciones.notificador import StatusNotifier, TelegramObserver, ConsoleObserver, NotionObserver 
 
 if __name__ == "__main__":
 
