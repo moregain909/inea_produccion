@@ -1,0 +1,81 @@
+<!doctype html>
+
+{% extends "base.html" %}
+
+{% block title %}
+Agregar publicaciones a GBP
+{% endblock %}
+
+{% block content %}
+
+
+{% if export %}
+    <h2>Exportado.</h2>
+{% endif %}
+
+<div class="col pl-md-5 pt-md-5">
+
+<h4>Agregar publicación</h4>
+<form action="" method="post">
+
+    <label for="item_id">ID Publicación: </label>
+    <input type="text" id="item_id" name="item_id" />
+
+    <label for="sku">SKU: </label>
+    <input type="text" id="sku" name="sku" />
+
+    <label for="variation_id">Variación: </label>
+    <input type="text" id="variation" name="variation_id" />
+
+    <label for="tienda">Tienda: </label>
+    <select name="tienda" class="Input">
+          {% for tienda in tiendas %}
+          <option value="{{ tienda.name }}">{{ tienda.name }}</option>
+          {% endfor %}
+    </select>
+    
+    <label for="lista_precios">Lista de Precios: </label>    
+    <select name="lista_precios" class="Input">
+          {% for lista in listas_de_precios %}
+          <option value="{{ lista.desc }}">{{ lista.desc }}</option>
+          {% endfor %}
+    </select>
+
+    <label for="deposito">Depósito: </label>    
+    <select name="deposito" class="Input">
+          {% for deposito in depositos %}
+          <option value="{{ deposito.name }}">{{ deposito.name }}</option>
+          {% endfor %}
+    </select>    
+    <br>
+
+    <!-- botón AGREGAR -->
+    <input type="submit" class="btn btn btn-outline-dark btn-sm" id="add" name="add" value="Agregar" />
+
+</div>
+
+<div class="col pt-md-5">
+    <!-- AGREGAR LOGICA PARA SEPARAR POR TIENDA-->
+    <ul>
+        {% if items %}
+    
+        <h4>Publicaciones agregadas</h4>
+            {% for item in items %}
+    
+                <li>{{ item.ml_item_id }} | {{ item.sku }} | {{ item.variation_id }} | {{ item.store }} | {{ item.price_list }}
+                    <!-- botón BORRAR -->
+                    <button type="submit" class="btn btn btn-outline-dark btn-sm" id="delete" name="delete" value={{ item.ml_item_id }}>Borrar</button>
+
+                </li>
+    
+            {% endfor %}
+    
+            <!-- botón EXPORTAR -->
+            <input type="submit" class="btn btn btn-outline-dark btn-sm" id="export" name="export" value="Exportar" />
+    
+        {% endif %}
+    </ul>
+</div>
+
+</form>
+{% endblock %}

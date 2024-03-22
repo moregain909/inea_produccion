@@ -1,0 +1,157 @@
+<!doctype html>
+
+{% extends "base.html" %}
+
+{% block title %}
+Tarifarios Envios para Notion
+{% endblock %}
+
+{% block content %}
+<div class="col pl-md-5 pt-md-5">
+
+    <h4>Agregar Tarifarios de Envío a Notion</h4>
+</div>
+
+<!-- Carga de datos -->
+<div class="col pl-md-5 pt-md-5">
+
+    <form action="" method="post">
+        <div class="row-md-2 pb-md-3 bg-light">
+            <label for="formula_original">Agregar Tarifario Nuevo</label>
+            <div class="row">
+                <div class="col-md-2">    
+                    <input type="text" name="col_tarifario" class="form-control" placeholder="Columna Tarifario">
+                </div>
+                <div class="col-md-2">
+                  <input type="text" name="col_rollup" class="form-control" placeholder="Columna Rollup">
+                </div>
+            </div>
+            <small id="formulaHelp" class="form-text text-muted">Por cada tarifario nuevo, cargar nombre de la columna del TARIFARIO y su ROLLUP.</small>
+            <button type="submit" name="add" class="btn btn btn-outline-dark btn-sm">Agregar</button>
+        </div>
+
+        <!-- Lista los tarifarios cargados -->
+        {% if tarifarios_nuevos %}
+
+            <h4>Tarifarios Nuevos</h4>
+
+            {% for tarifario in tarifarios_nuevos %}
+                <div class="row-md-2 pb-md-3 bg-secondary text-white">
+                    <div class="row">
+                    <div class="col-md-2">    
+                        {{ tarifario[0] }}
+                    </div>
+                    <div class="col-md-2">    
+                        {{ tarifario[1] }}
+                    </div>
+                    </div>
+                </div>
+            {% endfor %}
+
+
+        {% endif %}
+
+        <div class="row-pt-5 bg-light">
+            <div class="form-group">
+              <label for="formula_original">Fórmula Original</label>
+              <input type="formula" class="form-control" name="formula_original" id="formula_original" placeholder="Ingresar Fórmula Original">
+              <small id="formulaHelp" class="form-text text-muted">Copiar la fórmula original de la columna IMPORTE de Tarifarios en Notion.</small>
+            </div>
+        </div>
+
+        <button type="submit" name="process" class="btn btn btn-outline-dark btn-sm">Enviar</button>
+      </form>
+
+{% if nueva_formula %}
+
+    <div class="row-pt-5 bg-light">
+        <h5>Nueva Fórmula:</h5>
+        {{ nueva_formula }} 
+    </div>
+
+    <div class="row-pt-5 text-muted">
+        <h5>Fórmula original:</h5>
+        {{ vieja_formula }}
+    </div>
+
+{% endif %}
+
+
+</div>
+
+
+<!-- INSTRUCCIONES -->
+<div class="col pl-md-5 pt-md-5">
+    <div class="text-secondary">
+    <h4>Instrucciones</h4>
+    <div class="col pl-md-5 pt-md-1">
+        <h5>EN ZONAS TARIFARIAS AGREGAR COLUMNAS CON TARIFARIOS NUEVOS.</h5>
+        <div class="col pl-md-5 pt-md-1">
+            <h6>Ej de nombre ML23A-ENERO, ML23B-MARZO, ML24A-FEBRERO, FA23A-ENERO, etc.</br>
+                Tipo propiedad "Number", Number Format "Argentine peso".
+            </h6>
+        </div>
+    </div>
+
+    <div class="col pl-md-5 pt-md-1">
+        <h5>En LOCALIDADES agregar tarifas nuevas:</h5>
+        <div class="col pl-md-5 pt-md-1">
+            <h6>Agregar columna tipo "Rollup" Relation "AMBA" Calculate "Sum" apuntando Property al tarifario nuevo en ZONAS TARIFARIAS y con Property Name el mismo del tarifario.</br>
+                Agregar columna tipo "Formula" apuntando a la propiedad Rollup que creamos anteriormente. El "Property Name" agrega "Formula" al nombre original. Ej: "Formula FA23A-ENERO".</br>
+                El Number Format de la Formula es "Argentine peso."
+            </h6>
+        </div>
+    </div>
+
+    <div class="col pl-md-5 pt-md-1">
+        <h5>En ENVIOS FLEX:</h5>
+        <div class="col pl-md-5 pt-md-1">
+            <h6>En columna TARIFARIO agregar opciones para los tarifarios nuevos en GRIS CLARO.</br>
+                El día que entran en VIGENCIA los nuevos tarifarios, se les pone color gris a todos los demás, y COLOR a los nuevos.</br>
+                </br>
+                Agregar columna con rollup "Rollup" Relation LOCALIDAD apuntando Property la FORMULA del TARIFARIO NUEVO con opción Calculate "Sum"</br>
+                Si se copia la propiedad de la versión anterior del mismo tarifario, ya la crea con la RELACION.</br>
+                Sólo resta renombrar la propiedad, editar la PROPIEDAD relacionada para apuntarla a la fórmula correcta, y confirmar la opción CALCULATE > SUM.</br>
+                </br>
+                Editar la Fórmula de la columna IMPORTE agregando condiciones para los nuevos tarifarios.</br>
+                Ej, si se agrega el nuevo tarifario "MELI 2023 F-NOV" que toma el Rollup "ML23F", la fórmula pasaría de esto:</br>
+                </br>
+                ORIGINAL FORMATEADA</br>
+                <pre><code>
+                    if(prop("Tarifario") == "MELI 2023 B", prop("ML23B"), 
+                       if(prop("Tarifario") == "FABIAN 2023 A", prop("FA23A"), 
+                          if(prop("Tarifario") == "FABIAN 2023 B", prop("FA23B"), 
+                             if(prop("Tarifario") == "MELI 2023 C-JUNIO", prop("ML23C-JUNIO"), 
+                                if(prop("Tarifario") == "FABIAN 2023 C", prop("FA23C-JUNIO"), 
+                                   if(prop("Tarifario") == "MELI 2023 D-AGOSTO", prop("ML23D"), 
+                                      if(prop("Tarifario") == "FABIAN 2023 D-AGOSTO", prop("FA23D"), 
+                                         if(prop("Tarifario") == "MELI 2023 E-SEPTIEMBRE",prop("ML23E"), 
+                                            if(prop("Tarifario") == "FABIAN 2023 E-SEPTIEMBRE", prop("FA23E"), 
+                                               prop("ML23A")))))))))) + prop("Recargo")  
+                </code></pre>
+                A esto:</br>
+                NUEVA</br>
+                <pre><code>
+                    if(prop("Tarifario") == "MELI 2023 B", prop("ML23B"), 
+                       if(prop("Tarifario") == "FABIAN 2023 A", prop("FA23A"), 
+                          if(prop("Tarifario") == "FABIAN 2023 B", prop("FA23B"), 
+                             if(prop("Tarifario") == "MELI 2023 C-JUNIO", prop("ML23C-JUNIO"), 
+                                if(prop("Tarifario") == "FABIAN 2023 C", prop("FA23C-JUNIO"), 
+                                   if(prop("Tarifario") == "MELI 2023 D-AGOSTO", prop("ML23D"), 
+                                      if(prop("Tarifario") == "FABIAN 2023 D-AGOSTO", prop("FA23D"), 
+                                         if(prop("Tarifario") == "MELI 2023 E-SEPTIEMBRE",prop("ML23E"), 
+                                            if(prop("Tarifario") == "FABIAN 2023 E-SEPTIEMBRE", prop("FA23E"), 
+                                               if(prop("Tarifario") == "MELI 2023 F-NOV", prop("ML23F"),
+                                               prop("ML23A")))))))))))) + prop("Recargo")                    
+                </code></pre>
+                Lo importante a tener en cuenta que se agrega un nuevo <code>"if(prop("Tarifario") == $_OPCION_TARIFARIO, $_ROLLUP_TARIFARIO"</code> por cada tarifario nuevo.</br>
+                Y por cada nuevo <code>if(prop("Tarifario")</code> que agregamos, tenemos que agregar un <code>")"</code> luego del último <code>$_ROLLUP_TARIFARIO "("ML23A")"</code>.</br>                
+                Tiene que quedar con n+1 paréntesis, siendo n la cantidad de condiciones <code>"if(prop("Tarifario")</code> que tengamos en la fórmula.</br>
+            </h6>
+        </div>
+    </div>
+    </div>
+</div>
+
+
+{% endblock %}
