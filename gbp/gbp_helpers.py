@@ -31,6 +31,7 @@ from utils.utils_helpers import create_class_instance
 logging.basicConfig(level=logging.DEBUG)
 
 
+
 def get_field_name(field_id, spreadsheet_schema):
     for k, v in spreadsheet_schema.__dict__.items():
         if v[0] == field_id:
@@ -313,6 +314,31 @@ class GbpMlItem:
             return True
 
 
+@dataclass
+class ListaPreciosGBP:
+    """ Clase que representa una lista de precios de GBP
+    """
+    name: str
+    desc: str
+    id_gbp: int
+
+
+@dataclass
+class GBPWarehouse:
+    """ Clase que representa un deposito de GBP
+    """
+    name: str
+    id_gbp: int
+
+
+@dataclass
+class StoreGBP:
+    """ Clase que representa una tienda de ML en GBP
+    """
+    name: str
+    id_gbp: int
+    id_ml: str
+
 class PublisGbpSchema(ExcelSchema):
     """ Esquema de planilla de publicaciones de ML en GBP
     attributte (data reference) = excel column
@@ -587,6 +613,44 @@ def create_excel(items: List[Type], spreadsheet_type: Type, filename: str = None
     wb.save(file_path)
     logging.info(f'Planilla {file_path} creada correctamente.')
     return True
+
+
+def get_list_id_from_desc(lista_de_precios_gbp, desc):
+    """ Función que devuelve el id de una lista de precios de GBP a partir de su descripción
+    """
+    for lista in lista_de_precios_gbp:
+        if lista.desc == desc:
+            return lista.id_gbp
+
+    return None
+
+
+def get_warehouse_id_from_name(depositos_gbp, name):
+    """ Función que devuelve el id de un deposito de GBP a partir de su nombre
+    """
+    for deposito in depositos_gbp:
+        if deposito.name == name:
+            return deposito.id_gbp
+
+    return None
+
+
+# DATA
+
+listas_de_precios_gbp = [ListaPreciosGBP(name="ml_clasica", desc="ML Clásica",id_gbp=1),
+                         ListaPreciosGBP(name="ml_premium", desc="ML Premium",id_gbp=5),
+                         ListaPreciosGBP(name="mg_tecnorium_clasica", desc="MG Tecnorium Clásica",id_gbp=10),
+                         ListaPreciosGBP(name="mg_tecnorium_premium", desc="MG Tecnorium Premium",id_gbp=12),
+                         ListaPreciosGBP(name="mg_lenovo_clasica", desc="MG Lenovo Clásica",id_gbp=11),
+                         ListaPreciosGBP(name="mg_lenovo_premium", desc="MG Lenovo Premium",id_gbp=13)]
+
+depositos_gbp = [GBPWarehouse(name="Perón", id_gbp=1)]
+
+tiendas_gbp = [{"tienda": "Tecnorium"}, {"tienda": "Celestron"}, {"tienda": "Lenovo"}]
+
+tiendas_gbp = [StoreGBP(name="Tecnorium", id_gbp=1, id_ml="77581040"),
+               StoreGBP(name="Celestron", id_gbp=2, id_ml="146367667"),
+               StoreGBP(name="Lenovo", id_gbp=3, id_ml="301181249")]
 
 
 if __name__ == "__main__":
