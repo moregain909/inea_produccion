@@ -1,0 +1,234 @@
+{
+    "substatus_history": [
+        {
+            "date": "2022-12-23T02:52:57.349-04:00",
+            "substatus": "ready_to_print",
+            "status": "ready_to_ship"
+        },
+        {
+            "date": "2022-12-23T14:48:22.000-04:00",
+            "substatus": "picked_up",
+            "status": "ready_to_ship"
+        },
+        {
+            "date": "2022-12-23T19:05:15.000-04:00",
+            "substatus": "in_hub",
+            "status": "ready_to_ship"
+        },
+        {
+            "date": "2022-12-23T19:56:45.000-04:00",
+            "substatus": "in_packing_list",
+            "status": "ready_to_ship"
+        }
+    ],
+    "snapshot_packing": {
+        "snapshot_id": null,
+        "pack_hash": null
+    },
+    "receiver_id": 180207846,
+    "base_cost": 1259.99,
+    "status_history": {
+        "date_shipped": "2022-12-25T23:53:54.000-04:00",
+        "date_returned": null,
+        "date_delivered": "2023-01-02T10:46:42.000-04:00",
+        "date_first_visit": "2023-01-02T10:46:42.000-04:00",
+        "date_not_delivered": null,
+        "date_cancelled": null,
+        "date_handling": "2022-12-23T02:52:56.000-04:00",
+        "date_ready_to_ship": "2022-12-23T02:52:57.349-04:00"
+    },
+    "type": "forward",
+    "return_details": null,
+    "sender_id": 77581040,
+    "mode": "me2",
+    "order_cost": 4661,
+    "priority_class": null,
+    "service_id": 351,
+    "shipping_items": [
+        {
+            "domain_id": null,
+            "quantity": 1,
+            "dimensions_source": {
+                "origin": "similarity",
+                "id": "MLA1141209087__1"
+            },
+            "description": "Adaptador De Trípode Celestron Para Binoculares",
+            "id": "MLA1141209087",
+            "user_product_id": null,
+            "sender_id": 77581040,
+            "dimensions": "5.0x18.0x20.0,120.0"
+        }
+    ],
+    "tracking_number": "EC2AD39301552",
+    "cost_components": {
+        "loyal_discount": 0,
+        "special_discount": 0,
+        "compensation": 0,
+        "gap_discount": -50,
+        "ratio": 2619.98
+    },
+    "id": 41908933856,
+    "tracking_method": "Prioritario",
+    "last_updated": "2023-01-02T11:20:41.822-04:00",
+    "items_types": [],
+    "comments": null,
+    "substatus": null,
+    "date_created": "2022-12-21T20:05:24.552-04:00",
+    "date_first_printed": "2022-12-23T06:57:05.965-04:00",
+    "created_by": "receiver",
+    "application_id": null,
+    "shipping_option": {
+        "processing_time": null,
+        "cost": 0,
+        "estimated_schedule_limit": {
+            "date": null
+        },
+        "shipping_method_id": 73328,
+        "estimated_delivery_final": {
+            "date": "2022-12-26T00:00:00.000-03:00",
+            "offset": 720
+        },
+        "buffering": {
+            "date": "2022-12-23T00:00:00.000Z"
+        },
+        "pickup_promise": null,
+        "list_cost": 1309.99,
+        "estimated_delivery_limit": {
+            "date": "2022-12-26T00:00:00.000-03:00",
+            "offset": 240
+        },
+        "priority_class": null,
+        "delivery_promise": "estimated",
+        "delivery_type": "estimated",
+        "estimated_handling_limit": {
+            "date": "2022-12-23T00:00:00.000-03:00"
+        },
+        "estimated_delivery_time": {
+            "date": "2022-12-26T00:00:00.000-03:00",
+            "pay_before": "2022-12-23T12:00:00.000-03:00",
+            "schedule": null,
+            "unit": "hour",
+            "offset": {
+                "date": "2022-12-27T00:00:00.000-03:00",
+                "shipping": 24
+            },
+            "shipping": 72,
+            "time_frame": {
+                "from": null,
+                "to": null
+            },
+            "handling": 24,
+            "type": "known_frame"
+        },
+        "name": "Normal a domicilio",
+        "id": 4276118402,
+        "estimated_delivery_extended": {
+            "date": "2022-12-26T00:00:00.000-03:00",
+            "offset": 240
+        },
+        "currency_id": "ARS"
+    },
+    "tags": [],
+    "sender_address": {
+        "country": {
+            "id": "AR",
+            "name": "Argentina"
+        },
+        "address_line": "XXXXXXX",
+        "types": [
+            "billing",
+            "default_selling_address",
+            "shipping"
+        ],
+        "scoring": null,
+        "agency": null,
+        "city": {
+            "id": null,
+            "name": "Microcentro"
+        },
+        "geolocation_type": "ROOFTOP",
+        "latitude": 0,
+        "municipality": {
+            "id": null,
+            "name": null
+        },
+        "location_id": null,
+        "street_name": "XXXXXXX",
+        "zip_code": "XXXXXXX",
+        "geolocation_source": "geolocation-feedback",
+        "intersection": null,
+        "street_number": "XXXXXXX",
+        "comment": "XXXXXXX",
+        "id": 527324025,
+        "state": {
+            "id": "AR-C",
+            "name": "Capital Federal"
+        },
+        "neighborhood": {
+            "id": null,
+            "name": null
+        },
+        "geolocation_last_updated": "2022-12-21T17:28:53Z",
+        "longitude": 0
+    },
+    "sibling": {
+        "reason": null,
+        "sibling_id": null,
+        "description": null,
+        "source": null,
+        "date_created": null,
+        "last_updated": null
+    },
+    "return_tracking_number": null,
+    "site_id": "MLA",
+    "carrier_info": null,
+    "market_place": "MELI",
+    "receiver_address": {
+        "country": {
+            "id": "AR",
+            "name": "Argentina"
+        },
+        "address_line": "9 de julio 369",
+        "types": [
+            "default_buying_address"
+        ],
+        "scoring": null,
+        "agency": null,
+        "city": {
+            "id": null,
+            "name": "Tapalque"
+        },
+        "geolocation_type": "RANGE_INTERPOLATED",
+        "latitude": -36.354733,
+        "municipality": {
+            "id": null,
+            "name": null
+        },
+        "location_id": null,
+        "street_name": "9 de julio",
+        "zip_code": "7303",
+        "geolocation_source": "google-maps",
+        "delivery_preference": "business",
+        "intersection": null,
+        "street_number": "369",
+        "receiver_name": "Luciano tropea",
+        "comment": "Muebles estar",
+        "id": 1076189385,
+        "state": {
+            "id": "AR-B",
+            "name": "Buenos Aires"
+        },
+        "neighborhood": {
+            "id": null,
+            "name": null
+        },
+        "geolocation_last_updated": "2019-11-29T19:17:36Z",
+        "receiver_phone": "XXXXXXX",
+        "longitude": -60.028483
+    },
+    "customer_id": null,
+    "order_id": 2000004798416370,
+    "quotation": null,
+    "status": "delivered",
+    "logistic_type": "cross_docking"
+}

@@ -1,0 +1,613 @@
+{
+    "query": "",
+    "results": [
+        {
+            "payments": [
+                {
+                    "reason": "Bencina Para Encendedores  Zippo 125ml Fluido Original ",
+                    "status_code": null,
+                    "total_paid_amount": 12267,
+                    "operation_type": "regular_payment",
+                    "transaction_amount": 12267,
+                    "transaction_amount_refunded": 0,
+                    "date_approved": "2023-12-01T05:43:30.000-04:00",
+                    "collector": {
+                        "id": 77581040
+                    },
+                    "coupon_id": null,
+                    "installments": 1,
+                    "authorization_code": "662828",
+                    "taxes_amount": 0,
+                    "id": 67745040055,
+                    "date_last_modified": "2023-12-01T08:33:31.000-04:00",
+                    "coupon_amount": 0,
+                    "available_actions": [
+                        "refund"
+                    ],
+                    "shipping_cost": 0,
+                    "installment_amount": 12267,
+                    "date_created": "2023-12-01T05:43:28.000-04:00",
+                    "activation_uri": null,
+                    "overpaid_amount": 0,
+                    "card_id": 9229133761,
+                    "status_detail": "accredited",
+                    "issuer_id": "692",
+                    "payment_method_id": "master",
+                    "payment_type": "credit_card",
+                    "deferred_period": null,
+                    "atm_transfer_reference": {
+                        "transaction_id": null,
+                        "company_id": null
+                    },
+                    "site_id": "MLA",
+                    "payer_id": 1371155490,
+                    "order_id": 2000007029518190,
+                    "currency_id": "ARS",
+                    "status": "approved",
+                    "transaction_order_id": null
+                }
+            ],
+            "fulfilled": true,
+            "taxes": {
+                "amount": null,
+                "currency_id": null,
+                "id": null
+            },
+            "order_request": {
+                "change": null,
+                "return": null
+            },
+            "expiration_date": "2023-12-29T05:43:30.000-04:00",
+            "feedback": {
+                "sale": {
+                    "date_created": "2023-12-01T08:33:19.000-04:00",
+                    "fulfilled": true,
+                    "rating": "positive",
+                    "id": 9041920746695,
+                    "status": "hidden"
+                },
+                "buyer": null,
+                "seller": {
+                    "id": 9041920746695
+                }
+            },
+            "shipping": {
+                "id": null
+            },
+            "date_closed": "2023-12-01T05:43:30.000-04:00",
+            "id": 2000007029518190,
+            "manufacturing_ending_date": null,
+            "order_items": [
+                {
+                    "item": {
+                        "id": "MLA737887796",
+                        "title": "Bencina Para Encendedores  Zippo 125ml Fluido Original",
+                        "category_id": "MLA417913",
+                        "variation_id": null,
+                        "seller_custom_field": "1022",
+                        "global_price": null,
+                        "net_weight": null,
+                        "variation_attributes": [],
+                        "warranty": "Garant\u00eda de f\u00e1brica: 6 meses",
+                        "condition": "new",
+                        "seller_sku": "28410"
+                    },
+                    "quantity": 3,
+                    "unit_price": 4089,
+                    "full_unit_price": 4089,
+                    "currency_id": "ARS",
+                    "manufacturing_days": null,
+                    "picked_quantity": null,
+                    "requested_quantity": {
+                        "measure": "unit",
+                        "value": 3
+                    },
+                    "sale_fee": 1054.24,
+                    "listing_type_id": "gold_special",
+                    "base_exchange_rate": null,
+                    "base_currency_id": null,
+                    "bundle": null,
+                    "element_id": 1
+                }
+            ],
+            "date_last_updated": "2023-12-01T14:00:11+00:00",
+            "last_updated": "2023-12-01T10:00:11.000-04:00",
+            "comment": null,
+            "pack_id": null,
+            "coupon": {
+                "amount": 0,
+                "id": null
+            },
+            "shipping_cost": null,
+            "date_created": "2023-12-01T05:43:28.000-04:00",
+            "pickup_id": null,
+            "status_detail": null,
+            "tags": [
+                "paid",
+                "not_delivered"
+            ],
+            "buyer": {
+                "id": 1371155490,
+                "nickname": "BLANCOMATIAS20230509192354"
+            },
+            "seller": {
+                "id": 77581040,
+                "nickname": "TECNORIUM"
+            },
+            "total_amount": 12267,
+            "paid_amount": 12267,
+            "currency_id": "ARS",
+            "status": "paid",
+            "context": {
+                "application": null,
+                "product_id": null,
+                "channel": "marketplace",
+                "site": "MLA",
+                "flows": []
+            }
+        },
+        {
+            "payments": [
+                {
+                    "reason": "Turboventilador Liliana 20  Aspas Met\u00e1licas 100 Watts",
+                    "status_code": null,
+                    "total_paid_amount": 64799,
+                    "operation_type": "regular_payment",
+                    "transaction_amount": 64799,
+                    "transaction_amount_refunded": 0,
+                    "date_approved": "2023-12-01T02:57:21.000-04:00",
+                    "collector": {
+                        "id": 77581040
+                    },
+                    "coupon_id": null,
+                    "installments": 1,
+                    "authorization_code": null,
+                    "taxes_amount": 0,
+                    "id": 67929875186,
+                    "date_last_modified": "2023-12-01T02:58:32.000-04:00",
+                    "coupon_amount": 0,
+                    "available_actions": [
+                        "refund"
+                    ],
+                    "shipping_cost": 0,
+                    "installment_amount": null,
+                    "date_created": "2023-12-01T02:57:21.000-04:00",
+                    "activation_uri": null,
+                    "overpaid_amount": 0,
+                    "card_id": null,
+                    "status_detail": "accredited",
+                    "issuer_id": "2005",
+                    "payment_method_id": "account_money",
+                    "payment_type": "account_money",
+                    "deferred_period": null,
+                    "atm_transfer_reference": {
+                        "transaction_id": null,
+                        "company_id": null
+                    },
+                    "site_id": "MLA",
+                    "payer_id": 1296181378,
+                    "order_id": 2000007029295538,
+                    "currency_id": "ARS",
+                    "status": "approved",
+                    "transaction_order_id": null
+                }
+            ],
+            "fulfilled": null,
+            "taxes": {
+                "amount": null,
+                "currency_id": null,
+                "id": null
+            },
+            "order_request": {
+                "change": null,
+                "return": null
+            },
+            "expiration_date": "2023-12-29T02:57:22.000-04:00",
+            "feedback": {
+                "buyer": null,
+                "seller": null
+            },
+            "shipping": {
+                "id": 42857343396
+            },
+            "date_closed": "2023-12-01T02:57:22.000-04:00",
+            "id": 2000007029295538,
+            "manufacturing_ending_date": null,
+            "order_items": [
+                {
+                    "item": {
+                        "id": "MLA1394871811",
+                        "title": "Turboventilador Liliana 20  Aspas Met\u00e1licas 100 Watts",
+                        "category_id": "MLA1645",
+                        "variation_id": 180567779765,
+                        "seller_custom_field": "PRD-178407490",
+                        "global_price": null,
+                        "net_weight": null,
+                        "variation_attributes": [
+                            {
+                                "name": "Cantidad de aspas",
+                                "id": "BLADES_NUMBER",
+                                "value_id": "1000295",
+                                "value_name": "3"
+                            },
+                            {
+                                "name": "Material de las aspas",
+                                "id": "BLADES_MATERIAL",
+                                "value_id": "6366941",
+                                "value_name": "Metal"
+                            },
+                            {
+                                "name": "Color de las aspas",
+                                "id": "BLADES_COLOR",
+                                "value_id": "10459177",
+                                "value_name": "Plateado"
+                            },
+                            {
+                                "name": "Di\u00e1metro",
+                                "id": "DIAMETER",
+                                "value_id": "2676418",
+                                "value_name": "20 \""
+                            },
+                            {
+                                "name": "Color de la estructura",
+                                "id": "STRUCTURE_COLOR",
+                                "value_id": "283165",
+                                "value_name": "Gris"
+                            }
+                        ],
+                        "warranty": "Garant\u00eda de f\u00e1brica: 2 a\u00f1os",
+                        "condition": "new",
+                        "seller_sku": "VTFM20"
+                    },
+                    "quantity": 1,
+                    "unit_price": 64799,
+                    "full_unit_price": 64799,
+                    "currency_id": "ARS",
+                    "manufacturing_days": null,
+                    "picked_quantity": null,
+                    "requested_quantity": {
+                        "measure": "unit",
+                        "value": 1
+                    },
+                    "sale_fee": 9071.86,
+                    "listing_type_id": "gold_special",
+                    "base_exchange_rate": null,
+                    "base_currency_id": null,
+                    "bundle": null,
+                    "element_id": 1
+                }
+            ],
+            "date_last_updated": "2023-12-01T07:03:06+00:00",
+            "last_updated": "2023-12-01T02:58:32.000-04:00",
+            "comment": null,
+            "pack_id": 2000005111600657,
+            "coupon": {
+                "amount": 0,
+                "id": null
+            },
+            "shipping_cost": null,
+            "date_created": "2023-12-01T02:56:35.000-04:00",
+            "pickup_id": null,
+            "status_detail": null,
+            "tags": [
+                "pack_order",
+                "paid",
+                "not_delivered"
+            ],
+            "buyer": {
+                "id": 1296181378,
+                "nickname": "IFRANSUSANA20230126172102"
+            },
+            "seller": {
+                "id": 77581040,
+                "nickname": "TECNORIUM"
+            },
+            "total_amount": 64799,
+            "paid_amount": 64799,
+            "currency_id": "ARS",
+            "status": "paid",
+            "context": {
+                "application": null,
+                "product_id": null,
+                "channel": "marketplace",
+                "site": "MLA",
+                "flows": []
+            }
+        },
+        {
+            "payments": [
+                {
+                    "reason": "Disco Solido Interno Ssd Hikvision Desire 512gb Nvme M2 ",
+                    "status_code": null,
+                    "total_paid_amount": 46841.68,
+                    "operation_type": "regular_payment",
+                    "transaction_amount": 34246,
+                    "transaction_amount_refunded": 0,
+                    "date_approved": "2023-11-30T17:18:40.000-04:00",
+                    "collector": {
+                        "id": 77581040
+                    },
+                    "coupon_id": null,
+                    "installments": 3,
+                    "authorization_code": "395708",
+                    "taxes_amount": 0,
+                    "id": 67906380782,
+                    "date_last_modified": "2023-11-30T17:18:48.000-04:00",
+                    "coupon_amount": 0,
+                    "available_actions": [
+                        "refund"
+                    ],
+                    "shipping_cost": 0,
+                    "installment_amount": 15613.89,
+                    "date_created": "2023-11-30T17:18:37.000-04:00",
+                    "activation_uri": null,
+                    "overpaid_amount": 0,
+                    "card_id": 9300842562,
+                    "status_detail": "accredited",
+                    "issuer_id": "5",
+                    "payment_method_id": "visa",
+                    "payment_type": "credit_card",
+                    "deferred_period": null,
+                    "atm_transfer_reference": {
+                        "transaction_id": "981111115023942",
+                        "company_id": null
+                    },
+                    "site_id": "MLA",
+                    "payer_id": 433542785,
+                    "order_id": 2000007025875838,
+                    "currency_id": "ARS",
+                    "status": "approved",
+                    "transaction_order_id": null
+                }
+            ],
+            "fulfilled": null,
+            "taxes": {
+                "amount": null,
+                "currency_id": null,
+                "id": null
+            },
+            "order_request": {
+                "change": null,
+                "return": null
+            },
+            "expiration_date": "2023-12-28T17:18:40.000-04:00",
+            "feedback": {
+                "buyer": null,
+                "seller": null
+            },
+            "shipping": {
+                "id": 42855783391
+            },
+            "date_closed": "2023-11-30T17:18:40.000-04:00",
+            "id": 2000007025875838,
+            "manufacturing_ending_date": null,
+            "order_items": [
+                {
+                    "item": {
+                        "id": "MLA1361342401",
+                        "title": "Disco Solido Interno Ssd Hikvision Desire 512gb Nvme M2",
+                        "category_id": "MLA1672",
+                        "variation_id": null,
+                        "seller_custom_field": "3580",
+                        "global_price": null,
+                        "net_weight": null,
+                        "variation_attributes": [],
+                        "warranty": "Garant\u00eda de f\u00e1brica: 1 a\u00f1os",
+                        "condition": "new",
+                        "seller_sku": "HS-SSD-DESIRE/512G"
+                    },
+                    "quantity": 1,
+                    "unit_price": 34246,
+                    "full_unit_price": 34246,
+                    "currency_id": "ARS",
+                    "manufacturing_days": null,
+                    "picked_quantity": null,
+                    "requested_quantity": {
+                        "measure": "unit",
+                        "value": 1
+                    },
+                    "sale_fee": 5308.13,
+                    "listing_type_id": "gold_special",
+                    "base_exchange_rate": null,
+                    "base_currency_id": null,
+                    "bundle": null,
+                    "element_id": 1
+                }
+            ],
+            "date_last_updated": "2023-11-30T21:33:05+00:00",
+            "last_updated": "2023-11-30T17:20:13.000-04:00",
+            "comment": null,
+            "pack_id": null,
+            "coupon": {
+                "amount": 0,
+                "id": null
+            },
+            "shipping_cost": null,
+            "date_created": "2023-11-30T17:18:36.000-04:00",
+            "pickup_id": null,
+            "status_detail": null,
+            "tags": [
+                "catalog",
+                "paid",
+                "not_delivered"
+            ],
+            "buyer": {
+                "id": 433542785,
+                "nickname": "ALMALUCENAVERA"
+            },
+            "seller": {
+                "id": 77581040,
+                "nickname": "TECNORIUM"
+            },
+            "total_amount": 34246,
+            "paid_amount": 34246,
+            "currency_id": "ARS",
+            "status": "paid",
+            "context": {
+                "application": null,
+                "product_id": null,
+                "channel": "marketplace",
+                "site": "MLA",
+                "flows": [
+                    "catalog"
+                ]
+            }
+        },
+        {
+            "payments": [
+                {
+                    "reason": "Disco Solido Interno Ssd Hikvision Desire 512gb Nvme M2 ",
+                    "status_code": null,
+                    "total_paid_amount": 34246,
+                    "operation_type": "regular_payment",
+                    "transaction_amount": 34246,
+                    "transaction_amount_refunded": 0,
+                    "date_approved": "2023-11-30T16:22:21.000-04:00",
+                    "collector": {
+                        "id": 77581040
+                    },
+                    "coupon_id": null,
+                    "installments": 1,
+                    "authorization_code": null,
+                    "taxes_amount": 0,
+                    "id": 67896229846,
+                    "date_last_modified": "2023-11-30T16:24:36.000-04:00",
+                    "coupon_amount": 0,
+                    "available_actions": [
+                        "refund"
+                    ],
+                    "shipping_cost": 0,
+                    "installment_amount": null,
+                    "date_created": "2023-11-30T14:43:09.000-04:00",
+                    "activation_uri": "https://www.mercadolibre.com.ar/payments/67896229846/ticket?caller_id=57855766&payment_method_id=rapipago&payment_id=67896229846&payment_method_reference_id=10307504899&hash=493f3f54-2f30-4fea-981b-01a5becd4b50",
+                    "overpaid_amount": 0,
+                    "card_id": null,
+                    "status_detail": "accredited",
+                    "issuer_id": "2002",
+                    "payment_method_id": "rapipago",
+                    "payment_type": "ticket",
+                    "deferred_period": null,
+                    "atm_transfer_reference": {
+                        "transaction_id": "10307504899",
+                        "company_id": ""
+                    },
+                    "site_id": "MLA",
+                    "payer_id": 57855766,
+                    "order_id": 2000007024618692,
+                    "currency_id": "ARS",
+                    "status": "approved",
+                    "transaction_order_id": null
+                }
+            ],
+            "fulfilled": null,
+            "taxes": {
+                "amount": null,
+                "currency_id": null,
+                "id": null
+            },
+            "order_request": {
+                "change": null,
+                "return": null
+            },
+            "expiration_date": "2023-12-28T16:23:22.000-04:00",
+            "feedback": {
+                "buyer": null,
+                "seller": null
+            },
+            "shipping": {
+                "id": 42855339248
+            },
+            "date_closed": "2023-11-30T16:23:22.000-04:00",
+            "id": 2000007024618692,
+            "manufacturing_ending_date": null,
+            "order_items": [
+                {
+                    "item": {
+                        "id": "MLA1361342401",
+                        "title": "Disco Solido Interno Ssd Hikvision Desire 512gb Nvme M2",
+                        "category_id": "MLA1672",
+                        "variation_id": null,
+                        "seller_custom_field": "3580",
+                        "global_price": null,
+                        "net_weight": null,
+                        "variation_attributes": [],
+                        "warranty": "Garant\u00eda de f\u00e1brica: 1 a\u00f1os",
+                        "condition": "new",
+                        "seller_sku": "HS-SSD-DESIRE/512G"
+                    },
+                    "quantity": 1,
+                    "unit_price": 34246,
+                    "full_unit_price": 34246,
+                    "currency_id": "ARS",
+                    "manufacturing_days": null,
+                    "picked_quantity": null,
+                    "requested_quantity": {
+                        "measure": "unit",
+                        "value": 1
+                    },
+                    "sale_fee": 5308.13,
+                    "listing_type_id": "gold_special",
+                    "base_exchange_rate": null,
+                    "base_currency_id": null,
+                    "bundle": null,
+                    "element_id": 1
+                }
+            ],
+            "date_last_updated": "2023-11-30T20:33:05+00:00",
+            "last_updated": "2023-11-30T16:25:37.000-04:00",
+            "comment": null,
+            "pack_id": null,
+            "coupon": {
+                "amount": 0,
+                "id": null
+            },
+            "shipping_cost": null,
+            "date_created": "2023-11-30T14:43:08.000-04:00",
+            "pickup_id": null,
+            "status_detail": null,
+            "tags": [
+                "catalog",
+                "paid",
+                "not_delivered"
+            ],
+            "buyer": {
+                "id": 57855766,
+                "nickname": "RODRIGO_Z_79"
+            },
+            "seller": {
+                "id": 77581040,
+                "nickname": "TECNORIUM"
+            },
+            "total_amount": 34246,
+            "paid_amount": 34246,
+            "currency_id": "ARS",
+            "status": "paid",
+            "context": {
+                "application": null,
+                "product_id": null,
+                "channel": "marketplace",
+                "site": "MLA",
+                "flows": [
+                    "catalog"
+                ]
+            }
+        }
+    ],
+    "sort": {
+        "id": "date_desc",
+        "name": "Date descending"
+    },
+    "available_sorts": [
+        {
+            "id": "date_asc",
+            "name": "Date ascending"
+        }
+    ],
+    "filters": [],
+    "paging": {
+        "total": 374,
+        "offset": 6,
+        "limit": 4
+    },
+    "display": "partial"
+}

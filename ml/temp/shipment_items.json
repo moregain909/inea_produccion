@@ -1,0 +1,23 @@
+[
+    {
+        "manufacturing_time": null,
+        "domain_id": null,
+        "quantity": 1,
+        "item_id": "MLA1141209087",
+        "variation_id": null,
+        "dimensions_source": {
+            "origin": "similarity",
+            "id": "MLA1141209087__1"
+        },
+        "description": "Adaptador De Trípode Celestron Para Binoculares",
+        "order_id": "2000004798416370",
+        "user_product_id": null,
+        "sender_id": 77581040,
+        "dimensions": {
+            "width": 18,
+            "length": 20,
+            "weight": 120,
+            "height": 5
+        }
+    }
+]
