@@ -65,6 +65,7 @@ class MlPrice:
     pass
 
 
+
 # Trae JSON con info detallada de una publicación de ML
 #! DEPRECANDO
 def get_ml_item_details_json(item_id=None, item_object=None, token=None, client=None, store=None):
@@ -131,6 +132,7 @@ def get_ml_item_details_json(item_id=None, item_object=None, token=None, client=
 
     return j
 
+"""
 # Parsea JSON de publicación de ML y devuelve un objeto MlItem
 #! DEPRECANDO
 def parse_ml_item_details_json(item_json=None, store=None, **fields):
@@ -176,6 +178,7 @@ def get_ml_item_details(item_id=None, item_object=None, token=None, client=None,
     item = parse_ml_item_details_json(item_json=json, **fields)
     
     return item
+"""
 
 if __name__ == "__main__":
     pass
