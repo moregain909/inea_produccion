@@ -24,6 +24,7 @@ data_dir = os.path.join(path2root, "data")
 sys.path.append(data_dir)
 
 from data.data_helpers import Base, create_tables, db_connection
+from precios_mg_data_helpers import CostoMG, ItemMG, DisponibilidadStock
 
 #   Loads env db constants
 from precios_mg_config import PRODUCCION_MYSQL_USER, PRODUCCION_MYSQL_PASS, PRODUCCION_MYSQL_HOST, PRODUCCION_MYSQL_PORT, PRODUCCION_DB, \
@@ -31,119 +32,120 @@ from precios_mg_config import PRODUCCION_MYSQL_USER, PRODUCCION_MYSQL_PASS, PROD
 from sqlalchemy.orm import relationship
 
 
-#   Tablas con info de MG para database inea
+#!   Clases que definen tablas con info de MG para database inea
+#!   CostoMG, ItemMG, DisponibilidadStock
+#!   SE MOVIERON A precios_mg_data_helpers.py 
+#!   IMPORTAR DESDE AHÍ
 
-class ItemMG(Base):
-    """Objeto que representa un item de la tabla productos_mg de la base de datos inea
-    """
+#
+#class ItemMG(Base):
+#    """Objeto que representa un item de la tabla productos_mg de la base de datos inea
+#    """
+#
+#    __tablename__ = "productos_mg"
+#
+#    #item_id = Column(Integer, primary_key=True, autoincrement=True)
+#    #sku = Column(String (100), index=True, unique=True, nullable=False)
+#    sku = Column(String (100), primary_key=True, index=True)
+#    item_date = Column(DateTime, default=func.now(), nullable=False)
+#    nombre = Column(String (250))
+#    marca = Column(String (100))
+#    categoria = Column(String (100))
+#    cod_cat = Column(String (100))
+#    iva = Column(DECIMAL(precision=12, scale=3))
+#    ean = Column(String (100))
+#
+#    def __init__(self, item_date, sku, nombre, marca, categoria, cod_cat, iva, ean):
+#        self.item_date = item_date
+#        self.sku = sku
+#        self.nombre = nombre
+#        self.marca = marca
+#        self.categoria = categoria
+#        self.cod_cat = cod_cat
+#        self.iva = iva
+#        self.ean = ean
+#
+#    # Define the one-to-many relationship
+#    costos = relationship("CostoMG", back_populates="itemmg")
+#
+#    disponibilidad_stock = relationship("DisponibilidadStock", back_populates="itemmg")
+#
+#    def __repr__(self) -> str:
+#        return f'{self.sku} {self.iva} {self.marca} {self.nombre}'
+#    
+#    def __str__(self) -> str:
+#        return f'{self.sku} {self.marca} {self.nombre}'
+#    
+#
+#class CostoMG(Base):
+#    """Objeto que representa un item de la tabla costos_mg de la base de datos inea
+#    """
+#
+#    __tablename__ = "costos_mg"
+#
+#    costo_id = Column(Integer, primary_key=True, autoincrement=True)
+#    costo_date = Column(DateTime, default=func.now(), nullable=False)
+#    sku = Column(String (100), ForeignKey("productos_mg.sku"), nullable=False)
+#    costo = Column(DECIMAL(precision=12, scale=2))
+#
+#    # Establish the back-reference from CostoMG to ItemMG
+#    itemmg = relationship("ItemMG", back_populates="costos")    
+#
+#    def __init__(self, costo_date, sku, costo):
+#        self.costo_date = costo_date
+#        self.sku = sku
+#        self.costo = costo
+#
+#    def __repr__(self) -> str:
+#        return f'{self.costo_id} {self.costo_date} {self.sku} {self.costo}'
+#    
+#    def __str__(self):
+#        return f'{self.costo_date} {self.sku} {self.costo}'
+#
+#
+#class DisponibilidadStock(Base):
+#
+#    __tablename__ = "disponibilidad_stock_mg"
+#
+#    disponibilidad_id = Column(Integer, primary_key=True, autoincrement=True)
+#    timestamp = Column(DateTime, default=func.now(), nullable=False)
+#    sku = Column(String (100), ForeignKey("productos_mg.sku", name="fk_disponibilidad_stock_sku"), nullable=False)
+#    stock_disponible = Column(Integer)
+#
+#    itemmg = relationship("ItemMG", back_populates="disponibilidad_stock")
+#
+#    def __init__(self, timestamp: datetime, sku: str, stock_disponible: int):
+#
+#        # Valida presencia de valores de entrada:
+#        if None in [timestamp, sku, stock_disponible]:
+#            raise ValueError("timestamp, sku y stock_disponible son requeridos")
+#
+#        # Valida tipos de valores de entrada:
+#        #   timestamp: datetime
+#        #   sku: str
+#        #   stock_disponible: int
+#        if not isinstance(timestamp, datetime):
+#            raise TypeError("timestamp tiene que ser datetime")
+#        if not isinstance(sku, str):
+#            raise TypeError("sku tiene que ser string")
+#        if not isinstance(stock_disponible, int):
+#            raise TypeError("stock_disponible tiene que ser int")  
+#
+#        self.timestamp = timestamp
+#        self.sku = sku
+#        self.stock_disponible = stock_disponible
+#
+#    def __repr__(self) -> str:
+#        return f'{self.sku} {self.stock_disponible}'
+#    
+#    def is_available(self) -> bool:
+#        """Confirma si el sku (objeto DisponibilidadStock) tiene stock disponible
+#        """
+#        if self.stock_disponible > 0:
+#            return True
+#        return False
+#
 
-    __tablename__ = "productos_mg"
-
-    #item_id = Column(Integer, primary_key=True, autoincrement=True)
-    #sku = Column(String (100), index=True, unique=True, nullable=False)
-    sku = Column(String (100), primary_key=True, index=True)
-    item_date = Column(DateTime, default=func.now(), nullable=False)
-    nombre = Column(String (250))
-    marca = Column(String (100))
-    categoria = Column(String (100))
-    cod_cat = Column(String (100))
-    iva = Column(DECIMAL(precision=12, scale=3))
-    ean = Column(String (100))
-
-    def __init__(self, item_date, sku, nombre, marca, categoria, cod_cat, iva, ean):
-        self.item_date = item_date
-        self.sku = sku
-        self.nombre = nombre
-        self.marca = marca
-        self.categoria = categoria
-        self.cod_cat = cod_cat
-        self.iva = iva
-        self.ean = ean
-
-    # Define the one-to-many relationship
-    costos = relationship("CostoMG", back_populates="itemmg")
-
-    disponibilidad_stock = relationship("DisponibilidadStock", back_populates="itemmg")
-
-    def __repr__(self) -> str:
-        return f'{self.sku} {self.iva} {self.marca} {self.nombre}'
-    
-    def __str__(self) -> str:
-        return f'{self.sku} {self.marca} {self.nombre}'
-    
-
-class CostoMG(Base):
-    """Objeto que representa un item de la tabla costos_mg de la base de datos inea
-    """
-
-    __tablename__ = "costos_mg"
-
-    costo_id = Column(Integer, primary_key=True, autoincrement=True)
-    costo_date = Column(DateTime, default=func.now(), nullable=False)
-    sku = Column(String (100), ForeignKey("productos_mg.sku"), nullable=False)
-    costo = Column(DECIMAL(precision=12, scale=2))
-
-    # Establish the back-reference from CostoMG to ItemMG
-    itemmg = relationship("ItemMG", back_populates="costos")    
-
-    def __init__(self, costo_date, sku, costo):
-        self.costo_date = costo_date
-        self.sku = sku
-        self.costo = costo
-
-    def __repr__(self) -> str:
-        return f'{self.costo_id} {self.costo_date} {self.sku} {self.costo}'
-    
-    def __str__(self):
-        return f'{self.costo_date} {self.sku} {self.costo}'
-
-
-
-class DisponibilidadStock(Base):
-
-    __tablename__ = "disponibilidad_stock_mg"
-
-    disponibilidad_id = Column(Integer, primary_key=True, autoincrement=True)
-    timestamp = Column(DateTime, default=func.now(), nullable=False)
-    sku = Column(String (100), ForeignKey("productos_mg.sku", name="fk_disponibilidad_stock_sku"), nullable=False)
-    stock_disponible = Column(Integer)
-
-    itemmg = relationship("ItemMG", back_populates="disponibilidad_stock")
-
-    def __init__(self, timestamp: datetime, sku: str, stock_disponible: int):
-
-        # Valida presencia de valores de entrada:
-        if None in [timestamp, sku, stock_disponible]:
-            raise ValueError("timestamp, sku y stock_disponible son requeridos")
-
-        # Valida tipos de valores de entrada:
-        #   timestamp: datetime
-        #   sku: str
-        #   stock_disponible: int
-        if not isinstance(timestamp, datetime):
-            raise TypeError("timestamp tiene que ser datetime")
-        if not isinstance(sku, str):
-            raise TypeError("sku tiene que ser string")
-        if not isinstance(stock_disponible, int):
-            raise TypeError("stock_disponible tiene que ser int")  
-
-        self.timestamp = timestamp
-        self.sku = sku
-        self.stock_disponible = stock_disponible
-
-    def __repr__(self) -> str:
-        return f'{self.sku} {self.stock_disponible}'
-    
-    def is_available(self) -> bool:
-        """Confirma si el sku (objeto DisponibilidadStock) tiene stock disponible
-        """
-        if self.stock_disponible > 0:
-            return True
-        return False
-
-# TODO: Crear clase FacturasMG para manejar la tabla facturas_mg de la base de datos inea
-#class FacturasMG(Base):
-#    pass
 
 @dataclass
 class ProductoMG:
@@ -402,6 +404,20 @@ def parse_mgcat(xml_response: str, **kwargs: Dict[str, bool]) -> List[ProductoMG
 
     # crea lista con el catálogo de todos los productos MG a partir del objeto soup
     cat_mg = []
+
+    # Si no se especifican argumentos puntuales, trae todos los posibles
+    if not kwargs:
+        kwargs = {"timestamp": True, 
+                  "sku": True, 
+                  "nombre": True, 
+                  "marca": True, 
+                  "categoria": True, 
+                  "cod_cat": True, 
+                  "costo": True, 
+                  "stock": True, 
+                  "iva": True, 
+                  "ean": True
+                  }
 
     for i in range(0, len(skus)):
                 
@@ -677,7 +693,7 @@ def mg_get_response_error(mg_server_result_code: str) -> Union[str, None]:
     else:
         return None
 
-
+#print(locals())
 
 if __name__ == "__main__":
     """
@@ -705,7 +721,8 @@ if __name__ == "__main__":
     connection.close()
     """
     
-    print(parse_mgcat(mg_cat_xml()))
+    #print(parse_mgcat(mg_cat_xml()))
+
 
     #cat_response = mg_cat_xml()
     #mg_get_response_error("100")
