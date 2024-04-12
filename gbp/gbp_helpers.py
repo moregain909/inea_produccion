@@ -42,6 +42,8 @@ def get_schema_idxs(spreadsheet_schema):
     return schema_col_idxs
     
 
+# Clases que representan información de GBP
+
 class GbpDataSource:
     """ Fuente de datos de GBP
     """
@@ -127,7 +129,7 @@ class GbpExcelDataSource(GbpDataSource):
 
 
     def set_clone_fields(self, original_field, clone_field):
-        """ Setea el atributo field_name con el valor clone_field en cada item de self.items
+        """ Setea el atributo clone_field con el valor original_field en cada item de self.items
         """
 
         # Valida que self.items no esté vacío, y si lo está, obtiene los items
@@ -188,10 +190,10 @@ class GbpExcelDataSource(GbpDataSource):
         #        #logging.debug(f'Comparando {field_name_value} con {reference_attribute}')
         #        if field_name_value == reference_attribute:
         #            setattr(item, id_field_name, reference_id)
-        #            #logging.info(f'Agregado ID {reference_id} a {id_field_name} para {field_name} = {field_name_value}')
-    
+        #            #logging.info(f'Agregado ID {reference_id} a {id_field_name} para {field_name} = {field_name_value}')                
+        
 
-    def get_data(self, filename = None, path_to_data_dir = None, spreadsheet_schema = None, row_object = None, *fields):
+    def get_data(self, filename = None, path_to_data_dir = None, spreadsheet_schema = None, item = None, row_object = None, *fields):
         """ Lee el archivo de planilla y carga las filas en la lista self.items
         """
 
@@ -215,6 +217,7 @@ class GbpExcelDataSource(GbpDataSource):
                 return False                
             else:
                 spreadsheet_schema = self._spreadsheet_schema
+                #logging.debug(f'Schema: {vars(spreadsheet_schema)}')
 
         if not row_object:
             if not self._row_object:
@@ -243,11 +246,6 @@ class GbpExcelDataSource(GbpDataSource):
         wb = load_workbook(filename = file_path)
         sheet = wb.active
 
-        #def get_field_name(field_id):
-        #    for k, v in spreadsheet_schema.__dict__.items():
-        #        if v[0] == field_id:
-        #            return k
-
         # Retrieves each spreadhseet row              
 
         #schema_col_idxs = [col[0] for attr, col in spreadsheet_schema.__dict__.items() if isinstance(col, tuple)]
@@ -257,25 +255,21 @@ class GbpExcelDataSource(GbpDataSource):
 
         for row in sheet.iter_rows(min_row=2):
             item = row_object
-            item.get_row_data(row, spreadsheet_schema)
-        
-        
-            #for idx, cell in enumerate(row):
-            #    #logging.debug(f"col: {idx} ({type(idx)}), cell: {cell.value}")
-            #    if idx in schema_col_idxs:
-            #        field_name = get_field_name(idx, spreadsheet_schema)
-            #        setattr(item, field_name, cell.value)
-            #        #logging.info(f'Agregando {field_name} con valor {cell.value}')
-            #    #else:
-            #    #    logging.debug(f"col idx: {idx} ({type(idx)}) not in {schema_col_idxs}")
-                
+            item.get_row_data(row, spreadsheet_schema=spreadsheet_schema, sheet=sheet)
+            item.gbp_table = self._gbp_table
 
+        
             # Appends item to item list
             self.items.append(deepcopy(item))
             #logging.info(f'Agregando item: {item}')
-            
+
+        # Sets gbp_table attribute for GbpSeveralTablesItems
+        if self._row_object == GbpSeveralTablesItem():
+            for item in self.items:
+                item.gbp_table = self.gbp_table
+
         #self.show_data()
-        logging.info(f'Obtenidos {len(self.items)} items para {self.__class__.__name__}')
+        logging.info(f'Encontrados {len(self.items)} items para {self.__class__.__name__} de la planilla {filename}')
 
         return self.items
     
@@ -284,8 +278,30 @@ class GbpExcelDataSource(GbpDataSource):
         pass
 
 
+@dataclass
+class GbpItem:
+
+    def get_row_data(self, row, spreadsheet_schema = None, sheet = None):
+        # Retrieves a spreadhseet row              
+
+        for idx, cell in enumerate(row):
+            #logging.debug(f"Row cells: idx {idx} cell value {cell.value}")
+            #logging.debug(f'{ListasPreciosGbpSchema.__dict__.items()}')
+            spreadsheet_schema_class = type(spreadsheet_schema)
+            schema_col_idxs = [col[0] for attr, col in spreadsheet_schema_class.__dict__.items() if isinstance(col, tuple)]
+            #logging.debug(f'schema_col_idxs: {schema_col_idxs}')
+            if idx in schema_col_idxs:
+                field_name = get_field_name(idx, spreadsheet_schema_class)
+                #logging.info(f'Got this field names: {field_name} - {cell.value}')
+                setattr(self, field_name, cell.value)
+                #logging.debug(f'setting attr: {field_name} {cell.value}')
+        #logging.debug(f'spreadshet_schema: {spreadsheet_schema.}')
+        
+        #logging.debug(" ")
+                
+            
 @dataclass    
-class GbpMlItem:
+class GbpMlItem(GbpItem):
     """ Clase que representa una publicación de ML en GBP
     """
     
@@ -315,12 +331,33 @@ class GbpMlItem:
 
 
 @dataclass
-class ListaPreciosGBP:
+class ListaPreciosGBP(GbpItem):
     """ Clase que representa una lista de precios de GBP
     """
-    name: str
-    desc: str
-    id_gbp: int
+    gbp_table: str = "lista_precios"
+    name: str = field(default=None, repr=True)
+    extra: str = field(default=None, repr=True)
+    id_gbp: int = field(default=None, repr=True)
+
+
+@dataclass
+class ListaCostoGBP(GbpItem):
+    """ Clase que representa una lista de costos de GBP
+    """
+    gbp_table: str = "lista_costos"
+    name: str = field(default=None, repr=True)
+    extra: str = field(default=None, repr=True)
+    id_gbp: int = field(default=None, repr=True)
+
+
+@dataclass
+class GbpSeveralTablesItem(GbpItem):
+    """ Clase que representa un ítem de varias tablas de GBP para usarse en la tabla gbp_several_tables
+    """    
+    name: str = field(default=None, repr=True)
+    extra: str = field(default=None, repr=True)
+    id_gbp: int = field(default=None, repr=True)
+    gbp_table: str = field(default=None, repr=True)
 
 
 @dataclass
@@ -338,6 +375,7 @@ class StoreGBP:
     name: str
     id_gbp: int
     id_ml: str
+
 
 class PublisGbpSchema(ExcelSchema):
     """ Esquema de planilla de publicaciones de ML en GBP
@@ -362,6 +400,7 @@ class PublisGbpSchema(ExcelSchema):
         attribute_names = list(PublisGbpSchema.__dict__.keys())
         return attribute_names
 
+
 class ImportPublisGBP(ExcelSchema):
     """ Formato atributos:\n
     Atributos de nombres:\n
@@ -381,7 +420,176 @@ class ImportPublisGBP(ExcelSchema):
     price_list_id = (4, "ID de Lista de Precios", 20)
     warehouse_id = (5, "ID de Depósito", 20)
 
+
+class ListasPreciosGbpSchema(ExcelSchema):
+    """ Esquema de planilla de Listas de Precios de GBP
+    attributte (data reference) = excel column
+    """
+    _sheet_name = "Table"
+    _spreadsheet_name = "gbp_listasprecios.xlsx"  
+
+    gbp_id = (14, "ID", 15)
+    #name = (4, "Descr&#161;pcion", 20)
+    name = (4, "Descripcion", 20)
+
+    @classmethod
+    def get_fields(cls):
+        """ Devuelve una lista con los campos definidos en el schema.
+        """
+        attribute_names = list(ListasPreciosGbpSchema.__dict__.keys())
+        return attribute_names
+
+
+class ListasCostosGbpSchema(ExcelSchema):
+    """ Esquema de planilla de Listas de Costos de GBP
+    attributte (data reference) = excel column
+    """
+    _sheet_name = "Table"
+    _spreadsheet_name = "gbp_listascostos.xlsx"  
+
+    gbp_id = (12, "ID", 15)
+    #name = (4, "Descr&#161;pcion", 20)
+    name = (4, "Descripcion", 20)
+
+    @classmethod
+    def get_fields(cls):
+        """ Devuelve una lista con los campos definidos en el schema.
+        """
+        attribute_names = list(ListasCostosGbpSchema.__dict__.keys())
+        return attribute_names
     
+
+class DepositosGbpSchema(ExcelSchema):
+    """ Esquema de planilla de Depositos de GBP
+    attributte (data reference) = excel column
+    """
+    _sheet_name = "Table"
+    _spreadsheet_name = "gbp_depositos.xlsx"  
+
+    gbp_id = (4, "ID", 15)
+    name = (3, "Descripcion", 20)
+
+
+    @classmethod
+    def get_fields(cls):
+        """ Devuelve una lista con los campos definidos en el schema.
+        """
+        attribute_names = list(DepositosGbpSchema.__dict__.keys())
+        return attribute_names
+    
+
+class CategoriasGbpSchema(ExcelSchema):
+    """ Esquema de planilla de Categorias de GBP
+    attributte (data reference) = excel column
+    """
+    _sheet_name = "Table"
+    _spreadsheet_name = "gbp_categorias.xlsx"  
+
+    gbp_id = (9, "ID", 15)
+    name = (3, "Descripcion", 20)
+
+
+    @classmethod
+    def get_fields(cls):
+        """ Devuelve una lista con los campos definidos en el schema.
+        """
+        attribute_names = list(CategoriasGbpSchema.__dict__.keys())
+        return attribute_names
+
+
+class SubcategoriasGbpSchema(ExcelSchema):
+    """ Esquema de planilla de SubCategorias de GBP
+    attributte (data reference) = excel column
+    """
+    _sheet_name = "Table"
+    _spreadsheet_name = "gbp_subcategorias.xlsx"  
+
+    gbp_id = (10, "ID", 15)
+    name = (3, "Categorias", 20)
+    extra = (4, "Descripcion", 20)
+
+
+    @classmethod
+    def get_fields(cls):
+        """ Devuelve una lista con los campos definidos en el schema.
+        """
+        attribute_names = list(SubcategoriasGbpSchema.__dict__.keys())
+        return attribute_names
+    
+
+class SubcategoriasAuxiliaresGbpSchema(ExcelSchema):
+    """ Esquema de planilla de SubCategorias Auxiliares de GBP
+    attributte (data reference) = excel column
+    """
+    _sheet_name = "Table"
+    _spreadsheet_name = "gbp_subcategorias_auxiliares.xlsx"  
+
+    gbp_id = (10, "ID", 15)
+    name = (3, "Descripcion", 20)
+
+
+    @classmethod
+    def get_fields(cls):
+        """ Devuelve una lista con los campos definidos en el schema.
+        """
+        attribute_names = list(SubcategoriasAuxiliaresGbpSchema.__dict__.keys())
+
+
+class MarcasGbpSchema(ExcelSchema):
+    """ Esquema de planilla de Marcas de GBP
+    attributte (data reference) = excel column
+    """
+    _sheet_name = "Table"
+    _spreadsheet_name = "gbp_marcas.xlsx"  
+
+    gbp_id = (7, "ID", 15)
+    name = (2, "Descripcion", 20)
+
+
+    @classmethod
+    def get_fields(cls):
+        """ Devuelve una lista con los campos definidos en el schema.
+        """
+        attribute_names = list(MarcasGbpSchema.__dict__.keys())
+
+
+class MonedasGbpSchema(ExcelSchema):
+    """ Esquema de planilla de Monedas de GBP
+    attributte (data reference) = excel column
+    """
+    _sheet_name = "Table"
+    _spreadsheet_name = "gbp_monedas.xlsx"  
+
+    gbp_id = (5, "ID", 15)
+    name = (2, "Moneda", 20)
+
+
+    @classmethod
+    def get_fields(cls):
+        """ Devuelve una lista con los campos definidos en el schema.
+        """
+        attribute_names = list(MonedasGbpSchema.__dict__.keys())
+
+
+class TiendasGbpSchema(ExcelSchema):
+    """ Esquema de planilla de Tiendas de GBP
+    attributte (data reference) = excel column
+    """
+    _sheet_name = "Table"
+    _spreadsheet_name = "gbp_tiendas.xlsx"  
+
+    gbp_id = (33, "ID", 15)
+    name = (6, "Descripcion", 20)
+    extra  = (9, "MercadoLibre©:  ID de Usuario", 20)    
+
+
+    @classmethod
+    def get_fields(cls):
+        """ Devuelve una lista con los campos definidos en el schema.
+        """
+        attribute_names = list(MonedasGbpSchema.__dict__.keys())
+
+
 class ExcelPublisGbp(GbpExcelDataSource):
     """ Planilla Excel con publicaciones de ML en GBP
     """
@@ -454,6 +662,114 @@ class ExcelPublisGbp(GbpExcelDataSource):
         return True
             
 
+class ExcelListasPreciosGbp(GbpExcelDataSource):
+    """ Planilla Excel con Listas de Precios de GBP
+    """
+
+    def __init__(self):
+        self.items = []
+
+    _spreadsheet_schema = ListasPreciosGbpSchema()
+    _row_object = GbpSeveralTablesItem()
+    _gbp_table = "listas_precios" 
+
+
+class ExcelListasCostosGbp(GbpExcelDataSource):
+    """ Planilla Excel con Listas de Costos de GBP
+    """
+
+    def __init__(self):
+        self.items = []
+
+    _spreadsheet_schema = ListasCostosGbpSchema()
+    _row_object = GbpSeveralTablesItem()
+    _gbp_table = "listas_costos" 
+
+
+class ExcelDepositosGbp(GbpExcelDataSource):
+    """ Planilla Excel con Depósitos de GBP
+    """
+
+    def __init__(self):
+        self.items = []
+
+    _spreadsheet_schema = DepositosGbpSchema()
+    _row_object = GbpSeveralTablesItem()
+    _gbp_table = "depositos" 
+
+
+class ExcelCategoriasGbp(GbpExcelDataSource):
+    """ Planilla Excel con Categorías de GBP
+    """
+
+    def __init__(self):
+        self.items = []
+
+    _spreadsheet_schema = CategoriasGbpSchema()
+    _row_object = GbpSeveralTablesItem()
+    _gbp_table = "categorias" 
+
+
+class ExcelSubcategoriasGbp(GbpExcelDataSource):
+    """ Planilla Excel con SubCategorías de GBP
+    """
+
+    def __init__(self):
+        self.items = []
+
+    _spreadsheet_schema = SubcategoriasGbpSchema()
+    _row_object = GbpSeveralTablesItem()
+    _gbp_table = "subcategorias" 
+
+
+class ExcelSubcategoriasAuxiliaresGbp(GbpExcelDataSource):
+    """ Planilla Excel con SubCategorías Auxiliares de GBP
+    """
+
+    def __init__(self):
+        self.items = []
+
+    _spreadsheet_schema = SubcategoriasAuxiliaresGbpSchema()
+    _row_object = GbpSeveralTablesItem()
+    _gbp_table = "subcategorias_auxiliares" 
+
+
+class ExcelMarcasGbp(GbpExcelDataSource):
+    """ Planilla Excel con Marcas de GBP
+    """
+
+    def __init__(self):
+        self.items = []
+
+    _spreadsheet_schema = MarcasGbpSchema()
+    _row_object = GbpSeveralTablesItem()
+    _gbp_table = "marcas" 
+
+
+class ExcelMonedasGbp(GbpExcelDataSource):
+    """ Planilla Excel con Monedas de GBP
+    """
+
+    def __init__(self):
+        self.items = []
+
+    _spreadsheet_schema = MonedasGbpSchema()
+    _row_object = GbpSeveralTablesItem()
+    _gbp_table = "monedas" 
+
+
+class ExcelTiendasGbp(GbpExcelDataSource):
+    """ Planilla Excel con Tiendas de GBP
+    """
+
+    def __init__(self):
+        self.items = []
+
+    _spreadsheet_schema = TiendasGbpSchema()
+    _row_object = GbpSeveralTablesItem()
+    _gbp_table = "tiendas" 
+
+
 class GbpSkuMlItem(Base):
     """ Clase que representa un registro de la tabla gbp_sku_ml_item, que almacena los skus que contiene cada publi ML
     """
@@ -510,6 +826,49 @@ class GbpSkuMlItem(Base):
             return False
 
 
+class GbpSeveralTables_DbItem(Base):
+    """ Clase que representa un registro de la tabla gbp_several_tables, que almacena data de distintas tablas de GBP:\n
+    Lista de precios\n
+    Lista de costos\n
+    Depósitos\n
+    Categorias\n
+    Subcategorías\n
+    Subcategoria Auxiliar\n
+    Marcas\n
+    Monedas\n
+    Tiendas ML\n
+    """
+
+    __tablename__ = "gbp_several_tables"
+
+    db_id = Column(Integer, primary_key=True, autoincrement=True, index=True)
+    gbp_table = Column(String (50))
+    gbp_id = Column(String (20))
+    name = Column(String (100))
+    extra = Column(String (100))
+
+    def __init__(self, **kwargs):
+        
+        if kwargs:
+            for k, v in kwargs.items():
+                setattr(self, k, v)    
+
+    def __repr__(self):
+        return f"db_id: {self.db_id}, table: {self.gbp_table}, gbp_id: {self.gbp_id}, name: {self.name}, extra: {self.extra}"
+    
+    def is_on_db(self, session):
+        
+        item_on_db = session.query(GbpSeveralTables_DbItem).filter(GbpSeveralTables_DbItem.gbp_id == self.gbp_id, GbpSeveralTables_DbItem.gbp_table == self.gbp_table).first()
+        
+        if item_on_db:
+            logging.debug(f'{self.name} gbp_id {self.gbp_id} in on db already')
+            return True
+        logging.debug(f'{self.name} gbp_id {self.gbp_id} not in on db')
+        return False
+    
+
+
+
 class Tables:
     """ Mapa de tablas de la base de datos con sus respectivas clases (SQLAlchemy)
     """
@@ -517,6 +876,7 @@ class Tables:
     #disponibilidad_stock_mg = DisponibilidadStock()
     #productos_mg = ItemMG()
     gbp_sku_ml_item = GbpSkuMlItem()
+    
     
 
 class Spreadsheets:
@@ -615,11 +975,11 @@ def create_excel(items: List[Type], spreadsheet_type: Type, filename: str = None
     return True
 
 
-def get_list_id_from_desc(lista_de_precios_gbp, desc):
+def get_list_id_from_desc(lista_de_precios_gbp, name):
     """ Función que devuelve el id de una lista de precios de GBP a partir de su descripción
     """
     for lista in lista_de_precios_gbp:
-        if lista.desc == desc:
+        if lista.extra == name:
             return lista.id_gbp
 
     return None
@@ -637,12 +997,12 @@ def get_warehouse_id_from_name(depositos_gbp, name):
 
 # DATA
 
-listas_de_precios_gbp = [ListaPreciosGBP(name="ml_clasica", desc="ML Clásica",id_gbp=1),
-                         ListaPreciosGBP(name="ml_premium", desc="ML Premium",id_gbp=5),
-                         ListaPreciosGBP(name="mg_tecnorium_clasica", desc="MG Tecnorium Clásica",id_gbp=10),
-                         ListaPreciosGBP(name="mg_tecnorium_premium", desc="MG Tecnorium Premium",id_gbp=12),
-                         ListaPreciosGBP(name="mg_lenovo_clasica", desc="MG Lenovo Clásica",id_gbp=11),
-                         ListaPreciosGBP(name="mg_lenovo_premium", desc="MG Lenovo Premium",id_gbp=13)]
+listas_de_precios_gbp = [ListaPreciosGBP(extra="ml_clasica", name="ML Clásica",id_gbp=1),
+                         ListaPreciosGBP(extra="ml_premium", name="ML Premium",id_gbp=5),
+                         ListaPreciosGBP(extra="mg_tecnorium_clasica", name="MG Tecnorium Clásica",id_gbp=10),
+                         ListaPreciosGBP(extra="mg_tecnorium_premium", name="MG Tecnorium Premium",id_gbp=12),
+                         ListaPreciosGBP(extra="mg_lenovo_clasica", name="MG Lenovo Clásica",id_gbp=11),
+                         ListaPreciosGBP(extra="mg_lenovo_premium", name="MG Lenovo Premium",id_gbp=13)]
 
 depositos_gbp = [GBPWarehouse(name="Perón", id_gbp=1)]
 
@@ -655,7 +1015,7 @@ tiendas_gbp = [StoreGBP(name="Tecnorium", id_gbp=1, id_ml="77581040"),
 
 if __name__ == "__main__":
     
-
+    """
     database = Database(db_location = "desarrollo")
 
     #   Create database session
@@ -682,7 +1042,7 @@ if __name__ == "__main__":
 
         
     database.connection.close()
-    
+    """    
 
 
     
