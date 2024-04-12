@@ -1,5 +1,6 @@
 import logging
 
+
 ##  ACTUALIZACION DE TARIFAS DEL SISTEMA DE ENVIOS EN NOTION
 
 NUEVO_TARIFARIO = {
@@ -14,6 +15,8 @@ NUEVO_TARIFARIO = {
     }
 }
 
+#   ML24A-ENERO
+#   FA24A-ENERO
 
 #   EN ZONAS TARIFARIAS AGREGAR COLUMNAS CON TARIFARIOS NUEVOS 
     #   Ej de nombre ML23A-ENERO, ML23B-MARZO, ML24A-FEBRERO, FA23A-ENERO, etc
@@ -21,13 +24,16 @@ NUEVO_TARIFARIO = {
 
 #   En LOCALIDADES agregar tarifas nuevas:
     #   Agregar columna tipo "Rollup" Relation "AMBA" Calculate "Sum" apuntando Property al tarifario nuevo en ZONAS TARIFARIAS y con Property Name el mismo del tarifario
-    #   Agregar columna tipo "Formula" apuntando a la propiedad Rollup que creamos anteriormente. El "Property Name" agrega "Formula" al nombre original. Ej: "Formula FA23A-ENERO". El Number Format de la Formula es "Argentine peso"
+    #   Agregar columna tipo "Formula" apuntando a la propiedad Rollup que creamos anteriormente. El "Property Name" agrega "Formula" al nombre original. Ej: "Formula FA23A-ENERO". 
+    #       El Number Format de la Formula es "Argentine peso"
 
 #   En ENVIOS FLEX
-    #   En columna TARIFARIO agregar opciones para los tarifarios nuevos en GRIS CLARO. El día que entran en VIGENCIA los nuevos tarifarios, se les pone color gris a todos los demás, y COLOR a los nuevos.
+    #   En columna TARIFARIO agregar opciones para los tarifarios nuevos en GRIS CLARO. 
+    #   El día que entran en VIGENCIA los nuevos tarifarios, se les pone color gris a todos los demás, y COLOR a los nuevos.
 
     #   Agregar columna con rollup "Rollup" Relation LOCALIDAD apuntando Property la FORMULA del TARIFARIO NUEVO con opción Calculate "Sum"
-    #       Si se copia la propiedad de la versión anterior del mismo tarifario, ya la crea con la RELACION. Sólo resta renombrar la propiedad, editar la PROPIEDAD relacionada para apuntarla a la fórmula correcta, y confirmar la opción CALCULATE > SUM.
+    #       Si se copia la propiedad de la versión anterior del mismo tarifario, ya la crea con la RELACION. 
+    #       Sólo resta renombrar la propiedad, editar la PROPIEDAD relacionada para apuntarla a la fórmula correcta, y confirmar la opción CALCULATE > SUM.
 
     #   Editar la Fórmula de la columna IMPORTE agregando condiciones para los nuevos tarifarios.
     #       Ej, si se agrega el nuevo tarifario "MELI 2023 F-NOV" que toma el Rollup "ML23F", la fórmula pasaría de esto:
@@ -84,12 +90,12 @@ if(prop("Tarifario") == "MELI 2023 B", prop("ML23B"),
 # CONFIG
 
 # Copiar la fórmula original de la columna IMPORTE
-FORMULA_ORIGINAL = 'if(prop("Tarifario") == "MELI 2023 B", prop("ML23B"), if(prop("Tarifario") == "FABIAN 2023 A", prop("FA23A"), if(prop("Tarifario") == "FABIAN 2023 B", prop("FA23B"), if(prop("Tarifario") == "MELI 2023 C-JUNIO", prop("ML23C-JUNIO"), if(prop("Tarifario") == "FABIAN 2023 C", prop("FA23C-JUNIO"), if(prop("Tarifario") == "MELI 2023 D-AGOSTO", prop("ML23D"), if(prop("Tarifario") == "FABIAN 2023 D-AGOSTO", prop("FA23D"), if(prop("Tarifario") == "MELI 2023 E-SEPTIEMBRE",prop("ML23E"), if(prop("Tarifario") == "FABIAN 2023 E-SEPTIEMBRE", prop("FA23E"), if(prop("Tarifario") == "MELI 2023 F-NOV", prop("ML23F"), if(prop("Tarifario") == "FABIAN 2023 F-NOV", prop("FA23F"), prop("ML23A")))))))))))) + prop("Recargo")'
+FORMULA_ORIGINAL = 'if(prop("Tarifario") == "MELI 2023 B", prop("ML23B"), if(prop("Tarifario") == "FABIAN 2023 A", prop("FA23A"), if(prop("Tarifario") == "FABIAN 2023 B", prop("FA23B"), if(prop("Tarifario") == "MELI 2023 C-JUNIO", prop("ML23C-JUNIO"), if(prop("Tarifario") == "FABIAN 2023 C", prop("FA23C-JUNIO"), if(prop("Tarifario") == "MELI 2023 D-AGOSTO", prop("ML23D"), if(prop("Tarifario") == "FABIAN 2023 D-AGOSTO", prop("FA23D"), if(prop("Tarifario") == "MELI 2023 E-SEPTIEMBRE",prop("ML23E"), if(prop("Tarifario") == "FABIAN 2023 E-SEPTIEMBRE", prop("FA23E"), if(prop("Tarifario") == "MELI 2023 F-NOV", prop("ML23F"), if(prop("Tarifario") == "FABIAN 2023 F-NOV", prop("FA23F"), if(prop("Tarifario") == "MELI 2023-G DIC", prop("ML23G"), if(prop("Tarifario") == "FABIAN 2023-G DIC", prop("FA23G"), if(prop("Tarifario") == "MELI 2024-A ENE", prop("ML24A"), if(prop("Tarifario") == "FABIAN 2024-A ENE", prop("FA24A"), if(prop("Tarifario") == "MELI 2024-B FEB", prop("ML24B"), if(prop("Tarifario") == "FABIAN 2024-B FEB", prop("FA24B"), prop("ML23A")))))))))))))))))) + prop("Recargo")'
 
 # Cargar una tupla con cada tarifario nuevo y su rollup
-FORMADO_TARIFARIOS_NUEVOS = [("Columna TARIFARIO", "Columna ROLLUP"), ("OTRO_TARIFARIO", "OTRO_ROLLUP")]    # Referencia para crear nuevos
+FORMATO_TARIFARIOS_NUEVOS = [("Columna TARIFARIO", "Columna ROLLUP"), ("OTRO_TARIFARIO", "OTRO_ROLLUP")]    # Referencia para crear nuevos
 
-TARIFARIOS_NUEVOS = [("MELI 2023-G DIC", "ML23G"), ("FABIAN 2023-G DIC", "FA23G")]    # Tarifarios a crear
+TARIFARIOS_NUEVOS = [("MELI 2024-C MARZO", "ML24C"), ("FABIAN 2024-C MARZO", "FA24C")]    # Tarifarios a crear
 
 #TARIFARIOS_NUEVOS = [("TARIFARIO 1", "ROLLUP 1"), ("TARIFARIO 2", "ROLLUP 2")]    # Tarifarios a crear
 
