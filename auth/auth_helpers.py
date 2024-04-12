@@ -1,10 +1,13 @@
 from dataclasses import dataclass, field, asdict
-
-from typing import List, Dict, Union
 from decouple import AutoConfig, config, UndefinedValueError
 from dotenv import *
 import httpx
+import logging
+from typing import List, Dict, Union
 #from openpyxl import load_workbook, Workbook
+
+
+#logging.basicConfig(level=logging.INFO)
 
 #   AUTENTICACIÓN EN ML
 
@@ -62,7 +65,7 @@ class Credentials:
         return False
    
             
-def ml_aut(tienda: str = "tecnorium", client: httpx.Client = None)-> Union[str, None]:
+def ml_aut(tienda: str = "tecnorium", client: httpx.Client = None, credentials: Credentials = None)-> Union[str, None]:
     """
     Autentica en ML
     Argumentos:
@@ -76,7 +79,10 @@ def ml_aut(tienda: str = "tecnorium", client: httpx.Client = None)-> Union[str, 
     else:
         client = client
 
-    c = Credentials(tienda)
+    if not credentials:
+        c = Credentials(tienda)
+    else:
+        c = credentials
     
     # autentica en ML
 
@@ -109,6 +115,35 @@ def ml_aut(tienda: str = "tecnorium", client: httpx.Client = None)-> Union[str, 
         return None
     else:
         return(token)
+
+
+class MlSession():
+
+    """ Sesión de ML que contiene token y httpx.Client \n
+    Attrs: \n
+    store_name (str): Nombre de la tienda.\n
+    """
+
+    def __init__(self, store_name=None, credentials=None):
+
+        if not credentials:
+            if not store_name:
+                raise ValueError("Tienda no especificada")
+            else:
+                credentials = Credentials(store_name)
+
+        self.credentials = credentials
+        self.store_name = credentials.store
+        self.client = httpx.Client()
+
+        try:
+            self.token = ml_aut(client=self.client, credentials=self.credentials)
+
+        except Exception as e:
+            print(f'Error al autenticar {self.store_name} en ML\n {type(e)} {e}')
+
+
+
 
 def get_refresh_token(tienda: str = "tecnorium", client: httpx.Client = None, credentials: Credentials = "None"):
 
@@ -221,8 +256,7 @@ def format_tienda(tienda):
 
 if __name__ == '__main__':
     
-    ml_aut("tecnorium")
-    ml_aut("celestron")
-    ml_aut("lenovo")
-    #get_refresh_token("lenovo")
-    pass
+    session = MlSession(store_name="tecnorium")
+    
+
+    
