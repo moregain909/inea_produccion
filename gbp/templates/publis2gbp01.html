@@ -37,7 +37,7 @@ Agregar publicaciones a GBP
     <label for="lista_precios">Lista de Precios: </label>    
     <select name="lista_precios" class="Input">
           {% for lista in listas_de_precios %}
-          <option value="{{ lista.desc }}">{{ lista.desc }}</option>
+          <option value="{{ lista.extra }}">{{ lista.extra }}</option>
           {% endfor %}
     </select>
 
