@@ -38,11 +38,11 @@ class MlItem:
     seller_id: str = field(repr=True, default=None)
     sku: str = field(repr=True, default=None)
     title: str = field(repr=True, default=None)
-    price: int = field(repr=True, default=None)
+    price: Decimal = field(repr=True, default=None)
     available_quantity: int = field(repr=True, default=None)
-    link: str = field(repr=True, default=None)
+    permalink: str = field(repr=True, default=None)
     listing_type_id: str = field(repr=True, default=None)
-    store: str = field(repr=True, default=None)
+    #store: str = field(repr=True, default=None)
     channels: List[str] = field(repr=True, default=None)
 
     pass
