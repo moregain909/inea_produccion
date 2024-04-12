@@ -13,6 +13,7 @@ sys.path.append(data_dir)
 
 from auth import Credentials, ml_aut, MlSession
 from ml_helpers_objects import MlItem, MlPrice
+import channels
 
 
 #logging.basicConfig(level=logging.DEBUG)
@@ -27,6 +28,7 @@ class MlSellerCatalog():
 class MlApiResource():
 
     base_url = ""
+    cls = type(self)
 
     def set_seller_name(self):
         if self.seller_id:
@@ -232,32 +234,87 @@ class MlItemsDetails(MlApiResource):
                 print(attrs_to_print)
 
 
+class MlApiPrices(MlApiResource):
 
+    """Representa los recursos /prices y /sale_price de un item de ML en la API de ML.
 
-
-class MlPrices(MlApiResource):
+    """
 
     base_url = f'https://api.mercadolibre.com/items/'
     
 
-    def __init__(self, cls, item_id, channels=[], loyalty_level=None):
+    def __init__(self, item_id: str, channels: List[str] =[], loyalty_level: str =None, resource="prices"):
         self.item_id = item_id
-        self.url = f'{cls.base_url}{self.item_id}/sale_price'
+        self.channels: List[str] = channels
+        self.loyalty_level: str = loyalty_level
+        self.resource: str = resource
+        self.items = []        
+        
+        cls = type(self)
+        if resource in ["prices", "sale_price"]:
+            self.url = f'{cls.base_url}{self.item_id}/{resource}'
+        else:
+            raise ValueError(f'Resource {resource} no aceptado en la url del recurso prices de la API')
+
+        # Agrega contexto a la url si se llama al recurso sale_price
+        if resource == "sale_price":
+            context = 0
+            if channels:
+                context += 1
+                channels_str = "".join(f'{channel},' for channel in channels)
+            else:
+                channels_str = ""
+
+            if loyalty_level:
+                context += 1
+            else:
+                loyalty_level = ""
+            
+            if context > 0:
+                context_separator = ""
+            if context >1:
+                context_separator = "&"
+                self.url += f'?context={channels_str}{context_separator}{loyalty_level}'
+        
 
 
     def parse_json(self, json):
 
-        #"id"
-        #"type"
-        #"amount"
-        #"regular_amount"
-        #"currency_id"
-        #"context_restrictions"
-        #"promotion_id"
-        #"promotion_type"
-        #"start_time"
-        #"end_time"
-        pass
+        # Parsea json de sale_price
+        # Agrega 1 item a la lista de self.items (precios)
+        if self.resource == "sale_price":
+            item = MlItem(ml_id=self.item_id, item_id=self.item_id)
+            item.context_restrictions = []
+            if self.channels:
+                item.context_restrictions.extend(channels)
+            if self.loyalty_level:
+                item.context_restrictions.append(self.loyalty_level)
+            item.price_id = json["price_id"]
+            item.amount = json["amount"]
+            item.regular_amount = json["regular_amount"]
+            item.currency_id = json["currency_id"]
+            item.reference_date = json["reference_date"]
+            item.metadata = json["metadata"]
+
+            self.items.append(item)
+
+        # Parsea json de prices
+        # Agrega 1 o varios items a la lista de self.items (precios)
+        else:
+            for price in json["prices"]:
+                item = MlItem(ml_id=self.item_id, item_id=self.item_id)
+                item.type = price["type"]
+                item.amount = price["amount"]
+                item.regular_amount = price["regular_amount"]
+                item.currency_id = price["currency_id"]
+                item.last_updated = price["last_updated"]
+                item.context_restrictions = price["conditions"]["context_restrictions"]
+                item.start_time = price["conditions"]["start_time"]
+                item.end_time = price["conditions"]["end_time"]
+
+                self.items.append(item)
+
+
 
 
 class MlQuestion(MlApiResource):
