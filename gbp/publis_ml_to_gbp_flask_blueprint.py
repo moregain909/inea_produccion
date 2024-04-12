@@ -21,8 +21,7 @@ from gbp_helpers import ImportPublisGBP, GbpMlItem
 from gbp_helpers import listas_de_precios_gbp, depositos_gbp, tiendas_gbp
 
 
-#app = Flask(__name__)
-#app.secret_key = "cantina"
+output_filename = "import_publis_gbp.xlsx"
 
 publis_ml_to_gbp_blueprint = Blueprint('publis_ml_to_gbp_flask_blueprint', __name__, template_folder="templates")
 
@@ -90,7 +89,7 @@ def publis2gbp():
             # Genera planilla
             create_excel(submited_items, spreadsheet_type = ImportPublisGBP, path_to_data_dir=data_dir)
 
-            return send_file("../data/import_publis_gbp.xlsx", download_name="import_publis_gbp.xlsx", as_attachment=True)
+            return send_file(f'{data_dir}/{output_filename}', download_name="import_publis_gbp.xlsx", as_attachment=True)
         
 
         # BORRA ITEMS DE LA LISTA DE ITEMS A EXPORTAR
