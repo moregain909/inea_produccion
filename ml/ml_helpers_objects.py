@@ -55,12 +55,17 @@ class MlPrice:
 
     price_id: str = field(repr=True, default=None)              # price_id en /sale_price o id en /prices
     item_id: str = field(repr=True, default=None)               # id publicación
+    type: str = field(repr=True, default=None)                  # tipo de precio (standard, promotion)
     amount: Decimal = field(repr=True, default=None)            # precio de venta actual
-    regular_amount: Decimal = field(repr=True, default=None)    # precio original (en blanco si es igual al de venta actual)
+    regular_amount: Decimal = field(repr=True, default=None)    # precio original o pvp (en blanco si es igual al de venta actual)
     currency_id: str = field(repr=True, default=None)
-    reference_date: str = field(repr=True, default=None)
-    promotion_id: str = field(repr=True, default=None)          # id de promoción para consultar la oferta en /seller-promotions/offers 
-    promotion_type: str = field(repr=True, default=None)
+    last_updated: str = field(repr=True, default=None)
+
+    context_restrictions: List[str] = field(repr=True, default=None)
+    start_time: str = field(repr=True, default=None)
+    end_time: str = field(repr=True, default=None)
+    promotion_id: str = field(repr=True, default=None)          # aprace en sale_price - id de promoción para consultar la oferta en /seller-promotions/offers 
+    promotion_type: str = field(repr=True, default=None)        # aparece en sale_price
 
     pass
 
