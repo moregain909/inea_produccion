@@ -16,11 +16,50 @@
           <div class="navbar-nav">
             <!-- <a class="nav-item nav-link active" href="#">Home <span class="sr-only">(current)</span></a> -->
             <a class="nav-item nav-link disabled" href="/" tabindex="-1" aria-disabled="true">Home</a>
-            <a class="nav-item nav-link" href="publis2gbp">Agregar Publis a GBP</a>
-            <a class="nav-item nav-link" href="tarifarios">Tarifarios Notion</a>
-            <a class="nav-item nav-link disabled" href="#" tabindex="-1" aria-disabled="true">Publis Faltantes</a>
-            <a class="nav-item nav-link disabled" href="#" tabindex="-1" aria-disabled="true">Publicar en Catálogo</a>
-            <a class="nav-item nav-link disabled" href="#" tabindex="-1" aria-disabled="true">Check Precios MG</a>
+            
+            <!-- Menú Procesos -->
+            <li class="nav-item dropdown">
+              <a class="nav-link dropdown-toggle" data-toggle="dropdown" href="#" role="button" aria-haspopup="true" aria-expanded="false">Procesos</a>
+
+              <div class="dropdown-menu">
+                <a class="dropdown-item" href="publis2gbp">Agregar Publis a Excel GBP</a>
+
+                <div class="dropdown-divider"></div>
+                <a class="dropdown-item" href="tarifarios">Generar Fórmula Tarifarios Nuevos Notion</a>
+              </div>
+            </li>
+
+            <!-- Menú Consultas -->            
+            <li class="nav-item dropdown">
+              <a class="nav-link dropdown-toggle" data-toggle="dropdown" href="#" role="button" aria-haspopup="true" aria-expanded="false">Consultas</a>
+              
+              <div class="dropdown-menu">
+                <a class="dropdown-item" href="sku_en_mg">Consultar SKU en MicroGlobal</a>
+              </div>
+            </li>              
+            
+            <!-- Menú Controles -->
+            <li class="nav-item dropdown">
+              <a class="nav-link dropdown-toggle" data-toggle="dropdown" href="#" role="button" aria-haspopup="true" aria-expanded="false">Controles</a>
+              
+              <div class="dropdown-menu">
+                <a class="dropdown-item disabled" href="publis_faltantes">Publis Faltantes</a>
+                <a class="dropdown-item disabled" href="check_precios_ml">Check Precios ML-MG</a>                
+                <a class="dropdown-item disabled" href="publis_catalogo">Publis Elegibles para Catálogo</a>
+              </div>
+            </li>   
+
+
+            <!-- Menú Ayuda -->
+            <li class="nav-item dropdown">
+              <a class="nav-link dropdown-toggle" data-toggle="dropdown" href="#" role="button" aria-haspopup="true" aria-expanded="false">Ayuda</a>
+              
+              <div class="dropdown-menu">
+                <a class="dropdown-item disabled" href="#">Estás solo amigo</a>
+
+              </div>
+            </li>   
+
           </div>
         </div>
       </nav>
