@@ -1,3 +1,15 @@
+<!--
+# WEB: 
+# Filtro: Selección de tienda
+# Filtro: Estado publicaciones
+# Filtro: Está en GBP / No está en GBP
+# Filtro: Proveedor
+# Otros posibles filtros: tipo publicación, flex, retiro, garantía
+# Selección de campos a traer con checkbox
+# Botón TRAER PUBLICACIONES
+-->
+
+
 <!doctype html>
 
 {% extends "base.html" %}
@@ -24,17 +36,17 @@ Gestión de Publicaciones ML
                 <div class="form-group shadow-sm">
                     <div class="col"><h6>Tienda</h6>
                         <div class="form-check form-check-inline">
-                            <input class="form-check-input" type="radio" name="storeRadioOptions" id="tecnorium" value="tecnorium" checked>
+                            <input class="form-check-input" type="checkbox" name="requestConfigSeller" id="tecnorium" value="tecnorium" checked>
                             <label class="form-check-label" for="tecnorium">Tecnorium</label>
-                        </div>
+                        </div>                        
                         <div class="form-check form-check-inline">
-                            <input class="form-check-input" type="radio" name="storeRadioOptions" id="celestron" value="celestron" disabled>
-                            <label class="form-check-label" for="celestron">Celestron</label>
-                        </div>
+                            <input class="form-check-input" type="checkbox" name="requestConfigSeller" id="celestron" value="celestron" >
+                            <label class="form-check-label" for="tecnorium">Celestron</label>
+                        </div>                        
                         <div class="form-check form-check-inline">
-                            <input class="form-check-input" type="radio" name="storeRadioOptions" id="lenovo" value="lenovo" disabled>
+                            <input class="form-check-input" type="checkbox" name="requestConfigSeller" id="lenovo" value="lenovo" >
                             <label class="form-check-label" for="lenovo">Lenovo</label>
-                        </div>
+                        </div>       
                     </div>
                 </div>
 
@@ -42,17 +54,17 @@ Gestión de Publicaciones ML
                     <div class="col">
                         <div><h6>Estado</h6></div>
                         <div class="form-check form-check-inline">
-                            <input class="form-check-input" type="radio" name="stateRadioOptions" id="active" value="active" checked>
+                            <input class="form-check-input" type="checkbox" name="requestConfigState" id="active" value="active" checked>
                             <label class="form-check-label" for="active">Activas</label>
-                        </div>
+                        </div>         
                         <div class="form-check form-check-inline">
-                            <input class="form-check-input" type="radio" name="stateRadioOptions" id="paused" value="paused">
+                            <input class="form-check-input" type="checkbox" name="requestConfigState" id="paused" value="paused">
                             <label class="form-check-label" for="paused">Pausadas</label>
-                        </div>
+                        </div>      
                         <div class="form-check form-check-inline">
-                            <input class="form-check-input" type="radio" name="stateRadioOptions" id="inactive" value="inactive">
-                            <label class="form-check-label" for="inactive">Inactivas</label>
-                        </div>
+                            <input class="form-check-input" type="checkbox" name="requestConfigState" id="inactive" value="inactive">
+                            <label class="form-check-label" for="inactive">Inactive</label>
+                        </div> 
                     </div>
                 </div>
 
@@ -60,11 +72,11 @@ Gestión de Publicaciones ML
                     <div class="col">
                         <h6>Está en GBP</h6>
                         <div class="form-check form-check-inline">
-                            <input class="form-check-input" type="checkbox" name="isOnGbpCheckboxOptions" id="in_gbp" value="in_gbp" checked>
+                            <input class="form-check-input" type="checkbox" name="queryConfigIsInGbp" id="in_gbp" value="in_gbp" checked>
                             <label class="form-check-label" for="in_gbp">Si</label>
                         </div>
                         <div class="form-check form-check-inline">
-                            <input class="form-check-input" type="checkbox" name="isOnGbpCheckboxOptions" id="not_in_gbp" value="not_in_gbp" checked>
+                            <input class="form-check-input" type="checkbox" name="queryConfigIsInGbp" id="not_in_gbp" value="not_in_gbp" checked>
                             <label class="form-check-label" for="not_in_gbp">No</label>
                         </div>
                     </div>
@@ -76,23 +88,23 @@ Gestión de Publicaciones ML
                     <div class="col">
                         <h6>Proveedor</h6>
                         <div class="form-check form-check-inline">
-                            <input class="form-check-input" type="checkbox" name="supplierCheckboxOptions" id="microglobal" value="microglobal" checked>
+                            <input class="form-check-input" type="checkbox" name="queryConfigSuppliers" id="microglobal" value="microglobal" checked>
                             <label class="form-check-label" for="inlineCheckbox1">Microglobal</label>
                         </div>
                         <div class="form-check form-check-inline">
-                            <input class="form-check-input" type="checkbox" name="supplierCheckboxOptions" id="goldmund" value="goldmund" >
+                            <input class="form-check-input" type="checkbox" name="queryConfigSuppliers" id="goldmund" value="goldmund" >
                             <label class="form-check-label" for="goldmund">Goldmund</label>
                           </div>
                           <div class="form-check form-check-inline">
-                            <input class="form-check-input" type="checkbox" name="supplierCheckboxOptions" id="liliana" value="liliana" >
+                            <input class="form-check-input" type="checkbox" name="queryConfigSuppliers" id="liliana" value="liliana" >
                             <label class="form-check-label" for="liliana">Liliana</label>
                           </div>
                           <div class="form-check form-check-inline">
-                            <input class="form-check-input" type="checkbox" name="supplierCheckboxOptions" id="goris" value="goris" >
+                            <input class="form-check-input" type="checkbox" name="queryConfigSuppliers" id="goris" value="goris" >
                             <label class="form-check-label" for="goris">Goris</label>
                           </div>
                           <div class="form-check form-check-inline">
-                            <input class="form-check-input" type="checkbox" name="supplierCheckboxOptions" id="bowie" value="bowie" disabled>
+                            <input class="form-check-input" type="checkbox" name="queryConfigSuppliers" id="bowie" value="bowie" disabled>
                             <label class="form-check-label" for="bowie">Bowie</label>
                           </div>                      
                     </div>
@@ -109,31 +121,31 @@ Gestión de Publicaciones ML
                     <h4>Campos</h4>
                     <div class="col">
                         <div class="form-check form-check-inline">
-                            <input class="form-check-input" type="checkbox" name="fieldCheckboxOptions" id="item_ml_id" value="item_ml_id" checked>
+                            <input class="form-check-input" type="checkbox" name="requestConfigFields" id="item_ml_id" value="item_ml_id" checked>
                             <label class="form-check-label" for="item_ml_id">ID ML</label>
                           </div>        
                         <div class="form-check form-check-inline">
-                            <input class="form-check-input" type="checkbox" name="fieldCheckboxOptions" id="item_title" value="item_title" checked>
+                            <input class="form-check-input" type="checkbox" name="requestConfigFields" id="item_title" value="item_title" checked>
                             <label class="form-check-label" for="item_title">Título</label>
                         </div>
                         <div class="form-check form-check-inline">
-                            <input class="form-check-input" type="checkbox" name="fieldCheckboxOptions" id="item_price" value="item_price">
+                            <input class="form-check-input" type="checkbox" name="requestConfigFields" id="item_price" value="item_price">
                             <label class="form-check-label" for="item_price">Precio</label>
                         </div>
                         <div class="form-check form-check-inline">
-                            <input class="form-check-input" type="checkbox" name="fieldCheckboxOptions" id="sku" value="sku">
+                            <input class="form-check-input" type="checkbox" name="requestConfigFields" id="sku" value="sku">
                             <label class="form-check-label" for="sku">SKU</label>
                         </div>
                         <div class="form-check form-check-inline">
-                            <input class="form-check-input" type="checkbox" name="fieldCheckboxOptions" id="thumb" value="thumb">
+                            <input class="form-check-input" type="checkbox" name="requestConfigFields" id="thumb" value="thumb">
                             <label class="form-check-label" for="thumb">Foto</label>
                         </div>
                         <div class="form-check form-check-inline">
-                            <input class="form-check-input" type="checkbox" name="fieldCheckboxOptions" id="link" value="link">
+                            <input class="form-check-input" type="checkbox" name="requestConfigFields" id="link" value="link">
                             <label class="form-check-label" for="link">Link</label>
                         </div>
                         <div class="form-check form-check-inline">
-                            <input class="form-check-input" type="checkbox" name="fieldCheckboxOptions" id="variations" value="variations">
+                            <input class="form-check-input" type="checkbox" name="requestConfigFields" id="variations" value="variations">
                             <label class="form-check-label" for="variations">Variaciones</label>
                         </div>
                     </div>   
@@ -201,19 +213,7 @@ Gestión de Publicaciones ML
             </tbody>
           </table>
             
-            {% for item in items %}
-    
-                <li>{{ item.ml_item_id }} | {{ item.sku }} | {{ item.variation_id }} | {{ item.store }} | {{ item.price_list }}
-                    <!-- botón BORRAR -->
-                    <button type="submit" class="btn btn btn-outline-dark btn-sm" id="delete" name="delete" value={{ item.ml_item_id }}>Borrar</button>
 
-                </li>
-    
-            {% endfor %}
-    
-            <!-- botón EXPORTAR -->
-            <input type="submit" class="btn btn btn-outline-dark btn-sm" id="export" name="export" value="Exportar" />
-    
         {% endif %}
     </ul>
     </div>
