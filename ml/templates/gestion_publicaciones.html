@@ -36,15 +36,15 @@ Gestión de Publicaciones ML
                 <div class="form-group shadow-sm">
                     <div class="col"><h6>Tienda</h6>
                         <div class="form-check form-check-inline">
-                            <input class="form-check-input" type="checkbox" name="requestConfigSeller" id="tecnorium" value="tecnorium" checked>
+                            <input class="form-check-input" type="checkbox" name="request_config_seller" id="tecnorium" value="tecnorium" checked>
                             <label class="form-check-label" for="tecnorium">Tecnorium</label>
                         </div>                        
                         <div class="form-check form-check-inline">
-                            <input class="form-check-input" type="checkbox" name="requestConfigSeller" id="celestron" value="celestron" >
+                            <input class="form-check-input" type="checkbox" name="request_config_seller" id="celestron" value="celestron" >
                             <label class="form-check-label" for="tecnorium">Celestron</label>
                         </div>                        
                         <div class="form-check form-check-inline">
-                            <input class="form-check-input" type="checkbox" name="requestConfigSeller" id="lenovo" value="lenovo" >
+                            <input class="form-check-input" type="checkbox" name="request_config_seller" id="lenovo" value="lenovo" >
                             <label class="form-check-label" for="lenovo">Lenovo</label>
                         </div>       
                     </div>
@@ -54,19 +54,33 @@ Gestión de Publicaciones ML
                     <div class="col">
                         <div><h6>Estado</h6></div>
                         <div class="form-check form-check-inline">
-                            <input class="form-check-input" type="checkbox" name="requestConfigState" id="active" value="active" checked>
+                            <input class="form-check-input" type="checkbox" name="requestfilter_status" id="active" value="active" checked>
                             <label class="form-check-label" for="active">Activas</label>
                         </div>         
                         <div class="form-check form-check-inline">
-                            <input class="form-check-input" type="checkbox" name="requestConfigState" id="paused" value="paused">
+                            <input class="form-check-input" type="checkbox" name="requestfilter_status" id="paused" value="paused" disabled>
                             <label class="form-check-label" for="paused">Pausadas</label>
                         </div>      
                         <div class="form-check form-check-inline">
-                            <input class="form-check-input" type="checkbox" name="requestConfigState" id="inactive" value="inactive">
+                            <input class="form-check-input" type="checkbox" name="requestfilter_status" id="inactive" value="inactive"  disabled>
                             <label class="form-check-label" for="inactive">Inactive</label>
                         </div> 
                     </div>
                 </div>
+
+                <div class="form-group shadow-sm">
+                    <div class="col">
+                        <div><h6>Tipo</h6></div>
+                        <div class="form-check form-check-inline">
+                            <input class="form-check-input" type="checkbox" name="requestfilter_listing_type_id" id="gold_pro" value="gold_pro" checked>
+                            <label class="form-check-label" for="gold_pro">Premium</label>
+                        </div>         
+                        <div class="form-check form-check-inline">
+                            <input class="form-check-input" type="checkbox" name="requestfilter_listing_type_id" id="gold_special" value="gold_special" checked>
+                            <label class="form-check-label" for="gold_special">Clásica</label>
+                        </div>      
+                    </div>
+                </div>                
 
                 <div class="form-group shadow-sm">
                     <div class="col">
@@ -121,31 +135,47 @@ Gestión de Publicaciones ML
                     <h4>Campos</h4>
                     <div class="col">
                         <div class="form-check form-check-inline">
-                            <input class="form-check-input" type="checkbox" name="requestConfigFields" id="item_ml_id" value="item_ml_id" checked>
+                            <input class="form-check-input" type="checkbox" name="requestattribute" id="item_ml_id" value="item_ml_id" checked>
                             <label class="form-check-label" for="item_ml_id">ID ML</label>
                           </div>        
-                        <div class="form-check form-check-inline">
-                            <input class="form-check-input" type="checkbox" name="requestConfigFields" id="item_title" value="item_title" checked>
-                            <label class="form-check-label" for="item_title">Título</label>
-                        </div>
-                        <div class="form-check form-check-inline">
-                            <input class="form-check-input" type="checkbox" name="requestConfigFields" id="item_price" value="item_price">
-                            <label class="form-check-label" for="item_price">Precio</label>
-                        </div>
-                        <div class="form-check form-check-inline">
-                            <input class="form-check-input" type="checkbox" name="requestConfigFields" id="sku" value="sku">
+                          <div class="form-check form-check-inline">
+                            <input class="form-check-input" type="checkbox" name="requestattribute" id="sku" value="sku" disabled>
                             <label class="form-check-label" for="sku">SKU</label>
                         </div>
                         <div class="form-check form-check-inline">
-                            <input class="form-check-input" type="checkbox" name="requestConfigFields" id="thumb" value="thumb">
+                            <input class="form-check-input" type="checkbox" name="requestattribute" id="available_quantity" value="available_quantity">
+                            <label class="form-check-label" for="available_quantity">Stock</label>
+                        </div>                                                  
+                        <div class="form-check form-check-inline">
+                            <input class="form-check-input" type="checkbox" name="requestattribute" id="title" value="title" checked>
+                            <label class="form-check-label" for="title">Título</label>
+                        </div>
+                        <div class="form-check form-check-inline">
+                            <input class="form-check-input" type="checkbox" name="requestattribute" id="price" value="price" disabled>
+                            <label class="form-check-label" for="price">Precio</label>
+                        </div>
+                        <div class="form-check form-check-inline">
+                            <input class="form-check-input" type="checkbox" name="requestattribute" id="listing_type_id" value="listing_type_id">
+                            <label class="form-check-label" for="listing_type_id">Tipo</label>
+                        </div>         
+                        <div class="form-check form-check-inline">
+                            <input class="form-check-input" type="checkbox" name="requestattribute" id="status" value="status">
+                            <label class="form-check-label" for="status">Estado</label>
+                        </div>          
+                        <div class="form-check form-check-inline">
+                            <input class="form-check-input" type="checkbox" name="requestattribute" id="channels" value="channels">
+                            <label class="form-check-label" for="channels">Canales</label>
+                        </div>                                                           
+                        <div class="form-check form-check-inline">
+                            <input class="form-check-input" type="checkbox" name="requestattribute" id="thumb" value="thumb">
                             <label class="form-check-label" for="thumb">Foto</label>
                         </div>
                         <div class="form-check form-check-inline">
-                            <input class="form-check-input" type="checkbox" name="requestConfigFields" id="link" value="link">
-                            <label class="form-check-label" for="link">Link</label>
+                            <input class="form-check-input" type="checkbox" name="requestattribute" id="permalink" value="permalink">
+                            <label class="form-check-label" for="permalink">Link</label>
                         </div>
                         <div class="form-check form-check-inline">
-                            <input class="form-check-input" type="checkbox" name="requestConfigFields" id="variations" value="variations">
+                            <input class="form-check-input" type="checkbox" name="requestattribute" id="variations" value="variations">
                             <label class="form-check-label" for="variations">Variaciones</label>
                         </div>
                     </div>   
@@ -180,8 +210,7 @@ Gestión de Publicaciones ML
     <ul>
         {% if items %}
     
-        <h5>Publicaciones ML</h5>
-        
+        <h5>{{ items_len }} publicaciones ML</h5>        
         <table class="table">
             <thead>
               <tr>
@@ -192,26 +221,38 @@ Gestión de Publicaciones ML
               </tr>
             </thead>
             <tbody>
-              <tr>
-                <th scope="row">1</th>
-                <td>MLA111111</td>
-                <td>Access Point Profesional Allied Telesis Tqm5403 Ac 3 Bandas</td>
-                <td>AT-TQM5403-00</td>
-              </tr>
-              <tr>
-                <th scope="row">2</th>
-                <td>MLA2222222</td>
-                <td>Thornton</td>
-                <td>@fat</td>
-              </tr>
-              <tr>
-                <th scope="row">3</th>
-                <td>MLA33333</td>
-                <td>the Bird</td>
-                <td>@twitter</td>
-              </tr>
+                {% for index, item in items %}
+                  <tr>
+                    <th scope="row">{{ index }}</th>
+                    <td>{{ item.ml_id }}</td>
+                    <td></td>
+                    <td></td>
+                  </tr>
+                {% endfor %}
+
+<!--
+                <tr>
+                  <th scope="row">1</th>
+                  <td>MLA11111</td>
+                  #<td>Access Point Profesional Allied Telesis Tqm5403 Ac 3 Bandas</td>
+                  #<td>AT-TQM5403-00</td>
+                </tr>    
+                <tr>
+#                <th scope="row">2</th>
+#                <td>MLA2222222</td>
+#                <td>Thornton</td>
+#                <td>@fat</td>
+#              </tr>
+#              <tr>
+#                <th scope="row">3</th>
+#                <td>MLA33333</td>
+#                <td>the Bird</td>
+#                <td>@twitter</td>
+#              </tr>
+-->
             </tbody>
           </table>
+
             
 
         {% endif %}
