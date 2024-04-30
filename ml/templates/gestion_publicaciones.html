@@ -29,6 +29,24 @@ Gestión de Publicaciones ML
     
         <div>
         <div>
+            <h4>Filtros DINÁMICOSSSS</h4>
+
+            <div clas=" row align-items-center">
+
+                {% for filter in head_filters %}
+                <div class="form-group shadow-sm">
+                    <div class="col"><h6>{{ filter.name }}</h6>
+                    {% for option in filter.options %}
+                        <div class="form-check form-check-inline">
+                            <input class="{{ option.input_class }}" type="{{ option.input_type }}" name="{{ filter.option_name }}" id="{{ option.input_option_id }}" value="{{ option.input_value }}" {{ option.input_state }}>
+                            <label class="{{ option.label_class }}" for="{{ option.label_for }}">{{ option.name }}</label>
+                        </div>      
+                    {% endfor %}
+                {% endfor %}
+
+
+            </div>
+
             <h4>Filtros</h4>
 
             <div class="row align-items-center">
@@ -230,26 +248,7 @@ Gestión de Publicaciones ML
                   </tr>
                 {% endfor %}
 
-<!--
-                <tr>
-                  <th scope="row">1</th>
-                  <td>MLA11111</td>
-                  #<td>Access Point Profesional Allied Telesis Tqm5403 Ac 3 Bandas</td>
-                  #<td>AT-TQM5403-00</td>
-                </tr>    
-                <tr>
-#                <th scope="row">2</th>
-#                <td>MLA2222222</td>
-#                <td>Thornton</td>
-#                <td>@fat</td>
-#              </tr>
-#              <tr>
-#                <th scope="row">3</th>
-#                <td>MLA33333</td>
-#                <td>the Bird</td>
-#                <td>@twitter</td>
-#              </tr>
--->
+
             </tbody>
           </table>
 
