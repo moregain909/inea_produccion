@@ -9,6 +9,7 @@
 #   MUESTRA TITULO, PRECIO Y PROVEEDOR
 #   PERMITE SELECCIONAR PARA BORRAR
 
+from dataclasses import dataclass
 from flask import Flask, render_template, request, flash, send_file, Blueprint
 import logging
 from typing import List, Dict
@@ -50,13 +51,47 @@ def get_apirequest_attributes_from_requestform():
     # TODO
     pass
 
-@dataclass
+
 class MlItem_HtmlTableRow:
 
     pass
 
 def mlitem_to_htmlrowobject(item: MlItem) -> MlItem_HtmlTableRow:
     pass
+
+@dataclass
+class HtmlRequestFilterOption:
+
+
+    input_option_id: str        
+    input_value: str
+    input_state: str      # checked, disabled, etc
+    label_for: str      
+    name: str
+    input_class: str = 'form-check-input'     # class="form-check-input"
+    input_type: str = 'checkbox'              # radio, checkbox, etc
+    label_class: str = 'form-check-label'     # class="form-check-label"
+
+    pass
+
+@dataclass
+class HtmlRequestFilter:
+
+    name: str
+    option_name: str
+    options: List[HtmlRequestFilterOption]
+    pass
+
+head_filters = [HtmlRequestFilter(name="Tienda", option_name="request_config_seller", 
+                                     options=[HtmlRequestFilterOption(input_option_id="tecnorium", input_value="tecnorium", 
+                                                                      input_state="checked", label_for="tecnorium", name="Tecnorium"), 
+                                              HtmlRequestFilterOption(input_option_id="celestron", input_value="celestron", 
+                                                                      input_state="disabled", label_for="celestron", name="Celestron"), 
+                                                HtmlRequestFilterOption(input_option_id="lenovo", input_value="lenovo", 
+                                                                      input_state="", label_for="lenovo", name="Lenovo")
+                                                                      ]
+                                                                      )
+                                                                      ]
 
 gestion_publicaciones_blueprint = Blueprint('gestion_publicaciones', __name__, template_folder="templates")
 
@@ -68,7 +103,7 @@ items = None
 def gestion_publicaciones():
     if request.method == "GET":
 
-        return render_template("gestion_publicaciones.html")
+        return render_template("gestion_publicaciones.html", head_filters=head_filters)
     
     elif request.method == "POST":
         
@@ -137,8 +172,8 @@ def gestion_publicaciones():
         #   index items
         indexed_items = [(index + 1, item) for index, item in enumerate(items)]
 
-        
-        return render_template("gestion_publicaciones.html", items=indexed_items, items_len=len(items), form=request.form)
+        print(request.form.to_dict(flat=False))
+        return render_template("gestion_publicaciones.html", head_filters=head_filters, items=indexed_items, items_len=len(items), form=request.form)
         
 
 
