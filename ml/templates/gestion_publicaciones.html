@@ -29,173 +29,38 @@ Gestión de Publicaciones ML
     
         <div>
         <div>
-            <h4>Filtros DINÁMICOSSSS</h4>
-
-            <div clas=" row align-items-center">
-
-                {% for filter in head_filters %}
-                <div class="form-group shadow-sm">
-                    <div class="col"><h6>{{ filter.name }}</h6>
-                    {% for option in filter.options %}
-                        <div class="form-check form-check-inline">
-                            <input class="{{ option.input_class }}" type="{{ option.input_type }}" name="{{ filter.option_name }}" id="{{ option.input_option_id }}" value="{{ option.input_value }}" {{ option.input_state }}>
-                            <label class="{{ option.label_class }}" for="{{ option.label_for }}">{{ option.name }}</label>
-                        </div>      
-                    {% endfor %}
-                {% endfor %}
-
-
-            </div>
-
             <h4>Filtros</h4>
-
             <div class="row align-items-center">
-
-                <div class="form-group shadow-sm">
-                    <div class="col"><h6>Tienda</h6>
-                        <div class="form-check form-check-inline">
-                            <input class="form-check-input" type="checkbox" name="request_config_seller" id="tecnorium" value="tecnorium" checked>
-                            <label class="form-check-label" for="tecnorium">Tecnorium</label>
-                        </div>                        
-                        <div class="form-check form-check-inline">
-                            <input class="form-check-input" type="checkbox" name="request_config_seller" id="celestron" value="celestron" >
-                            <label class="form-check-label" for="tecnorium">Celestron</label>
-                        </div>                        
-                        <div class="form-check form-check-inline">
-                            <input class="form-check-input" type="checkbox" name="request_config_seller" id="lenovo" value="lenovo" >
-                            <label class="form-check-label" for="lenovo">Lenovo</label>
-                        </div>       
-                    </div>
-                </div>
-
-                <div class="form-group shadow-sm">
-                    <div class="col">
-                        <div><h6>Estado</h6></div>
-                        <div class="form-check form-check-inline">
-                            <input class="form-check-input" type="checkbox" name="requestfilter_status" id="active" value="active" checked>
-                            <label class="form-check-label" for="active">Activas</label>
-                        </div>         
-                        <div class="form-check form-check-inline">
-                            <input class="form-check-input" type="checkbox" name="requestfilter_status" id="paused" value="paused" disabled>
-                            <label class="form-check-label" for="paused">Pausadas</label>
-                        </div>      
-                        <div class="form-check form-check-inline">
-                            <input class="form-check-input" type="checkbox" name="requestfilter_status" id="inactive" value="inactive"  disabled>
-                            <label class="form-check-label" for="inactive">Inactive</label>
-                        </div> 
-                    </div>
-                </div>
-
-                <div class="form-group shadow-sm">
-                    <div class="col">
-                        <div><h6>Tipo</h6></div>
-                        <div class="form-check form-check-inline">
-                            <input class="form-check-input" type="checkbox" name="requestfilter_listing_type_id" id="gold_pro" value="gold_pro" checked>
-                            <label class="form-check-label" for="gold_pro">Premium</label>
-                        </div>         
-                        <div class="form-check form-check-inline">
-                            <input class="form-check-input" type="checkbox" name="requestfilter_listing_type_id" id="gold_special" value="gold_special" checked>
-                            <label class="form-check-label" for="gold_special">Clásica</label>
-                        </div>      
-                    </div>
-                </div>                
-
-                <div class="form-group shadow-sm">
-                    <div class="col">
-                        <h6>Está en GBP</h6>
-                        <div class="form-check form-check-inline">
-                            <input class="form-check-input" type="checkbox" name="queryConfigIsInGbp" id="in_gbp" value="in_gbp" checked>
-                            <label class="form-check-label" for="in_gbp">Si</label>
-                        </div>
-                        <div class="form-check form-check-inline">
-                            <input class="form-check-input" type="checkbox" name="queryConfigIsInGbp" id="not_in_gbp" value="not_in_gbp" checked>
-                            <label class="form-check-label" for="not_in_gbp">No</label>
+                {% for filter in head_filters.filters %}
+                    <div class="form-group shadow-sm">
+                        <div class="col">
+                            <h6>{{ filter.name }}</h6>
+                            {% for option in filter.options %}
+                                <div class="form-check form-check-inline">
+                                    <input class="{{ option.input_class }}" type="{{ option.input_type }}" name="{{ filter.option_name }}" id="{{ option.input_option_id }}" value="{{ option.input_value }}" {{ option.input_state }}>
+                                    <label class="{{ option.label_class }}" for="{{ option.label_for }}">{{ option.name }}</label>
+                                </div>      
+                            {% endfor %}
                         </div>
                     </div>
-                </div>
-            </div>
-
-            <div class="row align-items-center">
-                <div class="form-group shadow-sm">
-                    <div class="col">
-                        <h6>Proveedor</h6>
-                        <div class="form-check form-check-inline">
-                            <input class="form-check-input" type="checkbox" name="queryConfigSuppliers" id="microglobal" value="microglobal" checked>
-                            <label class="form-check-label" for="inlineCheckbox1">Microglobal</label>
-                        </div>
-                        <div class="form-check form-check-inline">
-                            <input class="form-check-input" type="checkbox" name="queryConfigSuppliers" id="goldmund" value="goldmund" >
-                            <label class="form-check-label" for="goldmund">Goldmund</label>
-                          </div>
-                          <div class="form-check form-check-inline">
-                            <input class="form-check-input" type="checkbox" name="queryConfigSuppliers" id="liliana" value="liliana" >
-                            <label class="form-check-label" for="liliana">Liliana</label>
-                          </div>
-                          <div class="form-check form-check-inline">
-                            <input class="form-check-input" type="checkbox" name="queryConfigSuppliers" id="goris" value="goris" >
-                            <label class="form-check-label" for="goris">Goris</label>
-                          </div>
-                          <div class="form-check form-check-inline">
-                            <input class="form-check-input" type="checkbox" name="queryConfigSuppliers" id="bowie" value="bowie" disabled>
-                            <label class="form-check-label" for="bowie">Bowie</label>
-                          </div>                      
-                    </div>
-                </div>
+                {% endfor %}
             </div>
 
         </div>
-        <!-- Otros posibles filtros: tipo publicación, flex, retiro, garantía -->
-        <!-- Otros campos: variación (id, sku, atributos, costo envío promedio -->
     
         
             <div class="form-group shadow-sm">
                 <div>
                     <h4>Campos</h4>
                     <div class="col">
+                        {% for field in head_fields.options %}
+                        
                         <div class="form-check form-check-inline">
-                            <input class="form-check-input" type="checkbox" name="requestattribute" id="item_ml_id" value="item_ml_id" checked>
-                            <label class="form-check-label" for="item_ml_id">ID ML</label>
-                          </div>        
-                          <div class="form-check form-check-inline">
-                            <input class="form-check-input" type="checkbox" name="requestattribute" id="sku" value="sku" disabled>
-                            <label class="form-check-label" for="sku">SKU</label>
+                            <input class="form-check-input" type="checkbox" name="{{head_fields.option_name}}" id="{{field.input_option_id}}" value="{{field.input_value}}" {{field.input_state}}>
+                            <label class="form-check-label" for="{{field.label_for}}">{{field.name}}</label>
                         </div>
-                        <div class="form-check form-check-inline">
-                            <input class="form-check-input" type="checkbox" name="requestattribute" id="available_quantity" value="available_quantity">
-                            <label class="form-check-label" for="available_quantity">Stock</label>
-                        </div>                                                  
-                        <div class="form-check form-check-inline">
-                            <input class="form-check-input" type="checkbox" name="requestattribute" id="title" value="title" checked>
-                            <label class="form-check-label" for="title">Título</label>
-                        </div>
-                        <div class="form-check form-check-inline">
-                            <input class="form-check-input" type="checkbox" name="requestattribute" id="price" value="price" disabled>
-                            <label class="form-check-label" for="price">Precio</label>
-                        </div>
-                        <div class="form-check form-check-inline">
-                            <input class="form-check-input" type="checkbox" name="requestattribute" id="listing_type_id" value="listing_type_id">
-                            <label class="form-check-label" for="listing_type_id">Tipo</label>
-                        </div>         
-                        <div class="form-check form-check-inline">
-                            <input class="form-check-input" type="checkbox" name="requestattribute" id="status" value="status">
-                            <label class="form-check-label" for="status">Estado</label>
-                        </div>          
-                        <div class="form-check form-check-inline">
-                            <input class="form-check-input" type="checkbox" name="requestattribute" id="channels" value="channels">
-                            <label class="form-check-label" for="channels">Canales</label>
-                        </div>                                                           
-                        <div class="form-check form-check-inline">
-                            <input class="form-check-input" type="checkbox" name="requestattribute" id="thumb" value="thumb">
-                            <label class="form-check-label" for="thumb">Foto</label>
-                        </div>
-                        <div class="form-check form-check-inline">
-                            <input class="form-check-input" type="checkbox" name="requestattribute" id="permalink" value="permalink">
-                            <label class="form-check-label" for="permalink">Link</label>
-                        </div>
-                        <div class="form-check form-check-inline">
-                            <input class="form-check-input" type="checkbox" name="requestattribute" id="variations" value="variations">
-                            <label class="form-check-label" for="variations">Variaciones</label>
-                        </div>
+                        {% endfor %}
+
                     </div>   
                 </div> 
             </div>          
@@ -232,19 +97,27 @@ Gestión de Publicaciones ML
         <table class="table">
             <thead>
               <tr>
+                    {% for col in item_columns %}
+                        <th scope="col">{{ col }}</th>
+                    
+                    <!--
                     <th scope="col">#</th>
                     <th scope="col">ID ML</th>
                     <th scope="col">Título</th>
                     <th scope="col">SKU</th>
+                    -->
+                    {% endfor %}
               </tr>
             </thead>
             <tbody>
-                {% for index, item in items %}
+                {% for row in items %}
                   <tr>
-                    <th scope="row">{{ index }}</th>
-                    <td>{{ item.ml_id }}</td>
-                    <td></td>
-                    <td></td>
+                    {% for field in row %}
+                    <td scope="row">{{ field }}</td>
+                    
+
+                    {% endfor %}
+
                   </tr>
                 {% endfor %}
 
