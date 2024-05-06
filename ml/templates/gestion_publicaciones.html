@@ -113,7 +113,7 @@ Gestión de Publicaciones ML
                 {% for row in items %}
                   <tr>
                     {% for field in row %}
-                    <td scope="row">{{ field }}</td>
+                    <td scope="row">{{ field | safe }}</td>
                     
 
                     {% endfor %}
