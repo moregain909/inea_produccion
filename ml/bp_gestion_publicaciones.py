@@ -12,7 +12,7 @@
 from dataclasses import dataclass
 from flask import Flask, render_template, request, flash, send_file, Blueprint
 import logging
-from typing import List, Dict
+from typing import List, Dict, Tuple
 
 import os, sys
 path2root = os.path.join(os.path.dirname(__file__), "..")
@@ -47,11 +47,6 @@ def get_apirequest_filters_from_requestform(request_form) -> List[str]:
     return request_filters
 
 
-def get_apirequest_attributes_from_requestform():
-    # TODO
-    pass
-
-
 class MlItem_HtmlTableRow:
 
     pass
@@ -61,7 +56,6 @@ def mlitem_to_htmlrowobject(item: MlItem) -> MlItem_HtmlTableRow:
 
 @dataclass
 class HtmlRequestFilterOption:
-
 
     input_option_id: str        
     input_value: str
@@ -82,16 +76,130 @@ class HtmlRequestFilter:
     options: List[HtmlRequestFilterOption]
     pass
 
-head_filters = [HtmlRequestFilter(name="Tienda", option_name="request_config_seller", 
-                                     options=[HtmlRequestFilterOption(input_option_id="tecnorium", input_value="tecnorium", 
-                                                                      input_state="checked", label_for="tecnorium", name="Tecnorium"), 
-                                              HtmlRequestFilterOption(input_option_id="celestron", input_value="celestron", 
-                                                                      input_state="disabled", label_for="celestron", name="Celestron"), 
-                                                HtmlRequestFilterOption(input_option_id="lenovo", input_value="lenovo", 
-                                                                      input_state="", label_for="lenovo", name="Lenovo")
-                                                                      ]
-                                                                      )
-                                                                      ]
+@dataclass
+class HtmlRequestControlGroup:
+    
+    name: str
+    filters: List[HtmlRequestFilter]
+
+
+
+head_filters = HtmlRequestControlGroup(name="Filtros", filters=[
+    HtmlRequestFilter(name="Tienda", option_name="request_config_seller", 
+        options=[HtmlRequestFilterOption(input_option_id="tecnorium", input_value="tecnorium", 
+                                          input_state="checked", label_for="tecnorium", name="Tecnorium"), 
+                 HtmlRequestFilterOption(input_option_id="celestron", input_value="celestron", 
+                                          input_state="", label_for="celestron", name="Celestron"), 
+                 HtmlRequestFilterOption(input_option_id="lenovo", input_value="lenovo", 
+                                          input_state="", label_for="lenovo", name="Lenovo")
+                                          ]),
+    HtmlRequestFilter(name="Estado", option_name="requestfilter_status", 
+        options=[HtmlRequestFilterOption(input_option_id="active", input_value="active", 
+                                         input_state="checked", label_for="active", name="Activas"), 
+                 HtmlRequestFilterOption(input_option_id="paused", input_value="paused", 
+                                         input_state="", label_for="paused", name="Pausadas"),
+                 HtmlRequestFilterOption(input_option_id="inactive", input_value="inactive", 
+                                         input_state="", label_for="inactive", name="Inactivas")
+                                         ]),
+    HtmlRequestFilter(name="Tipo", option_name="requestfilter_listing_type_id", 
+        options=[HtmlRequestFilterOption(input_option_id="gold_pro", input_value="gold_pro", 
+                                         input_state="checked", label_for="gold_pro", name="Premium"), 
+                 HtmlRequestFilterOption(input_option_id="gold_special", input_value="gold_special", 
+                                         input_state="checked", label_for="gold_special", name="Clásica")
+                                         ]),
+    HtmlRequestFilter(name="Está en GBP", option_name="queryConfigIsInGbp", 
+        options=[HtmlRequestFilterOption(input_option_id="in_gbp", input_value="in_gbp", 
+                                         input_state="checked", label_for="in_gbp", name="Sí"), 
+                 HtmlRequestFilterOption(input_option_id="not_in_gbp", input_value="not_in_gbp", 
+                                         input_state="checked", label_for="not_in_gbp", name="No")]), 
+    HtmlRequestFilter(name="Proveedor", option_name="queryConfigSuppliers", 
+        options=[HtmlRequestFilterOption(input_option_id="microglobal", input_value="microglobal", 
+                                         input_state="checked", label_for="microglobal", name="Microglobal"), 
+                 HtmlRequestFilterOption(input_option_id="goldmund", input_value="goldmund", 
+                                         input_state="", label_for="goldmund", name="Goldmund"), 
+                 HtmlRequestFilterOption(input_option_id="liliana", input_value="liliana", 
+                                           input_state="", label_for="liliana", name="Liliana"),
+                 HtmlRequestFilterOption(input_option_id="goris", input_value="goris", 
+                                           input_state="", label_for="goris", name="Goris"),
+                 HtmlRequestFilterOption(input_option_id="bowie", input_value="bowie", 
+                                           input_state="", label_for="bowie", name="Bowie")
+                                           ])])
+
+head_fields = HtmlRequestFilter(name="Campos", option_name="requestattribute", 
+        options=[HtmlRequestFilterOption(input_option_id="item_ml_id", input_value="item_ml_id", 
+                                         input_state="checked", label_for="item_ml_id", name="ID ML"), 
+                 HtmlRequestFilterOption(input_option_id="sku", input_value="sku", 
+                                         input_state="disabled", label_for="sku", name="SKU"), 
+                 HtmlRequestFilterOption(input_option_id="title", input_value="title", 
+                                         input_state="checked", label_for="title", name="Título"),                                          
+                 HtmlRequestFilterOption(input_option_id="available_quantity", input_value="available_quantity", 
+                                         input_state="", label_for="available_quantity", name="Stock"),
+                 HtmlRequestFilterOption(input_option_id="price", input_value="price", 
+                                         input_state="", label_for="price", name="Precio"),
+                 HtmlRequestFilterOption(input_option_id="listing_type_id", input_value="listing_type_id", 
+                                         input_state="", label_for="listing_type_id", name="Tipo Publicación"),
+
+                 HtmlRequestFilterOption(input_option_id="status", input_value="status", 
+                                         input_state="disabled", label_for="status", name="Estado"), 
+                 HtmlRequestFilterOption(input_option_id="channels", input_value="channels", 
+                                         input_state="", label_for="channels", name="Canales"),
+                 HtmlRequestFilterOption(input_option_id="thumb", input_value="thumb", 
+                                         input_state="", label_for="thumb", name="Foto"),
+                 HtmlRequestFilterOption(input_option_id="permalink", input_value="permalink", 
+                                         input_state="", label_for="permalink", name="Link"),
+                 HtmlRequestFilterOption(input_option_id="variations", input_value="variations", 
+                                         input_state="", label_for="variations", name="Variaciones")                                                                                      
+                                         ])
+
+def get_checked_options(option_name: str) -> List[str]:
+    """ Get checked options from request form.
+    :param option_name: name of the form field
+    :return: list of checked options
+    """
+
+    checked_options = request.form.getlist(option_name)
+    checked_options.remove("item_ml_id")        # remueve el ID que ya lo trae por default
+    
+    return checked_options
+
+def check_options(filter: HtmlRequestFilter, checked_options: List[str]):
+    """ stores checked options to retrieve them in html
+    """
+    
+    pass
+
+def request_attributes_to_column_names(request_fields: HtmlRequestFilter, attributes: List[str]) -> Tuple:
+
+    column_names = ['#', 'ID ML']
+    for attribute in attributes:
+        for field in request_fields.options:
+            if field.input_option_id == attribute:
+                column_names.append(field.name)
+    column_names_tuple = tuple(column_names)
+    print(f'column_names_tuple = {column_names_tuple}')
+    return column_names_tuple
+
+
+def item_list_to_item_row_list(item_list: List[MlItem], attributes: List[str]) -> Tuple:
+    """ Convert a list of MlItems to a list of MlItemRows for html
+    """
+
+    row_list = []
+    for index, item in enumerate(item_list):
+        row_field_list = []
+        row_field_list.append(index + 1)
+        row_field_list.append(item.ml_id)
+        for attribute in attributes:
+            row_field_list.append(getattr(item, attribute, ""))
+        row_field_tuple = tuple(row_field_list)
+        row_list.append(row_field_tuple)
+        print(f'convirtiendo item a row tuple: {row_field_tuple}')
+    return row_list
+
+
+
+#   Otros posibles filtros: flex, retiro, garantía
+#   Otros campos: variación (id, sku, atributos, costo envío promedio
 
 gestion_publicaciones_blueprint = Blueprint('gestion_publicaciones', __name__, template_folder="templates")
 
@@ -103,7 +211,7 @@ items = None
 def gestion_publicaciones():
     if request.method == "GET":
 
-        return render_template("gestion_publicaciones.html", head_filters=head_filters)
+        return render_template("gestion_publicaciones.html", head_filters=head_filters, head_fields=head_fields)
     
     elif request.method == "POST":
         
@@ -134,8 +242,8 @@ def gestion_publicaciones():
         request_filters = get_apirequest_filters_from_requestform(request_form=request.form)
         #print(f'\n\nREQUEST_FILTERS: {request_filters}\n\n')
 
-        #TODO   Arma atributos a traer
-        #attributes = get_apirequest_attributes_from_requestform(reques_form=request.form)
+        #Arma atributos a traer
+        attributes = get_checked_options("requestattribute")
 
         #   LISTA DE ITEMS DE TODAS LAS TIENDAS
         items = []
@@ -159,8 +267,8 @@ def gestion_publicaciones():
             set_all_resource_items(seller_items, sessions[store])
             print(f'publicaciones {store}: {len(seller_items.items)}')
 
-            #TODO   Trae los detalles (atributos) de cada item
-            #get_all_seller_item_details(seller_items, sessions[store], attributes)
+            #   Trae los detalles (atributos) de cada item en seller_items
+            get_all_seller_item_details(seller_items, sessions[store], attributes)
 
             #TODO   Crear un objeto que represente una ROW en la tabla del html con un item
 
@@ -171,9 +279,14 @@ def gestion_publicaciones():
         print(f'\n\nTotal: {len(items)} publicaciones de {request_stores}\n\n')
         #   index items
         indexed_items = [(index + 1, item) for index, item in enumerate(items)]
-
+        attributes = get_checked_options("requestattribute")
         print(request.form.to_dict(flat=False))
-        return render_template("gestion_publicaciones.html", head_filters=head_filters, items=indexed_items, items_len=len(items), form=request.form)
+        print()
+        print(f'Acá traemos las opciones chekeadas: {attributes}')
+        print()
+        item_columns = request_attributes_to_column_names(head_fields, attributes)
+        item_rows = item_list_to_item_row_list(items, attributes)
+        return render_template("gestion_publicaciones.html", head_filters=head_filters, head_fields=head_fields, item_columns= item_columns, items=item_rows, items_len=len(items), form=request.form)
         
 
 
