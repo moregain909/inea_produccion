@@ -87,11 +87,11 @@ class HtmlRequestControlGroup:
 head_filters = HtmlRequestControlGroup(name="Filtros", filters=[
     HtmlRequestFilter(name="Tienda", option_name="request_config_seller", 
         options=[HtmlRequestFilterOption(input_option_id="tecnorium", input_value="tecnorium", 
-                                          input_state="checked", label_for="tecnorium", name="Tecnorium"), 
+                                          input_state="", label_for="tecnorium", name="Tecnorium"), 
                  HtmlRequestFilterOption(input_option_id="celestron", input_value="celestron", 
                                           input_state="", label_for="celestron", name="Celestron"), 
                  HtmlRequestFilterOption(input_option_id="lenovo", input_value="lenovo", 
-                                          input_state="", label_for="lenovo", name="Lenovo")
+                                          input_state="checked", label_for="lenovo", name="Lenovo")
                                           ]),
     HtmlRequestFilter(name="Estado", option_name="requestfilter_status", 
         options=[HtmlRequestFilterOption(input_option_id="active", input_value="active", 
@@ -128,27 +128,26 @@ head_filters = HtmlRequestControlGroup(name="Filtros", filters=[
 head_fields = HtmlRequestFilter(name="Campos", option_name="requestattribute", 
         options=[HtmlRequestFilterOption(input_option_id="item_ml_id", input_value="item_ml_id", 
                                          input_state="checked", label_for="item_ml_id", name="ID ML"), 
+                HtmlRequestFilterOption(input_option_id="thumbnail", input_value="thumbnail", 
+                                         input_state="", label_for="thumbnail", name="Foto"),                                         
                  HtmlRequestFilterOption(input_option_id="sku", input_value="sku", 
-                                         input_state="disabled", label_for="sku", name="SKU"), 
-                 HtmlRequestFilterOption(input_option_id="title", input_value="title", 
-                                         input_state="checked", label_for="title", name="Título"),                                          
+                                         input_state="disabled", label_for="sku", name="SKU"),                                           
                  HtmlRequestFilterOption(input_option_id="available_quantity", input_value="available_quantity", 
                                          input_state="", label_for="available_quantity", name="Stock"),
                  HtmlRequestFilterOption(input_option_id="price", input_value="price", 
                                          input_state="", label_for="price", name="Precio"),
                  HtmlRequestFilterOption(input_option_id="listing_type_id", input_value="listing_type_id", 
                                          input_state="", label_for="listing_type_id", name="Tipo Publicación"),
-
                  HtmlRequestFilterOption(input_option_id="status", input_value="status", 
                                          input_state="disabled", label_for="status", name="Estado"), 
                  HtmlRequestFilterOption(input_option_id="channels", input_value="channels", 
                                          input_state="", label_for="channels", name="Canales"),
-                 HtmlRequestFilterOption(input_option_id="thumb", input_value="thumb", 
-                                         input_state="", label_for="thumb", name="Foto"),
                  HtmlRequestFilterOption(input_option_id="permalink", input_value="permalink", 
                                          input_state="", label_for="permalink", name="Link"),
                  HtmlRequestFilterOption(input_option_id="variations", input_value="variations", 
-                                         input_state="", label_for="variations", name="Variaciones")                                                                                      
+                                         input_state="", label_for="variations", name="Variaciones"), 
+                 HtmlRequestFilterOption(input_option_id="title", input_value="title", 
+                                         input_state="checked", label_for="title", name="Título")
                                          ])
 
 def get_checked_options(option_name: str) -> List[str]:
@@ -190,7 +189,12 @@ def item_list_to_item_row_list(item_list: List[MlItem], attributes: List[str]) -
         row_field_list.append(index + 1)
         row_field_list.append(item.ml_id)
         for attribute in attributes:
-            row_field_list.append(getattr(item, attribute, ""))
+            if attribute == 'thumbnail':
+                thumb_link = getattr(item, attribute, "")
+                attribute_value = f'<img src="{thumb_link}" alt="..." class="img-thumbnail">'
+            else:
+                attribute_value = getattr(item, attribute, "")
+            row_field_list.append(attribute_value)
         row_field_tuple = tuple(row_field_list)
         row_list.append(row_field_tuple)
         print(f'convirtiendo item a row tuple: {row_field_tuple}')
