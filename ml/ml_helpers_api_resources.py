@@ -2,7 +2,7 @@
 # Clases que representan recursos de la API de ML
 import json
 import logging
-from typing import List, Union
+from typing import List, Union, Dict
 
 import os, sys
 sys.path.append(os.path.dirname(os.path.realpath(__file__)))
@@ -13,10 +13,10 @@ sys.path.append(data_dir)
 
 from auth import Credentials, ml_aut, MlSession
 from ml_helpers_objects import MlItem, MlPrice
-import channels
+#import channels
 
-
-#logging.basicConfig(level=logging.DEBUG)
+# Set the logging level for httpx to WARNING
+logging.getLogger('httpx').setLevel(logging.ERROR)
 
 class MlSellerCatalog():
     tecnorium = "77581040"
@@ -28,7 +28,7 @@ class MlSellerCatalog():
 class MlApiResource():
 
     base_url = ""
-    cls = type(self)
+    #cls = type(self)
 
     def set_seller_name(self):
         if self.seller_id:
