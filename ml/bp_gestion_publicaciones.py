@@ -47,13 +47,6 @@ def get_apirequest_filters_from_requestform(request_form) -> List[str]:
     return request_filters
 
 
-class MlItem_HtmlTableRow:
-
-    pass
-
-def mlitem_to_htmlrowobject(item: MlItem) -> MlItem_HtmlTableRow:
-    pass
-
 @dataclass
 class HtmlRequestFilterOption:
 
@@ -157,7 +150,8 @@ def get_checked_options(option_name: str) -> List[str]:
     """
 
     checked_options = request.form.getlist(option_name)
-    checked_options.remove("item_ml_id")        # remueve el ID que ya lo trae por default
+    if 'item_ml_id' in checked_options:
+        checked_options.remove("item_ml_id")        # remueve el ID que ya lo trae por default
     
     return checked_options
 
@@ -273,9 +267,6 @@ def gestion_publicaciones():
                 store_session = MlSession(store_name=store_name)
                 sessions.update({store_name: store_session})
             
-        #for store, session in sessions.items():
-        #    print(store, session)
-
 
         #   TRAE LISTADO DE ITEM IDS PARA CADA TIENDA
 
@@ -294,12 +285,11 @@ def gestion_publicaciones():
         # PARA CADA STORE ENVIA REQUEST Y TRAE LA INFO DE LOS ITEMS
         request_stores = request.form.getlist("request_config_seller")      #   Lista de tiendas a consultar
         
-        print()
-        print(f'request_stores: {request_stores}')
+        #print()
+        #print(f'request_stores: {request_stores}')
 
         for store in request_stores:
 
-            #new_session = MlSession(store_name=store)
             #   Crea un objeto MlSellerItems
             seller_items = MlSellerItems(seller_id=getattr(MlSellerCatalog, store), filters=request_filters)
             print()
@@ -321,7 +311,7 @@ def gestion_publicaciones():
         print(f'\n\nTotal: {len(items)} publicaciones de {request_stores}\n\n')
         #   index items
         indexed_items = [(index + 1, item) for index, item in enumerate(items)]
-        attributes = get_checked_options("requestattribute")
+        #attributes = get_checked_options("requestattribute")
         print(request.form.to_dict(flat=False))
         print()
         print(f'Acá traemos las opciones chekeadas: {attributes}')
@@ -330,7 +320,19 @@ def gestion_publicaciones():
         item_rows = item_list_to_item_row_list(items, attributes)
 
         # Configura filtros con selecciones hechas
-        # Configura campos
+        
+        for filter in head_filters.filters:
+            checked_filter_options = get_checked_options(filter.option_name)
+        
+            for option in filter.options:
+                if option.input_option_id in checked_filter_options:
+                    option.input_state = 'checked'
+                elif option.input_state != 'disabled':
+                    option.input_state = ''
+
+        
+
+        # Configura campos con selecciones hechas
         check_options(head_fields, attributes)
 
         return render_template("gestion_publicaciones.html", head_filters=head_filters, head_fields=head_fields, item_columns= item_columns, items=item_rows, items_len=len(items), form=request.form)
