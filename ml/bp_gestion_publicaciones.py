@@ -193,11 +193,44 @@ def item_list_to_item_row_list(item_list: List[MlItem], attributes: List[str]) -
     for index, item in enumerate(item_list):
         row_field_list = []
         row_field_list.append(index + 1)
-        row_field_list.append(item.ml_id)
+
+        # ML Item ID con link a la edición del item en ML
+        ml_id_link = f'https://www.mercadolibre.com.ar/syi/core/modify?itemId={item.ml_id}'
+        ml_id_row = f'<a href="{ml_id_link}" target="_blank">{item.ml_id}</a>'
+        row_field_list.append(ml_id_row)
+
         for attribute in attributes:
+            ml_link = ''
+            
+            # Procesa thumbnail
             if attribute == 'thumbnail':
                 thumb_link = getattr(item, attribute, "")
                 attribute_value = f'<img src="{thumb_link}" alt="..." class="img-thumbnail">'
+            
+            # Procesa permalink
+            elif attribute == 'permalink':
+                ml_link = getattr(item, attribute, "")
+                attribute_value = f'<a href="{ml_link}" target="_blank">ver</a>'
+
+            # Procesa precio
+            elif attribute == 'price':
+                price = getattr(item, attribute, "")
+                attribute_value = f'$ {price:,.2f}'
+
+            # Procesa channels
+            elif attribute == 'channels':
+                channels_catalog = {'marketplace': 'ml', 'mshops': 'ms'}
+                channels = getattr(item, attribute, "")
+                attribute_value = ''
+                for channel in channels:
+                    attribute_value += f'<small>{channels_catalog[channel]}</small><br>'
+
+            # Procesa listing type
+            elif attribute == 'listing_type_id':
+                listing_type_catalog = {'gold_special': 'clásica', 'gold_pro': 'premium'}
+                listing_type = getattr(item, attribute, "")
+                attribute_value = listing_type_catalog[listing_type]
+
             else:
                 attribute_value = getattr(item, attribute, "")
             row_field_list.append(attribute_value)
