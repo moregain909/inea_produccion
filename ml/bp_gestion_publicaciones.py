@@ -98,8 +98,8 @@ head_filters = HtmlRequestControlGroup(name="Filtros", filters=[
                                          input_state="checked", label_for="active", name="Activas"), 
                  HtmlRequestFilterOption(input_option_id="paused", input_value="paused", 
                                          input_state="", label_for="paused", name="Pausadas"),
-                 HtmlRequestFilterOption(input_option_id="inactive", input_value="inactive", 
-                                         input_state="", label_for="inactive", name="Inactivas")
+                 HtmlRequestFilterOption(input_option_id="closed", input_value="closed", 
+                                         input_state="", label_for="closed", name="Inactivas")
                                          ]),
     HtmlRequestFilter(name="Tipo", option_name="requestfilter_listing_type_id", 
         options=[HtmlRequestFilterOption(input_option_id="gold_pro", input_value="gold_pro", 
@@ -139,7 +139,7 @@ head_fields = HtmlRequestFilter(name="Campos", option_name="requestattribute",
                  HtmlRequestFilterOption(input_option_id="listing_type_id", input_value="listing_type_id", 
                                          input_state="", label_for="listing_type_id", name="Tipo Publicación"),
                  HtmlRequestFilterOption(input_option_id="status", input_value="status", 
-                                         input_state="disabled", label_for="status", name="Estado"), 
+                                         input_state="", label_for="status", name="Estado"), 
                  HtmlRequestFilterOption(input_option_id="channels", input_value="channels", 
                                          input_state="", label_for="channels", name="Canales"),
                  HtmlRequestFilterOption(input_option_id="permalink", input_value="permalink", 
@@ -164,8 +164,14 @@ def get_checked_options(option_name: str) -> List[str]:
 def check_options(filter: HtmlRequestFilter, checked_options: List[str]):
     """ stores checked options to retrieve them in html
     """
+    for option in filter.options:
+        if option.input_option_id in checked_options:
+            option.input_state = "checked"
+        #elif option.input_state != "disabled" or option.input_option_id != "item_ml_id":
+        elif option.input_state != "disabled" and option.input_option_id != "item_ml_id":
+            option.input_state = ""
+    return True    
     
-    pass
 
 def request_attributes_to_column_names(request_fields: HtmlRequestFilter, attributes: List[str]) -> Tuple:
 
@@ -175,7 +181,7 @@ def request_attributes_to_column_names(request_fields: HtmlRequestFilter, attrib
             if field.input_option_id == attribute:
                 column_names.append(field.name)
     column_names_tuple = tuple(column_names)
-    print(f'column_names_tuple = {column_names_tuple}')
+    # print(f'column_names_tuple = {column_names_tuple}')
     return column_names_tuple
 
 
@@ -197,7 +203,7 @@ def item_list_to_item_row_list(item_list: List[MlItem], attributes: List[str]) -
             row_field_list.append(attribute_value)
         row_field_tuple = tuple(row_field_list)
         row_list.append(row_field_tuple)
-        print(f'convirtiendo item a row tuple: {row_field_tuple}')
+        # print(f'convirtiendo item a row tuple: {row_field_tuple}')
     return row_list
 
 
@@ -274,7 +280,6 @@ def gestion_publicaciones():
             #   Trae los detalles (atributos) de cada item en seller_items
             get_all_seller_item_details(seller_items, sessions[store], attributes)
 
-            #TODO   Crear un objeto que represente una ROW en la tabla del html con un item
 
             #   Agrega lista de items de la tienda a la lista general
             items.extend(seller_items.items)
@@ -290,6 +295,11 @@ def gestion_publicaciones():
         print()
         item_columns = request_attributes_to_column_names(head_fields, attributes)
         item_rows = item_list_to_item_row_list(items, attributes)
+
+        # Configura filtros con selecciones hechas
+        # Configura campos
+        check_options(head_fields, attributes)
+
         return render_template("gestion_publicaciones.html", head_filters=head_filters, head_fields=head_fields, item_columns= item_columns, items=item_rows, items_len=len(items), form=request.form)
         
 
