@@ -85,10 +85,14 @@ class MlItemVariation:
     
 
     def parse_picture_urls(self):
-        for picture_id in self.picture_ids:
-            self.picture_urls.append(f"https://http2.mlstatic.com/D_NQ_NP_{picture_id}-O.jpg")
 
-        return True
+        if self.picture_ids:
+            for picture_id in self.picture_ids:
+                self.picture_urls.append(f"https://http2.mlstatic.com/D_NQ_NP_{picture_id}-O.jpg")
+
+            return True
+        
+        return False
     
 
 @dataclass
