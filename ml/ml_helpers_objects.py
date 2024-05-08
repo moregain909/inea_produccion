@@ -30,24 +30,6 @@ from data.data_helpers import Base, create_tables, db_connection
 # Clases que definen objetos de ML (items, variations, orders)
 
 @dataclass
-class MlItem:
-    
-    # Representa un item (publicación) de ML
-
-    ml_id: str = field(repr=True, default=None)
-    seller_id: str = field(repr=True, default=None)
-    sku: str = field(repr=True, default=None)
-    title: str = field(repr=True, default=None)
-    price: Decimal = field(repr=True, default=None)
-    available_quantity: int = field(repr=True, default=None)
-    permalink: str = field(repr=True, default=None)
-    listing_type_id: str = field(repr=True, default=None)
-    #store: str = field(repr=True, default=None)
-    channels: List[str] = field(repr=True, default=None)
-
-    pass
-
-@dataclass
 class MlItemVariationAttributeCombination:
 
     # Representa un atributo de una variación de un item de ML
@@ -76,6 +58,7 @@ class MlItemVariation:
     available_quantity: int = field(repr=True, default=None)
     sold_quantity: int = field(repr=True, default=None)
     picture_ids: List[str]
+    picture_urls: List[str]
     attribute_combinations: List[MlItemVariationAttributeCombination] = field(repr=True, default=None)
 
     def parse_json(self, variation_json, attributes: List[str] = None):
@@ -99,6 +82,34 @@ class MlItemVariation:
                     self.attribute_combinations.append(attribute_combination)
         
         return True
+    
+
+    def parse_picture_urls(self):
+        for picture_id in self.picture_ids:
+            self.picture_urls.append(f"https://http2.mlstatic.com/D_NQ_NP_{picture_id}-O.jpg")
+
+        return True
+    
+
+@dataclass
+class MlItem:
+    
+    # Representa un item (publicación) de ML
+
+    ml_id: str = field(repr=True, default=None)
+    seller_id: str = field(repr=True, default=None)
+    sku: str = field(repr=True, default=None)
+    title: str = field(repr=True, default=None)
+    price: Decimal = field(repr=True, default=None)
+    available_quantity: int = field(repr=True, default=None)
+    permalink: str = field(repr=True, default=None)
+    listing_type_id: str = field(repr=True, default=None)
+    #store: str = field(repr=True, default=None)
+    channels: List[str] = field(repr=True, default=None)
+    variations: List[MlItemVariation]
+
+    pass
+
 
 @dataclass
 class MlPrice:
