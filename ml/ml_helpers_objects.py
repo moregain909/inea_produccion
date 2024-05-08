@@ -47,6 +47,26 @@ class MlItem:
 
     pass
 
+@dataclass
+class MlItemVariationAttribute:
+
+    # Representa un atributo de una variación de un item de ML
+
+    attribute_name: str = field(repr=True, default=None)
+    attribute_value: str = field(repr=True, default=None)
+
+
+@dataclass
+class MlItemVariation:
+
+    # Representa una variación de un item de ML
+
+    variation_id: str = field(repr=True, default=None)
+    sku: str = field(repr=True, default=None)
+    price: str = field(repr=True, default=None)
+    picture_ids: List[str]
+    attributes: List[MlItemVariationAttribute] = field(repr=True, default=None)
+
 
 @dataclass
 class MlPrice:
