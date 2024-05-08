@@ -48,13 +48,22 @@ class MlItem:
     pass
 
 @dataclass
-class MlItemVariationAttribute:
+class MlItemVariationAttributeCombination:
 
     # Representa un atributo de una variación de un item de ML
 
-    attribute_name: str = field(repr=True, default=None)
-    attribute_value: str = field(repr=True, default=None)
+    name: str = field(repr=True, default=None)
+    value: str = field(repr=True, default=None)
 
+    def parse_json(self, attribute_json):
+
+        # Parsea nombre y valor del atributo a partir de un json
+
+        for attribute in attribute_json:
+            setattr(attribute, attribute["name"], None)
+            setattr(attribute, "value_name", None   )
+
+        return True
 
 @dataclass
 class MlItemVariation:
@@ -63,10 +72,33 @@ class MlItemVariation:
 
     variation_id: str = field(repr=True, default=None)
     sku: str = field(repr=True, default=None)
-    price: str = field(repr=True, default=None)
+    price: int = field(repr=True, default=None)
+    available_quantity: int = field(repr=True, default=None)
+    sold_quantity: int = field(repr=True, default=None)
     picture_ids: List[str]
-    attributes: List[MlItemVariationAttribute] = field(repr=True, default=None)
+    attribute_combinations: List[MlItemVariationAttributeCombination] = field(repr=True, default=None)
 
+    def parse_json(self, variation_json, attributes: List[str] = None):
+        
+        # Establece los atributos a traer por default
+        if attributes is None:
+            #TODO: PROCESAR ATRIBUTO SKU
+            attributes = ["price", "available_quantity", "sold_quantity", "picture_ids", "attribute_combinations"]
+
+        # Procesa cada atributo
+        for attribute in attributes:
+            if attribute != "attribute_combinations":           # excluye attribute combinations
+                if attribute in variation_json[attribute]:      # valida que el atributo exista en el json
+                    setattr(self, attribute, variation_json[attribute])
+            else:
+                # Procesa attribute combinations
+                self.attribute_combinations = []
+                for attribute_combination_json in variation_json["attribute_combinations"]:
+                    attribute_combination = MlItemVariationAttributeCombination()
+                    attribute_combination.parse_json(attribute_combination_json)
+                    self.attribute_combinations.append(attribute_combination)
+        
+        return True
 
 @dataclass
 class MlPrice:
