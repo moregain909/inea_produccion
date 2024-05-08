@@ -1,13 +1,15 @@
 from dataclasses import dataclass, field, asdict
+from datetime import datetime, timedelta
 from decouple import AutoConfig, config, UndefinedValueError
 from dotenv import *
 import httpx
 import logging
-from typing import List, Dict, Union
+from typing import List, Dict, Union, Tuple
 #from openpyxl import load_workbook, Workbook
 
 
-#logging.basicConfig(level=logging.INFO)
+# Set the logging level for httpx to WARNING
+logging.getLogger('httpx').setLevel(logging.WARNING)
 
 #   AUTENTICACIÓN EN ML
 
@@ -65,7 +67,7 @@ class Credentials:
         return False
    
             
-def ml_aut(tienda: str = "tecnorium", client: httpx.Client = None, credentials: Credentials = None)-> Union[str, None]:
+def ml_aut(tienda: str = "tecnorium", client: httpx.Client = None, credentials: Credentials = None, get_expiration: str = False)-> Union[str, Tuple, None]:
     """
     Autentica en ML
     Argumentos:
@@ -114,7 +116,13 @@ def ml_aut(tienda: str = "tecnorium", client: httpx.Client = None, credentials: 
         print(j["error"], j["error_description"])
         return None
     else:
-        return(token)
+        if not get_expiration:
+            return (token)
+        else:
+            expires_in = j["expires_in"]
+            now = datetime.now()
+            expiration_date = now + timedelta(seconds=expires_in)
+            return (token, expiration_date)
 
 
 class MlSession():
@@ -122,9 +130,11 @@ class MlSession():
     """ Sesión de ML que contiene token y httpx.Client \n
     Attrs: \n
     store_name (str): Nombre de la tienda.\n
+    credentials (Credentials)\n
+    client (httpx.Client)
     """
 
-    def __init__(self, store_name=None, credentials=None):
+    def __init__(self, store_name=None, credentials=None, get_expiration: str = False):
 
         if not credentials:
             if not store_name:
@@ -136,11 +146,27 @@ class MlSession():
         self.store_name = credentials.store
         self.client = httpx.Client()
 
-        try:
-            self.token = ml_aut(client=self.client, credentials=self.credentials)
-
-        except Exception as e:
-            print(f'Error al autenticar {self.store_name} en ML\n {type(e)} {e}')
+        if get_expiration:
+            try:
+                self.token, self.expiration = ml_aut(client=self.client, credentials=self.credentials, get_expiration=True)
+                #self.token = ml_aut(client=self.client, credentials=self.credentials)
+            except Exception as e:
+                print(f'Error al autenticar {self.store_name} en ML\n {type(e)} {e}')
+    
+    def is_active(self):
+        """Devuelve True si el token no ha expirado"""
+        
+        # valida que haya un token generado
+        if not self.token:
+            return False
+        
+        # valida que tenga info de expiración
+        if not self.expiration:
+            return False  
+        
+        # devuelve True si now es anterior (menor) a expiration
+        now = datetime.now()
+        return now < self.expiration
 
 
 
