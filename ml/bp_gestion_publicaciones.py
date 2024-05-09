@@ -225,6 +225,20 @@ def item_list_to_item_row_list(item_list: List[MlItem], attributes: List[str]) -
                 listing_type = getattr(item, attribute, "")
                 attribute_value = listing_type_catalog[listing_type]
 
+            # Procesa variations
+            elif attribute == 'variations':
+                variations = getattr(item, attribute, "")
+                attribute_value = ''
+                for variation in variations:
+                    # Arma string con nombre y valor del attributo 
+                    combinations = ''.join([f'{combination.name} {combination.value}' for combination in variation.attribute_combinations])
+                    
+                    # Arma string para html incluyendo stock positivo de variaciones si hay más de una variación
+                    if len(variations) > 1 and variation.available_quantity is not None:
+                        attribute_value += f'<small>{variation.variation_id} - {combinations} cant. {variation.available_quantity}</small><br>'
+                    else:
+                        attribute_value += f'<small>{variation.variation_id} - {combinations}</small><br>'
+
             else:
                 attribute_value = getattr(item, attribute, "")
             row_field_list.append(attribute_value)
@@ -261,10 +275,11 @@ def gestion_publicaciones():
             store_in_sessions = False
             for session_store in sessions.keys():
                 if store_name == session_store:
-                    store_in_sessions = True
-                    break
+                    if sessions[store_name].is_active:
+                        store_in_sessions = True
+                        break
             if not store_in_sessions:
-                store_session = MlSession(store_name=store_name)
+                store_session = MlSession(store_name=store_name, get_expiration=True)
                 sessions.update({store_name: store_session})
             
 
