@@ -12,7 +12,7 @@ data_dir = os.path.join(path2root, "data")
 sys.path.append(data_dir)
 
 from auth import Credentials, ml_aut, MlSession
-from ml_helpers_objects import MlItem, MlPrice
+from ml_helpers_objects import MlItem, MlPrice, MlItemVariation
 #import channels
 
 # Set the logging level for httpx to WARNING
@@ -118,11 +118,6 @@ class MlItemsDetails(MlApiResource):
         items_to_add_to_url = ""
         
         for item in items:
-            
-            #if isinstance(item, MlItem):
-            #    item.seller_id = self.seller_id
-            #    #self.items.extend(item)
-            #    #items_to_add_to_url += f'{item.ml_id},'
 
             if not isinstance(item, MlItem):
                 item = MlItem(ml_id=item)
@@ -133,6 +128,7 @@ class MlItemsDetails(MlApiResource):
             item.seller_name = self.seller_name
             self.items.append(item)
             items_to_add_to_url += f'{item.ml_id},'
+
         items_to_add_to_url = items_to_add_to_url[:-1]
 
         cls = type(self)
@@ -148,10 +144,13 @@ class MlItemsDetails(MlApiResource):
             if "id" not in attributes:
                 self.attributes_to_get.append("id")     # si se especifican atributos en la llamada, hay que incluir id para que lo traiga
 
+
             attributes_to_add = "".join(f'{attribute},' for attribute in attributes)
             attributes_to_add = attributes_to_add[:-1]
             self.url += f'&attributes={attributes_to_add}'
-
+            #print()
+            #print(self.url)
+            #print()
 
     def parse_json(self, json, channel_filter=['marketplace', 'mshops']):
 
@@ -168,8 +167,10 @@ class MlItemsDetails(MlApiResource):
                 print(f'Error {result["code"]} al obtener el detalle del item {result["body"]["id"]}\n Error: {result["body"]["error"]}.\n {result["body"]["message"]}')
                 continue
  
-            #print(f'JSON Body: {result["body"]}')
-            json_item = result["body"]
+
+
+            json_item = result["body"]  # formato de respuesta cuando se especifican atributos
+
             json_item_id = json_item["id"]
 
             for item in self.items[:]:
@@ -189,11 +190,23 @@ class MlItemsDetails(MlApiResource):
                         continue
 
                     # Agrega los atributos del item a la lista de items a parsear si los hay.
-                    #if self.attributes_to_get:
-                    if "attributes_to_get" in dir(self):
 
+                    if "attributes_to_get" in dir(self):
                         for attribute in self.attributes_to_get:
-                            setattr(item, attribute, json_item[attribute])
+
+                            if attribute != "variations":
+                                setattr(item, attribute, json_item[attribute])
+
+                            # Procesa variaciones
+                            else:
+                                variations = []
+                                for variation_json in json_item["variations"]:
+                                    variation = MlItemVariation(variation_id=variation_json["id"])
+                                    variation.parse_json(variation_json)
+                                    variation.parse_picture_urls()
+                                    variations.append(variation)
+                                setattr(item, attribute, variations)
+
                     else:
                         # Atributos por default (si no se especifican en la llamada)
                         item.title = json_item["title"]
@@ -441,7 +454,7 @@ def get_all_seller_item_details(seller_items: MlSellerItems, session: MlSession 
         list_of_items_details.append(item_details)
         from_idx += 20
         to_idx += 20
-    print(f'Total de ItemsDetails: {len(list_of_items_details)}')
+    #print(f'Total de ItemsDetails: {len(list_of_items_details)}')
     
     #for item_detials in list_of_items_details:
     #    print(f'{item_detials.url}')
@@ -454,14 +467,14 @@ def get_all_seller_item_details(seller_items: MlSellerItems, session: MlSession 
     # Trae detalles para cada MlItemDetails
     count = 0
     for items in list_of_items_details:
-        print(f'-- Acá va a parsear {len(items.items)} items')
+        #print(f'-- Acá va a parsear {len(items.items)} items')
         json = get_ml_json(items, session)
         items.parse_json(json)
-        print(f'-- Acá termina de parsear {len(items.items)} items')
+        #print(f'-- Acá termina de parsear {len(items.items)} items')
         count += len(items.items)
         # agrega items con detalles de cada MlItemDetails al MlSellerItems final
         final_seller_items.items.extend(items.items)   
-    print(f'--Total de items parseados: {count}')
+    #print(f'--Total de items parseados: {count}')
     return final_seller_items.items
     
     
