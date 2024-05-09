@@ -154,7 +154,7 @@ head_filters = HtmlRequestControlGroup(name="Filtros", filters=[
                  HtmlRequestFilterOption(input_option_id="without_stock", input_value="without_stock", 
                                          input_state="", label_for="without_stock", name="Sin stock")                                         
                                          ]),
-                                         
+
     HtmlRequestFilter(name="Está en GBP", option_name="queryConfigIsInGbp", 
         options=[HtmlRequestFilterOption(input_option_id="in_gbp", input_value="in_gbp", 
                                          input_state="checked", label_for="in_gbp", name="Sí"), 
@@ -315,7 +315,7 @@ sessions: Dict = {}
 
 items = None
 
-@gestion_publicaciones_blueprint.route("/gestion_publicaciones.html", methods=['GET', 'POST'])
+@gestion_publicaciones_blueprint.route("/gestion_publicaciones", methods=['GET', 'POST'])
 def gestion_publicaciones():
     if request.method == "GET":
 
