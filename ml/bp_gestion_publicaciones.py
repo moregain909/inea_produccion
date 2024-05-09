@@ -100,6 +100,13 @@ head_filters = HtmlRequestControlGroup(name="Filtros", filters=[
                  HtmlRequestFilterOption(input_option_id="gold_special", input_value="gold_special", 
                                          input_state="checked", label_for="gold_special", name="Clásica")
                                          ]),
+    HtmlRequestFilter(name="Flex", option_name="requestfilter_shipping_tags", 
+        options=[HtmlRequestFilterOption(input_option_id="self_service_in", input_value="self_service_in", 
+                                         input_state="", label_for="self_service_in", name="Tiene"), 
+                 HtmlRequestFilterOption(input_option_id="self_service_out", input_value="self_service_out", 
+                                         input_state="", label_for="self_service_out", name="No Tiene")
+                                         ]),
+
     HtmlRequestFilter(name="Está en GBP", option_name="queryConfigIsInGbp", 
         options=[HtmlRequestFilterOption(input_option_id="in_gbp", input_value="in_gbp", 
                                          input_state="checked", label_for="in_gbp", name="Sí"), 
@@ -276,6 +283,9 @@ def gestion_publicaciones():
             for session_store in sessions.keys():
                 if store_name == session_store:
                     if sessions[store_name].is_active:
+                        print()
+                        print(f'TOKEN ACTIVO - self expiration: {sessions[store_name].expiration})')
+                        print()
                         store_in_sessions = True
                         break
             if not store_in_sessions:
