@@ -25,7 +25,9 @@ sys.path.append(data_dir)
 
 from auth import Credentials, ml_aut, MlSession
 from data.data_helpers import Base, create_tables, db_connection
+import logging
 
+logging.basicConfig(level=logging.DEBUG)
 
 # Clases que definen objetos de ML (items, variations, orders)
 
@@ -41,9 +43,8 @@ class MlItemVariationAttributeCombination:
 
         # Parsea nombre y valor del atributo a partir de un json
 
-        for attribute in attribute_json:
-            setattr(attribute, attribute["name"], None)
-            setattr(attribute, "value_name", None   )
+        setattr(self, "name", attribute_json["name"])
+        setattr(self, "value", attribute_json["value_name"])
 
         return True
 
@@ -57,26 +58,28 @@ class MlItemVariation:
     price: int = field(repr=True, default=None)
     available_quantity: int = field(repr=True, default=None)
     sold_quantity: int = field(repr=True, default=None)
-    picture_ids: List[str]
-    picture_urls: List[str]
+    picture_ids: List[str] = field(repr=True, default=None)
+    picture_urls: List[str] = field(repr=True, default=None)
     attribute_combinations: List[MlItemVariationAttributeCombination] = field(repr=True, default=None)
 
     def parse_json(self, variation_json, attributes: List[str] = None):
         
         # Establece los atributos a traer por default
         if attributes is None:
-            #TODO: PROCESAR ATRIBUTO SKU
             attributes = ["price", "available_quantity", "sold_quantity", "picture_ids", "attribute_combinations"]
+            #TODO: PROCESAR ATRIBUTO SKU
 
         # Procesa cada atributo
         for attribute in attributes:
             if attribute != "attribute_combinations":           # excluye attribute combinations
-                if attribute in variation_json[attribute]:      # valida que el atributo exista en el json
+                if variation_json[attribute]:                   # valida que el atributo exista en el json
                     setattr(self, attribute, variation_json[attribute])
             else:
                 # Procesa attribute combinations
                 self.attribute_combinations = []
                 for attribute_combination_json in variation_json["attribute_combinations"]:
+                    
+                    #print(f"\n\nAttribute combination json: {attribute_combination_json}\n\n")
                     attribute_combination = MlItemVariationAttributeCombination()
                     attribute_combination.parse_json(attribute_combination_json)
                     self.attribute_combinations.append(attribute_combination)
@@ -87,6 +90,7 @@ class MlItemVariation:
     def parse_picture_urls(self):
 
         if self.picture_ids:
+            self.picture_urls = []
             for picture_id in self.picture_ids:
                 self.picture_urls.append(f"https://http2.mlstatic.com/D_NQ_NP_{picture_id}-O.jpg")
 
@@ -110,7 +114,7 @@ class MlItem:
     listing_type_id: str = field(repr=True, default=None)
     #store: str = field(repr=True, default=None)
     channels: List[str] = field(repr=True, default=None)
-    variations: List[MlItemVariation]
+    variations: List[MlItemVariation] = field(repr=True, default=None)
 
     pass
 
