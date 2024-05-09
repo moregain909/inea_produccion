@@ -106,12 +106,61 @@ head_filters = HtmlRequestControlGroup(name="Filtros", filters=[
                  HtmlRequestFilterOption(input_option_id="self_service_out", input_value="self_service_out", 
                                          input_state="", label_for="self_service_out", name="No Tiene")
                                          ]),
+    HtmlRequestFilter(name="Mercado Envíos", option_name="requestfilter_labels", 
+        options=[HtmlRequestFilterOption(input_option_id="with_mercadolibre_envios", input_value="with_mercadolibre_envios", 
+                                         input_state="", label_for="with_mercadolibre_envios", name="Tiene"), 
+                 HtmlRequestFilterOption(input_option_id="without_mercadolibre_envios", input_value="without_mercadolibre_envios", 
+                                         input_state="", label_for="without_mercadolibre_envios", name="No Tiene")
+                                         ]), 
+    HtmlRequestFilter(name="Envío Gratis", option_name="requestfilter_labels", 
+        options=[HtmlRequestFilterOption(input_option_id="with_free_shipping", input_value="with_free_shipping", 
+                                         input_state="", label_for="with_free_shipping", name="Tiene"), 
+                 HtmlRequestFilterOption(input_option_id="without_free_shipping", input_value="without_free_shipping", 
+                                         input_state="", label_for="without_free_shipping", name="No Tiene")
+                                         ]),                                         
 
+    HtmlRequestFilter(name="Sin Mercado Envíos", option_name="requestfilter_shipping_tags", 
+        options=[HtmlRequestFilterOption(input_option_id="is_flammable", input_value="is_flammable", 
+                                         input_state="", label_for="is_flammable", name="Inflamable"), 
+                HtmlRequestFilterOption(input_option_id="lost_me2_by_dimensions", input_value="lost_me2_by_dimensions", 
+                                         input_state="", label_for="lost_me2_by_dimensions", name="Dimensiones excedidas")
+                                         ]),      
+
+    HtmlRequestFilter(name="Control de Calidad", option_name="requestfilter_labels", 
+        options=[HtmlRequestFilterOption(input_option_id="with_low_quality_image", input_value="with_low_quality_image", 
+                                         input_state="", label_for="with_low_quality_image", name="Foto de baja calidad"), 
+                 HtmlRequestFilterOption(input_option_id="being_reviewed", input_value="being_reviewed", 
+                                         input_state="", label_for="being_reviewed", name="Bajo revisión"), 
+                 HtmlRequestFilterOption(input_option_id="fix_required", input_value="fix_required", 
+                                         input_state="", label_for="fix_required", name="Requiere corrección"), 
+                 HtmlRequestFilterOption(input_option_id="incomplete_technical_specs", input_value="incomplete_technical_specs", 
+                                         input_state="", label_for="incomplete_technical_specs", name="Ficha técnica incompleta"), 
+                 HtmlRequestFilterOption(input_option_id="suspended", input_value="suspended", 
+                                         input_state="", label_for="suspended", name="Suspendida"), 
+                 HtmlRequestFilterOption(input_option_id="cancelled", input_value="cancelled", 
+                                         input_state="", label_for="cancelled", name="Cancelada")                                         
+                                         ]),
+
+    HtmlRequestFilter(name="Ventas", option_name="requestfilter_labels", 
+        options=[HtmlRequestFilterOption(input_option_id="with_bids", input_value="with_bids", 
+                                         input_state="", label_for="with_bids", name="Con ventas"), 
+                 HtmlRequestFilterOption(input_option_id="without_bids", input_value="without_bids", 
+                                         input_state="", label_for="without_bids", name="Sin ventas")
+                                        ]),
+
+    HtmlRequestFilter(name="Stock", option_name="requestfilter_labels", 
+        options=[HtmlRequestFilterOption(input_option_id="few_available", input_value="few_available", 
+                                         input_state="", label_for="few_available", name="Poco stock"), 
+                 HtmlRequestFilterOption(input_option_id="without_stock", input_value="without_stock", 
+                                         input_state="", label_for="without_stock", name="Sin stock")                                         
+                                         ]),
+                                         
     HtmlRequestFilter(name="Está en GBP", option_name="queryConfigIsInGbp", 
         options=[HtmlRequestFilterOption(input_option_id="in_gbp", input_value="in_gbp", 
                                          input_state="checked", label_for="in_gbp", name="Sí"), 
                  HtmlRequestFilterOption(input_option_id="not_in_gbp", input_value="not_in_gbp", 
                                          input_state="checked", label_for="not_in_gbp", name="No")]), 
+
     HtmlRequestFilter(name="Proveedor", option_name="queryConfigSuppliers", 
         options=[HtmlRequestFilterOption(input_option_id="microglobal", input_value="microglobal", 
                                          input_state="checked", label_for="microglobal", name="Microglobal"), 
@@ -123,7 +172,8 @@ head_filters = HtmlRequestControlGroup(name="Filtros", filters=[
                                            input_state="", label_for="goris", name="Goris"),
                  HtmlRequestFilterOption(input_option_id="bowie", input_value="bowie", 
                                            input_state="", label_for="bowie", name="Bowie")
-                                           ])])
+                                           ])
+                                           ])
 
 head_fields = HtmlRequestFilter(name="Campos", option_name="requestattribute", 
         options=[HtmlRequestFilterOption(input_option_id="item_ml_id", input_value="item_ml_id", 
