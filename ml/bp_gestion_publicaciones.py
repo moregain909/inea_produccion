@@ -126,6 +126,13 @@ head_filters = HtmlRequestControlGroup(name="Filtros", filters=[
                                          input_state="", label_for="lost_me2_by_dimensions", name="Dimensiones excedidas")
                                          ]),      
 
+    HtmlRequestFilter(name="Publicación de Catálogo", option_name="requestfilter_catalog_listing", 
+        options=[HtmlRequestFilterOption(input_option_id="true", input_value="true", 
+                                         input_state="", label_for="true", name="Es"), 
+                HtmlRequestFilterOption(input_option_id="false", input_value="false", 
+                                         input_state="", label_for="false", name="No es")
+                                         ]),  
+
     HtmlRequestFilter(name="Elegible para Catálogo", option_name="requestfilter_tags", 
         options=[HtmlRequestFilterOption(input_option_id="catalog_listing_eligible", input_value="catalog_listing_eligible", 
                                          input_state="", label_for="catalog_listing_eligible", name="Sí")
