@@ -126,6 +126,11 @@ head_filters = HtmlRequestControlGroup(name="Filtros", filters=[
                                          input_state="", label_for="lost_me2_by_dimensions", name="Dimensiones excedidas")
                                          ]),      
 
+    HtmlRequestFilter(name="Elegible para Catálogo", option_name="requestfilter_tags", 
+        options=[HtmlRequestFilterOption(input_option_id="catalog_listing_eligible", input_value="catalog_listing_eligible", 
+                                         input_state="", label_for="catalog_listing_eligible", name="Sí")
+                                         ]), 
+
     HtmlRequestFilter(name="Control de Calidad", option_name="requestfilter_labels", 
         options=[HtmlRequestFilterOption(input_option_id="with_low_quality_image", input_value="with_low_quality_image", 
                                          input_state="", label_for="with_low_quality_image", name="Foto de baja calidad"), 
