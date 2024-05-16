@@ -31,7 +31,7 @@ def get_filters_from_requestform(request_form, filter) -> List[str]:
     request_filters = []
     for key in form_keys:
         splitted_key = key.split("_", 1)     # detecta si la key del form tiene prefijo de filtro (requestfilter)
-        if splitted_key[0] == "requestfilter":
+        if splitted_key[0] == filter:
             
             #print(f'acá encontró un requestfilter en key = {key}')
             filter_name = splitted_key[1]
@@ -382,7 +382,7 @@ def gestion_publicaciones():
         #   CONFIGURA REQUEST A API DE ML
         
         #   Arma filtros
-        request_filters = get_filters_from_requestform(request_form=request.form, filter="requestfilter")
+        request_filters = get_filters_from_requestform(request_form=request.form, filter='requestfilter')
         #print(f'\n\nREQUEST_FILTERS: {request_filters}\n\n')
 
         #Arma atributos a traer
@@ -434,7 +434,8 @@ def gestion_publicaciones():
         # Está en GBP, Proveedor, etc...
 
         #TODO: LEVANTA FILTROS GBP
-
+        gbp_attributes_to_get = get_filters_from_requestform(request_form=request.form, filter='gbpfilter')
+        print(f'\nGBP ATTRIBUTES TO GET: {gbp_attributes_to_get}\n')
 
         #TODO: HACE QUERY (a EXCEL o DATABASE)
 
