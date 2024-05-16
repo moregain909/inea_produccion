@@ -165,15 +165,38 @@ head_filters = HtmlRequestControlGroup(name="Filtros", filters=[
                                          input_state="", label_for="few_available", name="Poco stock"), 
                  HtmlRequestFilterOption(input_option_id="without_stock", input_value="without_stock", 
                                          input_state="", label_for="without_stock", name="Sin stock")                                         
-                                         ]),
+                                         ])
+                                        ])
 
-    HtmlRequestFilter(name="Está en GBP", option_name="queryConfigIsInGbp", 
+#    # ESTOS VAN A HEAD_GBP_FILTERS
+#    HtmlRequestFilter(name="Está en GBP", option_name="queryConfigIsInGbp", 
+#        options=[HtmlRequestFilterOption(input_option_id="in_gbp", input_value="in_gbp", 
+#                                         input_state="checked", label_for="in_gbp", name="Sí"), 
+#                 HtmlRequestFilterOption(input_option_id="not_in_gbp", input_value="not_in_gbp", 
+#                                         input_state="checked", label_for="not_in_gbp", name="No")]), 
+#
+#    HtmlRequestFilter(name="Proveedor", option_name="queryConfigSuppliers", 
+#        options=[HtmlRequestFilterOption(input_option_id="microglobal", input_value="microglobal", 
+#                                         input_state="checked", label_for="microglobal", name="Microglobal"), 
+#                 HtmlRequestFilterOption(input_option_id="goldmund", input_value="goldmund", 
+#                                         input_state="", label_for="goldmund", name="Goldmund"), 
+#                 HtmlRequestFilterOption(input_option_id="liliana", input_value="liliana", 
+#                                           input_state="", label_for="liliana", name="Liliana"),
+#                 HtmlRequestFilterOption(input_option_id="goris", input_value="goris", 
+#                                           input_state="", label_for="goris", name="Goris"),
+#                 HtmlRequestFilterOption(input_option_id="bowie", input_value="bowie", 
+#                                           input_state="", label_for="bowie", name="Bowie")
+#                                           ])
+
+
+head_gbp_filters = HtmlRequestControlGroup(name="Filtros GBP", filters=[
+    HtmlRequestFilter(name="Está en GBP", option_name="gbpfilter_isingbp", 
         options=[HtmlRequestFilterOption(input_option_id="in_gbp", input_value="in_gbp", 
                                          input_state="checked", label_for="in_gbp", name="Sí"), 
                  HtmlRequestFilterOption(input_option_id="not_in_gbp", input_value="not_in_gbp", 
                                          input_state="checked", label_for="not_in_gbp", name="No")]), 
 
-    HtmlRequestFilter(name="Proveedor", option_name="queryConfigSuppliers", 
+    HtmlRequestFilter(name="Proveedor", option_name="gbpfilter_suppliers", 
         options=[HtmlRequestFilterOption(input_option_id="microglobal", input_value="microglobal", 
                                          input_state="checked", label_for="microglobal", name="Microglobal"), 
                  HtmlRequestFilterOption(input_option_id="goldmund", input_value="goldmund", 
@@ -185,7 +208,7 @@ head_filters = HtmlRequestControlGroup(name="Filtros", filters=[
                  HtmlRequestFilterOption(input_option_id="bowie", input_value="bowie", 
                                            input_state="", label_for="bowie", name="Bowie")
                                            ])
-                                           ])
+                                        ])
 
 head_fields = HtmlRequestFilter(name="Campos", option_name="requestattribute", 
         options=[HtmlRequestFilterOption(input_option_id="item_ml_id", input_value="item_ml_id", 
@@ -223,6 +246,7 @@ def get_checked_options(option_name: str) -> List[str]:
         checked_options.remove("item_ml_id")        # remueve el ID que ya lo trae por default
     
     return checked_options
+
 
 def check_options(filter: HtmlRequestFilter, checked_options: List[str]):
     """ stores checked options to retrieve them in html
@@ -331,13 +355,11 @@ items = None
 def gestion_publicaciones():
     if request.method == "GET":
 
-        return render_template("gestion_publicaciones.html", head_filters=head_filters, head_fields=head_fields)
+        return render_template("gestion_publicaciones.html", head_filters=head_filters, head_gbp_filters=head_gbp_filters, head_fields=head_fields)
     
     elif request.method == "POST":
         
-        # TODO: ALMACENAR CONFIGURACION DE FORM PARA PRESERVARLA EN EL RENDER DEL TEMPLATE
-
-        # ASEGURA SESIONES PARA CADA STORE
+        # ASEGURA SESIONES PARA CADA STORE #! ESTA ROMPIENDO CUANDO CADUCA EL TOKEN... SI RESETEO EL SERVER AUTENTICA BIEN
         store_names = request.form.getlist("request_config_seller")
         
         for store_name in store_names:
@@ -350,6 +372,7 @@ def gestion_publicaciones():
                         print()
                         store_in_sessions = True
                         break
+                    print(f'\nEL TOKEN NO VALIDÓ is_active.\nAcá debería gestionar un nuevo token? - Expiration {sessions[store_name].expiration}')
             if not store_in_sessions:
                 store_session = MlSession(store_name=store_name, get_expiration=True)
                 sessions.update({store_name: store_session})
@@ -357,7 +380,7 @@ def gestion_publicaciones():
 
         #   TRAE LISTADO DE ITEM IDS PARA CADA TIENDA
 
-        #   CONFIGURA REQUEST
+        #   CONFIGURA REQUEST A API DE ML
         
         #   Arma filtros
         request_filters = get_apirequest_filters_from_requestform(request_form=request.form)
@@ -394,19 +417,40 @@ def gestion_publicaciones():
             #   Agrega lista de items de la tienda a la lista general
             items.extend(seller_items.items)
 
+
+        # PROCESA FILTROS GBP
+
+        # Configura filtros GBP con selecciones hechas para próximos renders
         
-        print(f'\n\nTotal: {len(items)} publicaciones de {request_stores}\n\n')
-        #   index items
-        indexed_items = [(index + 1, item) for index, item in enumerate(items)]
-        #attributes = get_checked_options("requestattribute")
-        print(request.form.to_dict(flat=False))
-        print()
-        print(f'Acá traemos las opciones chekeadas: {attributes}')
-        print()
+        for filter in head_gbp_filters.filters:
+            checked_gbp_filter_options = get_checked_options(filter.option_name)
+        
+            for option in filter.options:
+                if option.input_option_id in checked_gbp_filter_options:
+                    option.input_state = 'checked'
+                elif option.input_state != 'disabled':
+                    option.input_state = ''
+
+        # FILTRA POR CONDICIONES DE GBP
+        # Está en GBP, Proveedor, etc...
+
+        #TODO: LEVANTA FILTROS GBP
+
+
+        #TODO: HACE QUERY (a EXCEL o DATABASE)
+
+        #   Arma lista de publicaciones en GBP
+        publis_gbp = [] # Lista de GbpMlItem
+
+        
+        #TODO: FILTRA ITEMS POR CONDICIONES DE GBP
+        
+
+        # ARMA TABLA PARA HTML
         item_columns = request_attributes_to_column_names(head_fields, attributes)
         item_rows = item_list_to_item_row_list(items, attributes)
 
-        # Configura filtros con selecciones hechas
+        # Configura filtros con selecciones hechas para próximos renders
         
         for filter in head_filters.filters:
             checked_filter_options = get_checked_options(filter.option_name)
@@ -422,7 +466,7 @@ def gestion_publicaciones():
         # Configura campos con selecciones hechas
         check_options(head_fields, attributes)
 
-        return render_template("gestion_publicaciones.html", head_filters=head_filters, head_fields=head_fields, item_columns= item_columns, items=item_rows, items_len=len(items), form=request.form)
+        return render_template("gestion_publicaciones.html", head_filters=head_filters, head_gbp_filters=head_gbp_filters, head_fields=head_fields, item_columns= item_columns, items=item_rows, items_len=len(items), form=request.form)
         
 
 
