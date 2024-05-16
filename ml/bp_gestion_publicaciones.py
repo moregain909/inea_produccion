@@ -23,7 +23,7 @@ from ml.ml_helpers_api_resources import set_all_resource_items, MlSellerItems, M
 
 logging.basicConfig(level=logging.DEBUG)
 
-def get_apirequest_filters_from_requestform(request_form) -> List[str]:
+def get_filters_from_requestform(request_form, filter) -> List[str]:
 
     form_keys = list(request_form.keys())
     #print(f'{form_keys}')
@@ -31,7 +31,6 @@ def get_apirequest_filters_from_requestform(request_form) -> List[str]:
     request_filters = []
     for key in form_keys:
         splitted_key = key.split("_", 1)     # detecta si la key del form tiene prefijo de filtro (requestfilter)
-        #print(f'splitted_key = {splitted_key}')
         if splitted_key[0] == "requestfilter":
             
             #print(f'acá encontró un requestfilter en key = {key}')
@@ -383,7 +382,7 @@ def gestion_publicaciones():
         #   CONFIGURA REQUEST A API DE ML
         
         #   Arma filtros
-        request_filters = get_apirequest_filters_from_requestform(request_form=request.form)
+        request_filters = get_filters_from_requestform(request_form=request.form, filter="requestfilter")
         #print(f'\n\nREQUEST_FILTERS: {request_filters}\n\n')
 
         #Arma atributos a traer
