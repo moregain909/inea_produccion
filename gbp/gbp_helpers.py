@@ -48,7 +48,7 @@ class GbpDataSource:
     """ Fuente de datos de GBP
     """
 
-    def get_data():
+    def get_data(self, filename, path_to_data_dir = None, *fields):
         pass
 
 
@@ -336,6 +336,33 @@ class GbpMlItem(GbpItem):
             return True
 
 
+@dataclass    
+class GbpArticle(GbpItem):
+    """ Clase que representa un artículo (producto) en GBP
+    """
+    
+    gbp_id: int = field(default=None, repr=True)
+    sku: str = field(default=None, repr=True)
+    title: str = field(default=None, repr=True)
+    description: str = field(default=None, repr=True)
+    category: str = field(default=None, repr=True)
+    sub_category: str = field(default=None, repr=True)
+    auxiliary_sub_category: str = field(default=None, repr=True)
+    brand: str = field(default=None, repr=True)
+    detail: str = field(default=None, repr=True)    # por lo gral clona la info de title
+    supplier: str = field(default=None, repr=True)
+    iva: str = field(default=None, repr=True)
+
+    #TODO: objeto GbpPrices
+    #prices: GbpPrices = field(default=None, repr=True)
+
+
+    def __repr__(self):
+        attributes = {attr: value for attr, value in self.__dict__.items() if not attr.startswith('_') and not attr.endswith('__') and value != None}
+        return f'{self.__class__.__name__}: {attributes}'
+    
+        
+
 @dataclass
 class ListaPreciosGBP(GbpItem):
     """ Clase que representa una lista de precios de GBP
@@ -406,6 +433,35 @@ class PublisGbpSchema(ExcelSchema):
         attribute_names = list(PublisGbpSchema.__dict__.keys())
         return attribute_names
 
+
+class ArticulosExtendidaGbpSchema(ExcelSchema):
+    """ Esquema de planilla de artículos extendida de ML en GBP
+    attributte (data reference) = excel column
+    """
+    _sheet_name = "Table"
+    _spreadsheet_name = "Articulos_GBP_extendida.xlsx"    
+
+    sku = (6, "Codigo/EAN", 15)
+    description = (7, "Descripcion del Articulo", 50)
+    category = (10, "Categorias", 20)
+    sub_category = (11, "SubCategorias", 20)
+    auxiliary_sub_category = (12, "Sub Categoria Auxiliar", 20)
+    brand = (14, "Marca", 20)
+    detail = (17, "Detalle", 50)
+    supplier = (20, "Proveedor", 30)
+    iva = (25, "Impuesto al valor agregado", 15)
+    ml_title = (140, "Titulo para MercadoLibre©", 50)   #! CHEKEAR COLUMNA
+    ml_description = (141, "Descripcion Texto de la Publicacion en MercadoLibre©", 100)     #! CHEKEAR COLUMNA
+    gbp_id = (200, "ID", 15)   #! CHEKEAR COLUMNA
+
+
+    @classmethod
+    def get_fields(cls):
+        """ Devuelve una lista con los campos definidos en el schema.
+        """
+        attribute_names = list(ArticulosExtendidaGbpSchema.__dict__.keys())
+        return attribute_names
+    
 
 class ImportPublisGBP(ExcelSchema):
     """ Formato atributos:\n
@@ -668,6 +724,78 @@ class ExcelPublisGbp(GbpExcelDataSource):
         return True
             
 
+class ExcelArticulosExtendidaGbp(GbpExcelDataSource):
+    """ Planilla Excel con articulos extendida de GBP
+    """
+
+    # 
+    spreadsheet_schema = ArticulosExtendidaGbpSchema()
+    row_object = GbpArticle()
+
+    def __init__(self):
+        self.items = []
+
+
+    def get_data(self, filename, path_to_data_dir = None, *fields):
+        """ Lee el archivo de planilla y carga las publicaciones en la lista publis
+        """
+
+        if path_to_data_dir != None:
+            path_to_data_dir = data_dir
+    
+        file_path = data_dir + "/" + filename
+        
+        # Set fields to get from excel
+        schema_fields = ArticulosExtendidaGbpSchema.get_fields()
+        if not fields:
+            fields = schema_fields   # trae todos los campos definidos en el schema
+        else:
+            # Validate fields
+            for field in fields[:]:
+                if not field in schema_fields:
+                    logging.error(f"Se omite el campo {field}. No está definido en el esquema de planilla excel PublisGbpSchema")
+                    #print(f"Se omite el campo {field}. No está definido en el esquema de planilla excel PublisGbpSchema")
+                    fields.remove(field)
+
+        # Gets data from spreadsheet
+                    
+        # Loads spreadsheet
+        wb = load_workbook(filename = file_path)
+        sheet = wb.active
+
+        
+        def get_field_name(field_id):
+            for k, v in ArticulosExtendidaGbpSchema.__dict__.items():
+                if v[0] == field_id:
+                    return k
+
+        # Retrieves each spreadhseet row              
+        for row in sheet.iter_rows(min_row=2):
+            article = GbpArticle()
+            for idx, cell in enumerate(row):
+                #logging.debug(f"col: {col}, cell: {cell.value}")
+
+                schema_col_idxs = [col[0] for attr, col in ArticulosExtendidaGbpSchema.__dict__.items() if isinstance(col, tuple)]
+                if idx in schema_col_idxs:
+                    field_name = get_field_name(idx)
+                    #logging.info(f'{field_name} - {cell.value}')
+                    setattr(article, field_name, cell.value)
+                
+            self.items.append(article)
+            
+        
+        #self.show_data()
+        #logging.info(f"items: {len(self.items)}")
+
+        return self.items
+        
+
+    def show_data(self):
+        for item in self.items:
+            print(item)
+        return True            
+
+
 class ExcelListasPreciosGbp(GbpExcelDataSource):
     """ Planilla Excel con Listas de Precios de GBP
     """
@@ -884,7 +1012,6 @@ class Tables:
     gbp_sku_ml_item = GbpSkuMlItem()
     
     
-
 class Spreadsheets:
     """ Mapa de planillas con data de GBP con sus respectivas clases
     """
@@ -1005,6 +1132,7 @@ def get_warehouse_id_from_name(depositos_gbp, name):
 
 listas_de_precios_gbp = [ListaPreciosGBP(extra="ml_clasica", name="ML Clásica",id_gbp=1),
                          ListaPreciosGBP(extra="ml_premium", name="ML Premium",id_gbp=5),
+                         ListaPreciosGBP(extra="ml_3csi", name="ML 3 Cuotas Sin Interés",id_gbp=22),                         
                          ListaPreciosGBP(extra="mg_tecnorium_clasica", name="MG Tecnorium Clásica",id_gbp=10),
                          ListaPreciosGBP(extra="mg_tecnorium_premium", name="MG Tecnorium Premium",id_gbp=12),
                          ListaPreciosGBP(extra="mg_lenovo_clasica", name="MG Lenovo Clásica",id_gbp=11),
