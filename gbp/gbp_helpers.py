@@ -323,6 +323,7 @@ class GbpMlItem(GbpItem):
     ml_title: str = field(default=None, repr=True)
     gbp_title: str = field(default=None, repr=True)
     gbp_id: int = field(default=None, repr=True)
+    variations: List[str] = field(default=None, repr=True)
 
     def __repr__(self):
         attributes = {attr: value for attr, value in self.__dict__.items() if not attr.startswith('_') and not attr.endswith('__') and value != None}
@@ -1131,8 +1132,9 @@ def get_warehouse_id_from_name(depositos_gbp, name):
 # DATA
 
 listas_de_precios_gbp = [ListaPreciosGBP(extra="ml_clasica", name="ML Clásica",id_gbp=1),
-                         ListaPreciosGBP(extra="ml_premium", name="ML Premium",id_gbp=5),
-                         ListaPreciosGBP(extra="ml_3csi", name="ML 3 Cuotas Sin Interés",id_gbp=22),                         
+                         ListaPreciosGBP(extra="ml_3_cuotas", name="ML 3 Cuotas Sin Interés",id_gbp=22),                         
+                         ListaPreciosGBP(extra="ml_6_cuotas", name="ML 6 Cuotas Sin Interés - Premium",id_gbp=5),                         
+                         ListaPreciosGBP(extra="ml_12_cuotas", name="ML 12 Cuotas Sin Interés",id_gbp=23),                                                  
                          ListaPreciosGBP(extra="mg_tecnorium_clasica", name="MG Tecnorium Clásica",id_gbp=10),
                          ListaPreciosGBP(extra="mg_tecnorium_premium", name="MG Tecnorium Premium",id_gbp=12),
                          ListaPreciosGBP(extra="mg_lenovo_clasica", name="MG Lenovo Clásica",id_gbp=11),
